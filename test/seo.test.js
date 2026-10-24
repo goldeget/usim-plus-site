@@ -35,7 +35,7 @@ test("covers the requested climekr spellings and gives review searches useful, a
   const organization = graph.find(item => item["@type"] === "Organization");
   assert.ok(organization.alternateName.includes("climekr 유심"));
   assert.match(page, /<summary>클라임유심 후기나 climekr 유심 후기를 살펴볼 때 무엇을 확인해야 하나요\?<\/summary>/);
-  assert.match(page, /후기를 볼 때는 작성 시점, 가입 통신사·요금제·약정 조건, 실제 확인 가능한 이용 경험인지 살펴보세요/);
+  assert.match(page, /후기를 볼 때 작성 시점, 통신사·요금제·약정 조건과 실제 이용 경험인지 확인해 주세요/);
   assert.match(llms, /클라임유심 후기[\s\S]*climekr 유심 후기/);
   assert.match(llms, /클라임유심[\s\S]*climekr[\s\S]*실제 참여 절차/);
   assert.match(llms, /개통 전에 참여 조건, 통신사 요금·약정·해지 비용을 확인합니다[\s\S]*조건에 맞고 참여하기로 결정한 경우 유심을 개통한 뒤[\s\S]*개통 현황 사진/);
