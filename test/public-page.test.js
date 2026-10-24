@@ -34,7 +34,7 @@ test("leads with one clear offer and hides secondary tasks from the main navigat
   assert.doesNotMatch(html, /class="task-nav"|data-view-link|data-view-panel/);
   assert.match(html, /id="hero-title">유심 개통하면<br>최대 51만원<\/h1>/);
   assert.match(html, /3일 5만원.*15일 추가 5만원.*30일 추가 7만원/);
-  assert.match(html, /id="heroApplyButton"[^>]*href="#apply"[^>]*>참여 가능 여부 알아보기/);
+  assert.match(html, /id="heroApplyButton"[^>]*href="#benefits"[^>]*>참여 조건 먼저 확인하기/);
   assert.match(html, /href="#statusLookupDetails"[^>]*>이미 신청했어요\? 접수 조회/);
   assert.match(html, /<details class="application-details" id="apply"/);
   assert.match(html, /<details class="guide-disclosure" id="benefits"/);
@@ -52,15 +52,24 @@ test("loads Turnstile only after a valid submission attempt and lets users retry
   assert.doesNotMatch(html, /loadTurnstileWhenNeeded|observeWhenOpen|접수 영역에 가까워지면 자동 확인을 불러옵니다/);
 });
 
-test("makes the hero CTA open the photo form while keeping the flow to one short line", () => {
-  assert.match(html, /id="homeIntro">개통 현황 사진을 보내면 운영자가 참여 가능 여부를 확인합니다\. 유지 조건 충족 시 지급 대상이 됩니다\.<\/p>/);
-  assert.match(html, /id="quickFlow"><span>유심 개통<\/span><span aria-hidden="true">→<\/span><span>사진 보내기<\/span><span aria-hidden="true">→<\/span><span>조건 확인 후 지급<\/span>/);
+test("asks visitors to check conditions before opening a line and submit photos after activation", () => {
+  assert.match(html, /id="homeIntro">개통 전 참여 조건과 통신사 요금·약정을 먼저 확인하세요\. 참여를 원하면 개통 후 현황 사진으로 신청하세요\.<\/p>/);
+  assert.match(html, /id="quickFlow"><span>개통 전 조건 확인<\/span><span aria-hidden="true">→<\/span><span>개통 후 사진 신청<\/span><span aria-hidden="true">→<\/span><span>유지 조건 확인 후 지급<\/span>/);
+  assert.match(html, /<h4>1\. 개통 전 조건 확인<\/h4><p>지급 조건과 통신사 공식 안내의 월 요금, 약정 기간, 해지 비용을 먼저 확인하세요\.<\/p>/);
+  assert.match(html, /<h4>2\. 개통 후 사진 신청<\/h4><p>조건에 맞으면 유심을 개통한 뒤, 개통 현황이 보이는 화면을 사진으로 보내 신청합니다\.<\/p>/);
+  assert.match(html, /href="#apply">개통 후 사진 보내고 신청하기<\/a>/);
+  assert.match(userFlowCss, /\.step-action \{[^}]*display:\s*flex[^}]*max-width:\s*100%[^}]*white-space:\s*normal/);
+  assert.match(userFlowCss, /\.step-action \+ \.step-action \{[^}]*margin-top:\s*6px/);
+  assert.match(html, /class="application-trigger"><span>이미 개통하셨나요\? 사진 보내기<\/span><small>개통 현황 사진/);
+  assert.match(html, /id="apply-title">개통 현황 사진으로 신청하기/);
+  assert.match(html, /조건을 확인하고 개통하셨다면, 개통 현황이 보이는 화면 1장을 첨부해 주세요/);
   assert.match(html, /heroApplyButton\.addEventListener\(['"]click['"]/);
-  assert.match(html, /applyDisclosure\.open\s*=\s*true/);
+  assert.match(html, /guideDisclosure\.open\s*=\s*true/);
+  assert.doesNotMatch(html, /heroApplyButton\.addEventListener\(['"]click['"],\(\)=>\{applyDisclosure\.open=true\}\)/);
   assert.match(html, /quickFlow\.replaceChildren\(\)/);
   assert.match(html, /label\.textContent=item\.title\.replace/);
-  assert.match(html, /class="application-trigger"><span>참여 가능 여부 알아보기<\/span><small>개통 현황 사진/);
-  assert.match(html, /id="apply-title">개통 현황 사진 보내기/);
+  assert.match(html, /class="application-trigger"><span>이미 개통하셨나요\? 사진 보내기<\/span>/);
+  assert.match(html, /id="apply-title">개통 현황 사진으로 신청하기/);
   assert.match(html, /id="submitApplication"[^>]*>사진 보내고 확인받기/);
   assert.match(html, /<div class="application-form-content">\s*<form id="precheckForm">/);
   assert.match(html, /<details class="lookup-details" id="statusLookupDetails">/);
@@ -81,6 +90,10 @@ test("keeps feedback and footer copy legible and wrapped on small screens", () =
 
 test("keeps the public participation flow at exactly three CMS-editable steps", () => {
   assert.match(adminContent, /참여 단계는 세 개로 고정되어 있습니다/);
+  assert.match(adminContent, /intro:"개통 전 참여 조건과 통신사 요금·약정을 먼저 확인하세요/);
+  assert.match(adminContent, /title:"1\. 개통 전 조건 확인"/);
+  assert.match(adminContent, /title:"2\. 개통 후 사진 신청"/);
+  assert.match(adminContent, /title:"3\. 유지 조건 확인 후 지급"/);
   assert.doesNotMatch(adminContent, /id="addChecklist"/);
   assert.match(contentApi, /value\.checklist\.length !== 3/);
 });
@@ -107,11 +120,12 @@ test("discloses receipt status metadata cleanup in plain Korean", () => {
   assert.doesNotMatch(html, /최대 30일 더 보관|예약 작업/);
 });
 
-test("explains participation and the photo review before promising a result", () => {
+test("explains the pre-activation check and post-activation photo review without promising a result", () => {
   const hero = html.match(/<section class="hero"[^>]*>([\s\S]*?)<\/section>/)?.[1];
   assert.ok(hero, "hero offer exists");
   assert.match(hero, /유심 개통하면[\s\S]*최대 51만원/);
-  assert.match(hero, /개통 현황 사진을 보내면 운영자가 참여 가능 여부를 확인합니다/);
+  assert.match(hero, /개통 전 참여 조건과 통신사 요금·약정을 먼저 확인하세요/);
+  assert.match(hero, /href="#benefits"[^>]*>참여 조건 먼저 확인하기/);
   assert.doesNotMatch(hero, /사전 검토|KAIT|접수번호|조회 코드/);
   assert.match(html, /개통 승인.*지급 확정/);
   assert.match(html, /조건을 충족.*유지.*확인/);

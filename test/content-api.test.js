@@ -110,8 +110,10 @@ test("keeps legacy editor content out of the current homepage while showing vers
   assert.equal(data.schemaVersion, 2);
   assert.equal(data.legacyContent, true);
   assert.equal(data.headline, "유심 개통하면\n최대 51만원");
-  assert.equal(data.intro, "개통 현황 사진을 보내면 운영자가 참여 가능 여부를 확인합니다. 유지 조건 충족 시 지급 대상이 됩니다.");
-  assert.deepEqual(data.checklist.map(step => step.title), ["1. 유심 개통", "2. 사진 보내기", "3. 조건 확인 후 지급"]);
+  assert.equal(data.intro, "개통 전 참여 조건과 통신사 요금·약정을 먼저 확인하세요. 참여를 원하면 개통 후 현황 사진으로 신청하세요.");
+  assert.deepEqual(data.checklist.map(step => step.title), ["1. 개통 전 조건 확인", "2. 개통 후 사진 신청", "3. 유지 조건 확인 후 지급"]);
+  assert.match(data.checklist[0].body, /개통 전에 지급 조건과 통신사 공식 안내의 요금/);
+  assert.match(data.checklist[1].body, /개통한 뒤.*개통 현황.*사진/);
   assert.equal(cloudflare.siteContent.get("home").content, JSON.stringify(legacy));
 });
 
