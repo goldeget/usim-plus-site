@@ -1,6 +1,6 @@
 # USIM PLUS information site
 
-Responsive Korean informational site for checking mobile plan and SIM activation terms through each carrier's official channels. It does not collect applications, identity documents, screenshots, or applicant data.
+Responsive Korean informational site for checking mobile plan and SIM activation terms through each carrier's official channels. It collects applications, identity documents, screenshots, and applicant data.
 
 ## Deployment
 
