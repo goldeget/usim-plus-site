@@ -2,6 +2,9 @@ name = "usim-plus-site"
 compatibility_date = "2026-10-24"
 pages_build_output_dir = "public"
 
+# Preserve Cloudflare Pages environment variables configured as secrets.
+keep_vars = true
+
 [[d1_databases]]
 binding = "CONTENT_DB"
 database_name = "usim-plus-content"
