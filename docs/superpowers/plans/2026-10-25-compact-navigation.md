@@ -1,10 +1,10 @@
-# Compact User and Admin Navigation Implementation Plan
+# Simple User Offer and Admin Review Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Replace the public site’s long continuous page with focused service views, bound admin history length, and defer retryable Turnstile verification until submission.
+**Goal:** Replace the public site’s multi-choice task navigation with one clear offer and primary action, keep optional tasks behind direct links and disclosures, bound admin history length, and defer retryable Turnstile verification until submission.
 
-**Architecture:** Keep the static Pages frontend and existing Functions API. Add hash-compatible public view navigation and a small stylesheet layer; retain the current form, data, consent, and SEO schema. Use ten-row cursor pages and a narrowly scoped exact-ID query for admin history.
+**Architecture:** Keep the static Pages frontend and existing Functions API. Use one public landing page with hash-compatible disclosures; retain the current form, data, consent, and SEO schema. Use ten-row cursor pages and a narrowly scoped exact-ID query for admin history.
 
 **Tech Stack:** Static HTML/CSS, browser JavaScript, Cloudflare Pages Functions, D1, Node test runner, Chromium/Playwright.
 
@@ -28,7 +28,7 @@
 
 ---
 
-### Task 1: Focused public service views
+### Task 1: Offer-first public landing page
 
 **Files:**
 - Modify: `public/index.html`
@@ -36,13 +36,13 @@
 - Test: `test/public-page.test.js`
 
 **Interfaces:**
-- Public view keys: `steps`, `apply`, `status`, and `guide`.
-- Existing hashes remain the public navigation interface.
+- One primary action opens the application disclosure; one secondary link opens status lookup.
+- Existing hashes remain usable as deep links to the relevant disclosures.
 - CMS still edits the same three-step checklist and visible FAQ schema.
 
-- [ ] Write tests for four views, hash mapping, the three explicit CTA actions, and the preserved FAQ/schema.
-- [ ] Run `node --test test/public-page.test.js` and confirm the new assertions fail for the current all-sections-visible page.
-- [ ] Add view navigation and grouping, move payment details and FAQ/contact into the guide view, and apply the compact responsive banking-style layout.
+- [ ] Write tests for the one offer, one primary action, one secondary status link, and direct disclosure links.
+- [ ] Run `node --test test/public-page.test.js` and confirm the new assertions fail for the four-tab interface.
+- [ ] Remove task tabs, feature the reward conditions and single application action, keep the process to one line, and group secondary content behind disclosures.
 - [ ] Run the focused tests and verify direct hashes plus CMS content application.
 
 ### Task 2: Submission-time Turnstile and retry

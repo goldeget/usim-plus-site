@@ -109,7 +109,9 @@ test("keeps legacy editor content out of the current homepage while showing vers
 
   assert.equal(data.schemaVersion, 2);
   assert.equal(data.legacyContent, true);
-  assert.notEqual(data.headline, legacy.headline);
+  assert.equal(data.headline, "유심 개통하면\n최대 51만원");
+  assert.equal(data.intro, "개통 현황 사진을 보내면 운영자가 참여 가능 여부를 확인합니다. 유지 조건 충족 시 지급 대상이 됩니다.");
+  assert.deepEqual(data.checklist.map(step => step.title), ["1. 유심 개통", "2. 사진 보내기", "3. 조건 확인 후 지급"]);
   assert.equal(cloudflare.siteContent.get("home").content, JSON.stringify(legacy));
 });
 

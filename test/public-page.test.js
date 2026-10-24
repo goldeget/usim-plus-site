@@ -30,21 +30,16 @@ test("requires consent and a Turnstile challenge before upload", () => {
   assert.match(html, /10MB|10MB/);
 });
 
-test("organizes the public tasks into four focused views with compatible deep links", () => {
-  for (const view of ["steps", "apply", "status", "guide"]) assert.match(html, new RegExp(`data-view-panel="${view}"`));
-  for (const [hash, view] of [["#steps", "steps"], ["#apply", "apply"], ["#statusLookupDetails", "status"], ["#benefits", "guide"], ["#faq", "guide"], ["#contact", "guide"]]) {
-    assert.match(html, new RegExp(`href="${hash}"`));
-    assert.ok(html.includes(`"${hash}":"${view}"`) || html.includes(`'${hash}':'${view}'`) || html.includes(`${hash}.*${view}`), `missing view mapping for ${hash}`);
-  }
-  assert.match(html, /aria-label="서비스 메뉴"/);
-  assert.match(html, /aria-current="page"/);
-  assert.match(html, /자세한 안내/);
-  assert.match(html, /id="steps" data-view-panel="steps"/);
-  assert.match(html, /href="#apply">사진 신청하기/);
-  assert.match(html, /href="#statusLookupDetails">신청 상태 조회/);
-  assert.match(html, /id="apply" data-view-panel="apply"[^>]*hidden/);
-  assert.match(html, /id="statusView" data-view-panel="status"[^>]*hidden/);
-  assert.match(html, /id="benefits" data-view-panel="guide"[^>]*hidden/);
+test("leads with one clear offer and hides secondary tasks from the main navigation", () => {
+  assert.doesNotMatch(html, /class="task-nav"|data-view-link|data-view-panel/);
+  assert.match(html, /id="hero-title">유심 개통하면<br>최대 51만원<\/h1>/);
+  assert.match(html, /3일 5만원.*15일 추가 5만원.*30일 추가 7만원/);
+  assert.match(html, /id="heroApplyButton"[^>]*href="#apply"[^>]*>참여 가능 여부 알아보기/);
+  assert.match(html, /href="#statusLookupDetails"[^>]*>이미 신청했어요\? 접수 조회/);
+  assert.match(html, /<details class="application-details" id="apply"/);
+  assert.match(html, /<details class="guide-disclosure" id="benefits"/);
+  assert.match(userFlowCss, /\.application-details:not\(\[open\]\),\.lookup-details:not\(\[open\]\) \{ display: none/);
+  assert.match(userFlowCss, /\.application-details:not\(\[open\]\) > \.application-trigger,\.lookup-details:not\(\[open\]\) > \.lookup-disclosure \{ display: none/);
   assert.match(html, /href="\/user-flow\.css"/);
 });
 
@@ -57,17 +52,20 @@ test("loads Turnstile only after a valid submission attempt and lets users retry
   assert.doesNotMatch(html, /loadTurnstileWhenNeeded|observeWhenOpen|접수 영역에 가까워지면 자동 확인을 불러옵니다/);
 });
 
-test("shows one task at a time and puts the photo action directly in its view", () => {
-  assert.match(html, /참여 방법 3단계/);
-  assert.match(html, /id="hero-title">유심 개통 현황을<br>사진으로 사전 검토 신청<\/h1>/);
-  assert.match(html, /class="cta-main" href="#steps">참여 방법 3단계 보기/);
-  assert.match(html, /href="#apply">사진 신청하기/);
-  assert.match(html, /href="#statusLookupDetails"[^>]*>신청 상태 조회/);
-  assert.match(html, /id="homeIntro">먼저 한국정보통신진흥협회\(KAIT\) 공식 사이트에서 개통 현황을 확인하고, 결과 화면을 첨부해 사전 검토를 요청합니다\.<\/p>/);
+test("makes the hero CTA open the photo form while keeping the flow to one short line", () => {
+  assert.match(html, /id="homeIntro">개통 현황 사진을 보내면 운영자가 참여 가능 여부를 확인합니다\. 유지 조건 충족 시 지급 대상이 됩니다\.<\/p>/);
+  assert.match(html, /id="quickFlow"><span>유심 개통<\/span><span aria-hidden="true">→<\/span><span>사진 보내기<\/span><span aria-hidden="true">→<\/span><span>조건 확인 후 지급<\/span>/);
+  assert.match(html, /heroApplyButton\.addEventListener\(['"]click['"]/);
+  assert.match(html, /applyDisclosure\.open\s*=\s*true/);
+  assert.match(html, /quickFlow\.replaceChildren\(\)/);
+  assert.match(html, /label\.textContent=item\.title\.replace/);
+  assert.match(html, /class="application-trigger"><span>참여 가능 여부 알아보기<\/span><small>개통 현황 사진/);
+  assert.match(html, /id="apply-title">개통 현황 사진 보내기/);
+  assert.match(html, /id="submitApplication"[^>]*>사진 보내고 확인받기/);
   assert.match(html, /<div class="application-form-content">\s*<form id="precheckForm">/);
   assert.match(html, /<details class="lookup-details" id="statusLookupDetails">/);
   assert.match(html, /statusLookupDetails\.open=true/);
-  assert.match(html, /activateView\('status'/);
+  assert.doesNotMatch(html, /activateView|hashViews/);
 });
 
 test("keeps feedback and footer copy legible and wrapped on small screens", () => {
@@ -110,7 +108,11 @@ test("discloses receipt status metadata cleanup in plain Korean", () => {
 });
 
 test("explains participation and the photo review before promising a result", () => {
-  assert.match(html, /사진으로 사전 검토 신청/);
+  const hero = html.match(/<section class="hero"[^>]*>([\s\S]*?)<\/section>/)?.[1];
+  assert.ok(hero, "hero offer exists");
+  assert.match(hero, /유심 개통하면[\s\S]*최대 51만원/);
+  assert.match(hero, /개통 현황 사진을 보내면 운영자가 참여 가능 여부를 확인합니다/);
+  assert.doesNotMatch(hero, /사전 검토|KAIT|접수번호|조회 코드/);
   assert.match(html, /개통 승인.*지급 확정/);
   assert.match(html, /조건을 충족.*유지.*확인/);
   assert.doesNotMatch(html, /내 신청 가능 개수 확인|내 개통 가능 수량 확인/);

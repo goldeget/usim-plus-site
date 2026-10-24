@@ -1,8 +1,8 @@
-# Compact User and Admin Navigation
+# Simple User Offer and Admin Review
 
 ## Goal
 
-Make the public site understandable at first glance, keep each task to a focused view, and prevent the admin application history from growing with every loaded record.
+Make the public offer understandable at first glance. A visitor should see the reward, the qualifying conditions, and one application action without choosing among several menus. Keep application status and legal details available on demand, and prevent the admin application history from growing with every loaded record.
 
 ## Current evidence
 
@@ -15,15 +15,16 @@ Make the public site understandable at first glance, keep each task to a focused
 ## Design
 
 1. Keep the current brand mark and teal accent, but simplify the page chrome, typography, surfaces, and spacing to a calm, banking-style hierarchy without copying another company’s exact visual system.
-2. Split the public service into four linked views: `참여 방법`, `사진 신청`, `상태 조회`, and `자세한 안내`. The first view presents the three steps and the first official lookup action. Direct links and existing hashes continue to work.
+2. Keep the public site on one landing page. Lead with `유심 개통하면 최대 51만원 받을 수 있어요`, state the 3/15/30-day per-line amounts and three-line cap directly beneath it, and show one primary `사진으로 신청하기` action. Use only one secondary `이미 신청했어요? 접수 조회` link. Keep the short process in one line and put the application form, status fields, and detailed conditions behind disclosures that open from their links.
 3. Keep payment conditions, FAQs, and contact details in the guidance view. Keep the privacy notice and consent close to the upload form. Do not add invented urgency, guaranteed payout wording, or claims that reviews are absent.
 4. Keep the managed Turnstile protection. Load and execute it only after a user submits a valid photo and consent; add a retry path for configuration or script-load failures. The public page must not request the Turnstile script merely because a visitor opens or scrolls through the site.
 5. Show ten admin history rows at a time, replace rows when navigating pages, and provide previous/next controls near the filters. Add exact receipt-number lookup so an operator can find a known application without browsing pages. Keep the existing mobile card layout and protected image behavior.
 
 ## Acceptance criteria
 
-- The default public view and each task view do not include unrelated panels in their layout; on mobile the document remains within one task view plus the shared header/footer.
-- Public CTA order is explicit: official KAIT lookup, photo precheck, receipt-status lookup. Each action opens the matching view, and the photo/status forms still work.
+- The public landing page has no task-tab menu, one primary application action, one secondary receipt lookup, and a compact process line.
+- The reward amounts, duration requirements, maximum eligible lines, and non-guarantee caveat are visible without opening the details.
+- The application form opens from the primary action; the status lookup opens from its secondary link; existing direct hashes still work.
 - Existing direct hashes `#steps`, `#apply`, `#statusLookupDetails`, `#benefits`, `#faq`, and `#contact` resolve to the correct view.
 - No Turnstile script or configuration request occurs before a valid submission attempt. A challenge failure can be retried without a reload.
 - The admin API returns no more than ten rows per history page. Previous/next navigation replaces the list, filters reset pagination, and exact receipt lookup returns only the requested retained application.

@@ -8,9 +8,9 @@ const sitemap = await readFile(new URL("../public/sitemap.xml", import.meta.url)
 const indexNowKey = "2cc7263262b5a365ad26c37e214acd2b";
 
 test("publishes a canonical Korean title, description, and social preview metadata", () => {
-  assert.match(page, /<title>클라임유심 \| climekr 유심 개통 현황 사진 사전 검토<\/title>/);
+  assert.match(page, /<title>클라임유심 \| 유심 개통하면 최대 51만원<\/title>/);
   assert.match(page, /<link rel="canonical" href="https:\/\/climekr\.com\/"\s*\/>/);
-  assert.match(page, /name="description" content="[^\"]*클라임유심[^\"]*climekr 유심[^\"]*사진 사전 검토[^\"]*"/);
+  assert.match(page, /name="description" content="[^\"]*클라임유심[^\"]*climekr 유심[^\"]*참여 가능 여부[^\"]*"/);
   assert.match(page, /property="og:url" content="https:\/\/climekr\.com\/"/);
   assert.match(page, /name="robots" content="index,follow/);
 });
