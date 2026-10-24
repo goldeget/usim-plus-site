@@ -10,9 +10,9 @@ export async function onRequest({ request, env }) {
     if (boundedBody.tooLarge) return jsonResponse({ error: "요청 크기가 너무 큽니다." }, 413);
     const raw = new TextDecoder().decode(boundedBody.bytes);
     body = JSON.parse(raw);
-  } catch { return jsonResponse({ error: "접수번호와 조회 토큰을 입력해 주세요." }, 400); }
+  } catch { return jsonResponse({ error: "접수번호와 조회 코드를 입력해 주세요." }, 400); }
   if (!body || typeof body !== "object" || Array.isArray(body) || !/^UP-[A-Za-z0-9_-]{22}$/.test(body.id || "") || !/^[A-Za-z0-9_-]{43}$/.test(body.token || "")) {
-    return jsonResponse({ error: "접수번호 또는 조회 토큰을 확인해 주세요." }, 400);
+    return jsonResponse({ error: "접수번호 또는 조회 코드를 확인해 주세요." }, 400);
   }
 
   let row;

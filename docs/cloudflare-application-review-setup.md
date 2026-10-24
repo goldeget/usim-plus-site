@@ -28,7 +28,7 @@ The existing database is `usim-plus-content`. Keep the `CONTENT_DB` binding and 
 npx wrangler d1 migrations apply usim-plus-content --remote
 ```
 
-The migration adds only opaque submission IDs, token hashes, object keys, MIME types, byte sizes, review status, and timestamps. It does not store the uploaded image bytes.
+The migration adds opaque submission IDs, token hashes, object keys, MIME types, byte sizes, keyed source-IP comparison values, exact image SHA-256 values, review status, and timestamps. Raw IP addresses and uploaded image bytes are not stored in D1.
 
 ## 4. Deploy the daily receipt-metadata cleanup Worker
 
@@ -49,7 +49,7 @@ npx wrangler deploy --config wrangler-retention.toml
 5. Have the operator choose a unique password of at least 12 characters and set it as the encrypted Pages Production Secret `ADMIN_PASSWORD`. Do not put the password in code, deployment logs, or chat.
 6. Set `ADMIN_AUTH_SECRET` as an encrypted Pages Production Secret using at least 32 random bytes. Generate it with `openssl rand -base64 48`; pipe the output directly into `npx wrangler pages secret put ADMIN_AUTH_SECRET --project-name usim-plus-site` so the value is never printed or saved in a file. This key protects the password-version and IP-throttle hashes and must stay independent from the password.
 7. Keep Cloudflare Access in place through the code and D1 migration deployment. Run the auth and route-guard checks first. After they pass, set the `USIM Plus Admin` Access application to Bypass for Everyone; the Pages middleware and every admin API enforce the D1-backed session. Immediately verify production: `/admin/login` returns 200, `/` redirects to login, and unauthenticated admin APIs return 401. If any check fails, restore the previous Access allow policy before proceeding. Keep any ACME challenge exception path-scoped.
-8. After production route checks pass, remove the unused one-time PIN identity provider. Set the `ADMIN_PASSWORD` production Secret if it is not already set, then confirm `https://admin.climekr.com/` opens the content editor and `https://admin.climekr.com/admin/review.html` opens the photo queue after email/password login. Use the logout button to end the session.
+8. After production route checks pass, remove the unused one-time PIN identity provider. Set the `ADMIN_PASSWORD` production Secret if it is not already set, then confirm `https://admin.climekr.com/` opens the operations dashboard, `/admin/review.html` opens the photo queue, and `/admin/content.html` opens the content editor after email/password login. Use the logout button to end the session.
 
 The login is available only on `admin.climekr.com`, requires the exact same-origin POST, and creates an eight-hour secure HttpOnly session. Changing the password invalidates existing sessions. Login is limited to ten attempts per IP in 15 minutes; only a keyed hash of the address is stored.
 
@@ -63,8 +63,16 @@ After deployment, verify all of the following with a real Turnstile challenge an
 - Public and `pages.dev` hosts cannot access admin pages or APIs. A request without a current password-authenticated session cannot list the queue, open photos, edit content, or decide applications.
 - The admin can view the original image and record one approval or rejection. The reviewed image is under `reviewed/`; the previous `pending/` key is removed.
 - The R2 bucket has no public URL, and both lifecycle rules are enabled.
-- The `usim-plus-application-retention` Worker is deployed with its daily Cron Trigger.
+- The `usim-plus-application-retention` Worker is deployed with its daily Cron Trigger, the same D1 binding, and the private R2 binding. It removes reviewed-prefix objects that are not referenced by a submission record.
 - D1 receipt metadata becomes eligible for deletion after 60 days from submission or review; the daily scheduled run deletes it, after which status lookup returns not found.
-- The public disclosure names `에스씨아이평가정보(주)`, `임동훈`, `help@climekr.com`, Cloudflare storage, the image purpose, and the two 30-day image-retention cases.
+- The public disclosure names `에스씨아이평가정보(주)`, `임동훈`, `help@climekr.com`, Cloudflare storage, the image purpose, the two 30-day image-retention cases, keyed IP and image-hash comparison, and the 60-day metadata period. It explains that raw IP is not stored and an IP match alone does not identify the same person.
 
-The page deliberately leaves Telegram, LINE, KakaoTalk, and Channel Talk inactive until real support URLs are configured.
+Email at `help@climekr.com` is the only published support channel until other support URLs are provided.
+
+## 7. Make the public site discoverable
+
+- The public hostname uses `https://climekr.com/` as its canonical address. `www.climekr.com` redirects to it; Pages preview hosts send `noindex`. `https://climekr.com/sitemap.xml` lists the public landing page; `https://climekr.com/robots.txt` points crawlers to that sitemap and excludes admin/API paths.
+- `https://admin.climekr.com/robots.txt` disallows crawling across the admin hostname. Admin pages also use `noindex` and require a password session.
+- The public page includes Korean title/description/social metadata and structured organization, service, and FAQ information. Brand spelling variants (`클라임유심`, `climekr`, `climekr유심`, `climekr 유심`) and related application/review search queries are used in relevant content. `https://climekr.com/llms.txt` summarizes the service and its limits for AI crawlers.
+- After the new deployment is live, submit `https://climekr.com/sitemap.xml` in Google Search Console and Naver Search Advisor. Both services require you to verify domain ownership first; add their TXT verification records to the `climekr.com` Cloudflare DNS zone, then complete verification in each service.
+- The hosted IndexNow verification file is `https://climekr.com/2cc7263262b5a365ad26c37e214acd2b.txt`. The public home URL can then be submitted to the IndexNow endpoint to notify participating search engines. IndexNow and sitemap submission request crawling; neither controls ranking or guarantees how an AI system answers.

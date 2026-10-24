@@ -5,7 +5,7 @@ import { createMemoryCloudflare, createSubmissionForm, withTurnstileResult } fro
 const secret = "test-turnstile-secret";
 const siteKey = "test-turnstile-site-key";
 const successfulChallenge = { success: true, hostname: "climekr.com", action: "submit" };
-const validEnv = () => ({ ...createMemoryCloudflare(), TURNSTILE_SECRET_KEY: secret, TURNSTILE_SITE_KEY: siteKey });
+const validEnv = () => ({ ...createMemoryCloudflare(), TURNSTILE_SECRET_KEY: secret, TURNSTILE_SITE_KEY: siteKey, ADMIN_AUTH_SECRET: "application-review-signal-secret-value-32-bytes-minimum" });
 
 async function callUpload(env, options = {}) {
   const { onRequest } = await import("../functions/api/applications.js");
@@ -19,7 +19,7 @@ async function callUpload(env, options = {}) {
 
 test("stores an allowed photo privately and returns one-time receipt credentials", async () => {
   const env = validEnv();
-  const response = await withTurnstileResult(successfulChallenge, () => callUpload(env));
+  const response = await withTurnstileResult(successfulChallenge, () => callUpload(env, { headers: { "cf-connecting-ip": "203.0.113.42" } }));
   assert.equal(response.status, 201);
   const receipt = await response.json();
   assert.match(receipt.id, /^UP-[A-Za-z0-9_-]+$/);
@@ -30,10 +30,31 @@ test("stores an allowed photo privately and returns one-time receipt credentials
   const row = [...env.rows.values()][0];
   assert.equal(row.status, "pending");
   assert.notEqual(row.token_hash, receipt.token);
+  assert.match(row.source_ip_hash, /^[a-f0-9]{64}$/);
+  assert.match(row.image_hash, /^[a-f0-9]{64}$/);
+  assert.notEqual(row.source_ip_hash, "203.0.113.42");
   assert.equal("filename" in row, false);
   assert.equal("private-original-name.jpg".includes(row.object_key), false);
   assert.match(row.object_key, /^pending\//);
   assert.equal(response.headers.get("cache-control"), "no-store");
+});
+
+test("creates domain-separated keyed IP signals and exact image hashes", async () => {
+  const { hmacSubmissionSignal, sha256Image } = await import("../functions/_lib/applications.js");
+  const key = "application-review-signal-secret-value-32-bytes-minimum";
+  const ip = "203.0.113.42";
+  const first = await hmacSubmissionSignal(key, "source-ip", ip);
+  assert.equal(first, await hmacSubmissionSignal(key, "source-ip", ip));
+  assert.notEqual(first, await hmacSubmissionSignal(key, "login-ip", ip));
+  assert.notEqual(first, await hmacSubmissionSignal("a-different-secret-value-long-enough-for-hmac", "source-ip", ip));
+  assert.equal(await sha256Image(Uint8Array.from([1, 2, 3])), "039058c6f2c0cb492c533b0a4d14ef77cc0f78abccced5287d84a1a2011cfb81");
+});
+
+test("does not fingerprint an unavailable source IP", async () => {
+  const env = validEnv();
+  const response = await withTurnstileResult(successfulChallenge, () => callUpload(env));
+  assert.equal(response.status, 201);
+  assert.equal([...env.rows.values()][0].source_ip_hash, null);
 });
 
 test("rejects missing consent without contacting Turnstile or storing a photo", async () => {

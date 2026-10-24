@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>중복 의심 검토 · USIM PLUS 운영 콘솔</title>
+  <link rel="stylesheet" href="/admin/admin-shell.css" />
+</head>
+<body>
+  <main class="admin-main" data-admin-page="duplicates">
+    <section class="intro">
+      <p class="eyebrow">신청 관리 · 검토 보조</p>
+      <h1>중복 의심 검토</h1>
+      <p>중복 가능성을 보여주는 접수 신호를 확인하고, 각 신청의 사진과 이력을 따로 검토하세요.</p>
+    </section>
+    <div class="admin-alert" role="note"><strong>판정 전 확인</strong><span id="duplicateNotice">중복 표시는 참고 정보입니다. 같은 인터넷을 쓰는 다른 사람일 수 있으니, 이 표시만으로 동일인이나 부정 신청을 단정하지 마세요.</span></div>
+    <div class="admin-toolbar"><span id="duplicateUpdatedAt" class="foot">중복 신호를 불러오는 중입니다…</span><button id="refreshDuplicates" type="button">새로고침</button></div>
+    <p id="duplicateStatus" class="status" role="status" aria-live="polite">최근 60일 접수 기록을 확인하고 있습니다.</p>
+    <section id="duplicateGroups" aria-label="중복 의심 접수 묶음" aria-live="polite" aria-busy="true"></section>
+    <p class="note">인터넷 주소 원문은 저장하지 않습니다. 같은 인터넷 접속에서 신청한 기록인지, 같은 사진 파일인지 표시합니다. 접수와 검토 정보는 60일이 지난 뒤 정기 삭제합니다. 이 표시만으로 신청을 자동 처리하지 않습니다.</p>
+  </main>
+  <dialog id="duplicateImageDialog" class="image-dialog" aria-labelledby="duplicateImageTitle">
+    <div class="image-dialog__head"><h2 id="duplicateImageTitle">접수 사진</h2><button id="closeDuplicateImage" class="admin-button" type="button">닫기</button></div>
+    <img id="duplicateImage" class="image-dialog__image" alt="신청자가 제출한 개통 현황 사진" />
+  </dialog>
+  <script>
+    const groupRoot = document.getElementById("duplicateGroups");
+    const duplicateState = document.getElementById("duplicateStatus");
+    const duplicateDialog = document.getElementById("duplicateImageDialog");
+    function formatKst(value) {
+      const date = new Date(value);
+      return Number.isNaN(date.valueOf()) ? "시간 정보 없음" : date.toLocaleString("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" });
+    }
+    function photoAvailable(item) {
+      const reference = item.reviewedAt || item.createdAt;
+      return Date.now() - Date.parse(reference) < 30 * 24 * 60 * 60 * 1000;
+    }
+    function showPhoto(item) {
+      document.getElementById("duplicateImageTitle").textContent = `${item.id} · 접수 사진`;
+      document.getElementById("duplicateImage").src = `/api/admin/applications/image?id=${encodeURIComponent(item.id)}`;
+      duplicateDialog.showModal();
+    }
+    function makeApplication(item) {
+      const card = document.createElement("article");
+      card.className = "duplicate-app";
+      const head = document.createElement("div");
+      head.className = "duplicate-app__head";
+      const id = document.createElement("strong");
+      id.textContent = item.id;
+      const badge = document.createElement("span");
+      badge.className = `status-badge ${item.status === "approved" ? "approved" : item.status === "rejected" ? "rejected" : "pending"}`;
+      badge.textContent = item.status === "approved" ? "승인 완료" : item.status === "rejected" ? "반려 완료" : item.photoExpired ? "미검토 · 사진 만료" : "검토 대기";
+      head.append(id, badge);
+      const meta = document.createElement("p");
+      meta.className = "duplicate-app__meta";
+      meta.textContent = `접수 ${formatKst(item.createdAt)}${item.reviewedAt ? ` · 결정 ${formatKst(item.reviewedAt)}` : ""}`;
+      const actions = document.createElement("div");
+      actions.className = "admin-record__actions";
+      if (!item.photoExpired && photoAvailable(item)) {
+        const image = document.createElement("button");
+        image.type = "button";
+        image.className = "admin-button";
+        image.textContent = "사진 확인";
+        image.addEventListener("click", () => showPhoto(item));
+        actions.append(image);
+      } else {
+        const expired = document.createElement("span");
+        expired.className = "status-badge expired";
+        expired.textContent = "사진 보관 기간 종료";
+        actions.append(expired);
+      }
+      if (item.status === "pending" && !item.photoExpired && photoAvailable(item)) {
+        const review = document.createElement("a");
+        review.className = "admin-button primary";
+        review.href = `/admin/review.html?focus=${encodeURIComponent(item.id)}`;
+        review.textContent = "검토 목록 열기";
+        actions.append(review);
+      }
+      card.append(head, meta, actions);
+      return card;
+    }
+    function renderGroups(groups) {
+      groupRoot.replaceChildren();
+      if (!groups.length) {
+        const empty = document.createElement("div");
+        empty.className = "admin-empty";
+        empty.textContent = "최근 60일 동안 중복 비교 신호가 겹친 신청이 없습니다.";
+        groupRoot.append(empty);
+        return;
+      }
+      for (const group of groups) {
+        const section = document.createElement("article");
+        section.className = "duplicate-group";
+        const head = document.createElement("div");
+        head.className = "duplicate-group__head";
+        const text = document.createElement("div");
+        const title = document.createElement("h2");
+        title.textContent = group.label;
+        const explanation = document.createElement("p");
+        explanation.textContent = group.type === "same_ip" ? "같은 인터넷 접속에서 신청한 기록입니다. 가족이나 공용 와이파이를 쓰는 다른 사람일 수 있습니다." : "제출한 사진 파일이 같은 신청이 있습니다. 사진 속 이름이나 정보가 같은지를 뜻하지는 않습니다.";
+        text.append(title, explanation);
+        const count = document.createElement("span");
+        count.className = "status-badge";
+        count.textContent = `${group.count}건`;
+        head.append(text, count);
+        const applications = document.createElement("div");
+        applications.className = "duplicate-applications";
+        section.append(head, applications);
+        let loadedCount = 0;
+        let cursor = null;
+        const moreRow = document.createElement("div");
+        moreRow.className = "admin-toolbar";
+        const more = document.createElement("button");
+        more.type = "button";
+        more.textContent = `신청 ${group.count}건 확인`;
+        more.setAttribute("aria-label", `${group.label}에 포함된 신청 ${group.count}건 확인`);
+        more.addEventListener("click", async () => {
+          more.disabled = true;
+          more.textContent = "신청을 불러오고 있습니다…";
+          try {
+            const query = new URLSearchParams({ type: group.type, reference: group.referenceId });
+            if (cursor) query.set("cursor", cursor);
+            const response = await fetch(`/api/admin/applications/duplicates?${query}`, { credentials: "same-origin", cache: "no-store", headers: { Accept: "application/json" } });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(data.error || "신청을 불러오지 못했습니다.");
+            const loaded = data.applications || [];
+            for (const item of loaded) applications.append(makeApplication(item));
+            loadedCount += loaded.length;
+            cursor = data.nextCursor;
+            if (!loaded.length || !cursor) moreRow.remove();
+            else {
+              more.disabled = false;
+              more.textContent = `신청 더 보기 (${Math.max(0, group.count - loadedCount)}건 남음)`;
+            }
+          } catch (error) {
+            more.disabled = false;
+            more.textContent = loadedCount ? "신청 다시 불러오기" : `신청 ${group.count}건 확인`;
+            duplicateState.textContent = error.message;
+            duplicateState.classList.add("error");
+          }
+        });
+        moreRow.append(more);
+        section.append(moreRow);
+        groupRoot.append(section);
+      }
+    }
+    async function loadDuplicates() {
+      const button = document.getElementById("refreshDuplicates");
+      button.disabled = true;
+      duplicateState.classList.remove("error");
+      duplicateState.textContent = "중복 신호를 새로 확인하고 있습니다.";
+      groupRoot.setAttribute("aria-busy", "true");
+      try {
+        const response = await fetch("/api/admin/applications/duplicates", { credentials: "same-origin", cache: "no-store", headers: { Accept: "application/json" } });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || "중복 신호를 불러오지 못했습니다.");
+        document.getElementById("duplicateNotice").textContent = data.disclaimer;
+        renderGroups(data.groups || []);
+        const signalCount = (data.groups || []).length;
+        duplicateState.textContent = `${signalCount}개의 중복 의심 묶음을 확인했습니다. 표시된 신청은 자동으로 처리되지 않습니다.`;
+        document.getElementById("duplicateUpdatedAt").textContent = `확인 시각 ${formatKst(new Date().toISOString())} · 한국 표준시(KST)`;
+        const badge = document.querySelector('[data-admin-count="duplicates"]');
+        badge.textContent = signalCount > 99 ? "99+" : String(signalCount);
+        badge.hidden = signalCount === 0;
+      } catch (error) {
+        duplicateState.textContent = error.message;
+        duplicateState.classList.add("error");
+      } finally {
+        button.disabled = false;
+        groupRoot.setAttribute("aria-busy", "false");
+      }
+    }
+    document.getElementById("refreshDuplicates").addEventListener("click", loadDuplicates);
+    document.getElementById("closeDuplicateImage").addEventListener("click", () => duplicateDialog.close());
+    duplicateDialog.addEventListener("close", () => { document.getElementById("duplicateImage").removeAttribute("src"); });
+    loadDuplicates();
+  </script>
+  <script src="/admin/admin-shell.js" defer></script>
+  <script src="/admin/admin-auth.js" defer></script>
+</body>
+</html>

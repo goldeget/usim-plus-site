@@ -48,3 +48,21 @@ test("purges expired login sessions and old hashed-IP throttling records", async
   assert.equal(env.adminLoginAttempts.has("d".repeat(64)), false);
   assert.equal(env.adminLoginAttempts.has("e".repeat(64)), true);
 });
+
+test("deletes unreferenced reviewed-image copies while retaining the image D1 still points to", async () => {
+  const env = createMemoryCloudflare();
+  const orphanId = `UP-${"A".repeat(22)}`;
+  const savedId = `UP-${"B".repeat(22)}`;
+  const orphanKey = `reviewed/${orphanId.slice(3)}/approved.jpg`;
+  const savedKey = `reviewed/${savedId.slice(3)}/rejected.jpg`;
+  env.rows.set(orphanId, row(orphanId, { createdDaysAgo: 5 }));
+  env.rows.set(savedId, { ...row(savedId, { status: "rejected", createdDaysAgo: 5, reviewedDaysAgo: 2 }), object_key: savedKey });
+  env.objects.set(orphanKey, { bytes: new Uint8Array([1]), httpMetadata: {}, customMetadata: {} });
+  env.objects.set(savedKey, { bytes: new Uint8Array([2]), httpMetadata: {}, customMetadata: {} });
+
+  const { purgeOrphanedReviewedImages } = await import(retentionFile);
+  const result = await purgeOrphanedReviewedImages(env);
+  assert.deepEqual(result, { checked: 2, deleted: 1, failed: 0 });
+  assert.equal(env.objects.has(orphanKey), false);
+  assert.equal(env.objects.has(savedKey), true);
+});

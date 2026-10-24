@@ -2,7 +2,7 @@
 
 Responsive Korean site for the user supplied USIM+ design, with an operator reviewed application photo flow.
 
-The public form accepts one JPG or PNG screenshot (up to 10 MiB) after consent and Turnstile verification. Do not submit names, phone numbers, identity documents, resident registration numbers, passwords, or authentication codes. Photos are stored in a private R2 bucket; D1 stores only an opaque receipt ID, a hash of the receipt token, image metadata, status, and timestamps. Applicants can check status with their receipt ID and token. The admin site uses a single email/password account with D1-backed sessions on `admin.climekr.com`; Pages Functions protect every admin page and API.
+The public form accepts one JPG or PNG screenshot (up to 10 MiB) after consent and Turnstile verification. Do not submit names, phone numbers, identity documents, resident registration numbers, passwords, or authentication codes. Photos are stored in a private R2 bucket. D1 stores an opaque receipt ID, a hash of the receipt token, image metadata and SHA-256 fingerprint, a keyed HMAC of the source IP when Cloudflare supplies it, status, and timestamps. The raw source IP is not stored. Applicants can check status with their receipt ID and token. The admin site uses a single email/password account with D1-backed sessions on `admin.climekr.com`; Pages Functions protect every admin page and API.
 
 Pending photos expire 30 days after submission. When an operator approves or rejects an application, the image is copied to a fresh R2 key and expires 30 days after that decision. R2 lifecycle processing can add some deletion delay. D1 receipt/status metadata is purged daily after 60 days from submission or decision, so status lookup ends after that retention period. The site does not automatically decide telecom eligibility or issue payments.
 
@@ -17,7 +17,13 @@ Pending photos expire 30 days after submission. When an operator approves or rej
 - Public domains: [climekr.com](https://climekr.com) and [www.climekr.com](https://www.climekr.com)
 - Admin domain: [admin.climekr.com](https://admin.climekr.com), protected by the Pages session middleware. The Cloudflare Access app is bypassed only after the session guards are deployed and verified.
 
-The public form and status lookup use `/api/applications`, `/api/applications/status`, and `/api/applications/config`. The operator queue is at `https://admin.climekr.com/admin/review.html`. The existing CMS remains at `https://admin.climekr.com/`.
+The public form and status lookup use `/api/applications`, `/api/applications/status`, and `/api/applications/config`. The operator console opens at `https://admin.climekr.com/`, with dashboard, review queue, application history, duplicate signals, and the content editor at `/admin/content.html`.
+
+## Search and AI discovery
+
+The public page declares `https://climekr.com/` as its canonical URL and provides Korean Open Graph metadata, Schema.org organization/service/FAQ data, host-aware `robots.txt`, `sitemap.xml`, and `llms.txt`. `www.climekr.com` redirects to the canonical host, Pages preview hosts send `noindex`, and the admin hostname blocks crawling. The public sitemap contains only the landing page. Brand wording covers `클라임유심`, `climekr`, `climekr유심`, and `climekr 유심` in natural page content. The hosted IndexNow key file lets participating search engines receive a URL update after deployment.
+
+These settings help crawlers understand the service, but search ranking and AI answers are determined by external providers and cannot be guaranteed. Google Search Console and Naver Search Advisor still require site ownership verification before submitting the sitemap there.
 
 ## Cloudflare resources
 
@@ -25,9 +31,9 @@ The production Pages project requires:
 
 - D1 binding `CONTENT_DB` for `usim-plus-content`.
 - A private R2 bucket named `usim-plus-applications`, bound as `APPLICATIONS_BUCKET`; do not add a public domain.
-- D1 migrations `migrations/0002_application_submissions.sql` and `migrations/0003_admin_password_auth.sql`.
+- D1 migrations `migrations/0002_application_submissions.sql`, `migrations/0003_admin_password_auth.sql`, and `migrations/0004_application_review_signals.sql`.
 - R2 lifecycle rules deleting the `pending/` and `reviewed/` prefixes after 30 days.
-- The `usim-plus-application-retention` Worker from `wrangler-retention.toml`, with its daily Cron Trigger and the same D1 binding, to purge receipt metadata after 60 days.
+- The `usim-plus-application-retention` Worker from `wrangler-retention.toml`, with its daily Cron Trigger, the same D1 binding, and the private R2 bucket binding, to purge receipt metadata after 60 days and remove unreferenced reviewed-photo copies.
 - Pages variable `TURNSTILE_SITE_KEY`, Pages secrets `TURNSTILE_SECRET_KEY`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and `ADMIN_AUTH_SECRET`.
 - A Cloudflare Access application for `admin.climekr.com`. Set its policy to Bypass only after the new deployment and route-guard checks pass; the application still requires a password session.
 
@@ -35,9 +41,9 @@ See [Cloudflare application review setup](docs/cloudflare-application-review-set
 
 ## Content management
 
-`public/admin/index.html` is routed by `functions/_middleware.js` on the management host. It edits the public title, checklist, and FAQs in D1. The photo review queue is a session-protected page. `ADMIN_EMAIL` selects the single operator; `ADMIN_PASSWORD` is stored as an encrypted Pages secret and is never stored in D1. `ADMIN_AUTH_SECRET` is a separate random secret used to invalidate sessions after credential rotation and to key hashed-IP rate limits.
+The session-protected admin console uses a shared responsive navigation shell. `/` is the operations dashboard; `/admin/review.html` is the pending photo queue; `/admin/applications.html` shows application history; `/admin/duplicates.html` groups exact photo matches and keyed source-IP signals; `/admin/content.html` edits the public title, checklist, and FAQs in D1. Duplicate matches are review clues only and are never automatically approved or rejected. A shared IP can represent different people, and exact image hashes only detect identical files. `ADMIN_EMAIL` selects the single operator; `ADMIN_PASSWORD` is stored as an encrypted Pages secret and is never stored in D1. `ADMIN_AUTH_SECRET` is a separate random secret used to invalidate sessions after credential rotation, key login throttling, and derive non-reversible source-IP comparison values.
 
-`migrations/0001_init.sql` creates the site content table. `migrations/0002_application_submissions.sql` creates the photo review metadata table. `migrations/0003_admin_password_auth.sql` creates hashed admin sessions and login throttle rows. Apply pending migrations before production traffic.
+`migrations/0001_init.sql` creates the site content table. `migrations/0002_application_submissions.sql` creates the photo review metadata table. `migrations/0003_admin_password_auth.sql` creates hashed admin sessions and login throttle rows. `migrations/0004_application_review_signals.sql` adds keyed IP and image comparison hashes. These comparison values are deleted with application metadata after 60 days. Apply pending migrations before production traffic.
 
 ## Local development
 
@@ -66,8 +72,11 @@ The Turnstile keys above are public test credentials that work only for local de
 ```text
 public/index.html                          public application and status page
 public/admin/login.html                    email and password login form
-public/admin/index.html                    session-protected content editor
+public/admin/index.html                    session-protected operations dashboard
 public/admin/review.html                   session-protected photo review queue
+public/admin/applications.html             session-protected application history
+public/admin/duplicates.html                session-protected duplicate-signal review
+public/admin/content.html                   session-protected content editor
 functions/_middleware.js                   admin host routing and session checks
 functions/api/applications.js              consent, Turnstile, image validation, upload
 functions/api/applications/status.js       applicant receipt status lookup

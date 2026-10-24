@@ -8,22 +8,24 @@
   <style>
     :root{color-scheme:dark;--bg:#07121d;--panel:#0c1d2b;--panel2:#102536;--line:#203b4e;--text:#eaf5fa;--muted:#9bb2c1;--mint:#59e4d2;--blue:#65c7ed;--red:#ff9a9a}
     *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -30%,#16344a 0,transparent 55%),var(--bg);color:var(--text);font:15px/1.6 system-ui,-apple-system,"Noto Sans KR",sans-serif}
-    a{color:inherit}.bar{position:sticky;top:0;z-index:2;background:#07121deF;border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}.bar-inner{max-width:1120px;margin:auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px}.bar-actions{display:flex;align-items:center;gap:15px}.brand{font-weight:850;letter-spacing:.04em}.wrap{width:min(100% - 36px,1050px);margin:auto}.main{padding:36px 0 64px}.intro{margin-bottom:22px}.intro h1{font-size:clamp(26px,4vw,38px);line-height:1.2;margin:0 0 9px}.intro p{color:var(--muted);margin:0}.panel{background:linear-gradient(145deg,var(--panel),#091824);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 22px 65px #0003}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}.panel-head h2{font-size:18px;margin:0}.count{border:1px solid #28776e;color:#9ef5e9;background:#0b302d;padding:5px 11px;border-radius:999px;font-size:12px;font-weight:800}.status{margin:0 0 14px;color:var(--muted)}.status.error{color:var(--red)}.queue{display:grid;gap:14px}.item{display:grid;grid-template-columns:minmax(150px,260px) minmax(0,1fr);gap:20px;padding:15px;border:1px solid var(--line);border-radius:14px;background:var(--panel2)}.preview{display:block;position:relative;overflow:hidden;width:100%;min-height:170px;padding:0;border:1px solid #355469;border-radius:10px;background:#07121d;cursor:zoom-in}.preview img{display:block;width:100%;height:100%;max-height:300px;min-height:170px;object-fit:contain}.item-info{min-width:0;display:flex;flex-direction:column}.item-info h3{font-size:16px;margin:0 0 7px;overflow-wrap:anywhere}.meta{display:grid;grid-template-columns:auto 1fr;gap:4px 13px;color:var(--muted);font-size:13px}.meta dt{font-weight:700;color:#c4d9e4}.meta dd{margin:0}.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:auto;padding-top:17px}.btn{min-height:42px;border:1px solid #3a596d;border-radius:9px;padding:9px 15px;background:#142c3d;color:var(--text);font:inherit;font-size:14px;font-weight:800;text-decoration:none;cursor:pointer}.btn:hover{border-color:var(--blue)}.btn:focus-visible,.preview:focus-visible,a:focus-visible{outline:3px solid var(--mint);outline-offset:3px}.btn.approve{border-color:#247d72;background:#12463f;color:#c2fff4}.btn.reject{border-color:#814f59;background:#482a32;color:#ffd2d6}.btn:disabled{opacity:.55;cursor:wait}.empty{padding:34px 16px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:12px}.more-row{text-align:center;padding-top:17px}.top-link{color:var(--blue);font-weight:700;text-decoration:none}.note{margin:18px 1px 0;color:var(--muted);font-size:12px}
-    dialog{width:min(96vw,1100px);max-width:none;max-height:95vh;padding:13px;border:1px solid #55778c;border-radius:14px;background:#07121d;color:var(--text)}dialog::backdrop{background:#000c;backdrop-filter:blur(4px)}.dialog-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 0 10px}.dialog-head h2{margin:0;font-size:15px;overflow-wrap:anywhere}.dialog-image{display:block;width:100%;max-height:calc(95vh - 90px);object-fit:contain}.close{min-width:42px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    a{color:inherit}.bar{position:sticky;top:0;z-index:2;background:#07121deF;border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}.bar-inner{max-width:1120px;margin:auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px}.bar-actions{display:flex;align-items:center;gap:15px}.brand{font-weight:850;letter-spacing:.04em}.wrap{width:min(100% - 36px,1050px);margin:auto}.main{padding:36px 0 64px}.intro{margin-bottom:22px}.intro h1{font-size:clamp(26px,4vw,38px);line-height:1.2;margin:0 0 9px}.intro p{color:var(--muted);margin:0}.panel{background:linear-gradient(145deg,var(--panel),#091824);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 22px 65px #0003}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}.panel-head h2{font-size:18px;margin:0}.count{border:1px solid #28776e;color:#9ef5e9;background:#0b302d;padding:5px 11px;border-radius:999px;font-size:12px;font-weight:800}.status{margin:0 0 14px;color:var(--muted)}.status.error{color:var(--red)}.queue{display:grid;gap:14px}.item{display:grid;grid-template-columns:minmax(150px,260px) minmax(0,1fr);gap:20px;padding:15px;border:1px solid var(--line);border-radius:14px;background:var(--panel2)}.preview{display:block;position:relative;overflow:hidden;width:100%;min-height:170px;padding:0;border:1px solid #355469;border-radius:10px;background:#07121d;cursor:zoom-in}.preview img{display:block;width:100%;height:100%;max-height:300px;min-height:170px;object-fit:contain}.item-info{min-width:0;display:flex;flex-direction:column}.item-info h3{font-size:16px;margin:0 0 7px;overflow-wrap:anywhere}.meta{display:grid;grid-template-columns:auto 1fr;gap:4px 13px;color:var(--muted);font-size:13px}.meta dt{font-weight:700;color:#c4d9e4}.meta dd{margin:0}.review-checklist{margin:14px 0 0;padding:11px 12px;border:1px solid #355469;border-radius:10px;background:#0b1b28;color:#cfe1ea;font-size:12px}.review-checklist strong{display:block;color:#eaf5fa;margin-bottom:4px}.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:auto;padding-top:17px}.btn{min-height:44px;border:1px solid #3a596d;border-radius:9px;padding:9px 15px;background:#142c3d;color:var(--text);font:inherit;font-size:14px;font-weight:800;text-decoration:none;cursor:pointer}.btn:hover{border-color:var(--blue)}.btn:focus-visible,.preview:focus-visible,a:focus-visible{outline:3px solid var(--mint);outline-offset:3px}.btn.approve{border-color:#247d72;background:#12463f;color:#c2fff4}.btn.reject{border-color:#814f59;background:#482a32;color:#ffd2d6}.btn:disabled{opacity:.55;cursor:wait}.empty{padding:34px 16px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:12px}.more-row{text-align:center;padding-top:17px}.top-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 7px;color:var(--blue);font-weight:700;text-decoration:none;white-space:nowrap}.note{margin:18px 1px 0;color:var(--muted);font-size:12px}
+    dialog{width:min(96vw,1100px);max-width:none;max-height:95vh;padding:13px;border:1px solid #55778c;border-radius:14px;background:#07121d;color:var(--text)}dialog::backdrop{background:#000c;backdrop-filter:blur(4px)}.dialog-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 0 10px}.dialog-head h2{min-width:0;margin:0;font-size:15px;overflow-wrap:anywhere}.dialog-image{display:block;width:100%;max-height:calc(95vh - 90px);object-fit:contain}.close{flex:none;min-width:72px;white-space:nowrap}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
     @media(max-width:680px){.bar-inner{padding:12px 17px;align-items:flex-start;flex-direction:column}.bar-actions{width:100%;justify-content:space-between;gap:9px}.wrap{width:min(100% - 24px,1050px)}.main{padding-top:25px}.panel{padding:14px}.panel-head{align-items:flex-start}.item{grid-template-columns:1fr;gap:12px;padding:11px}.preview{min-height:145px}.preview img{min-height:145px;max-height:240px}.actions .btn{flex:1}.meta{gap:4px 8px}.note{font-size:11px}}
   </style>
+  <link rel="stylesheet" href="/admin/admin-shell.css" />
 </head>
 <body>
     <header class="bar"><div class="bar-inner"><div class="brand">USIM PLUS · 신청 검토</div><div class="bar-actions"><a class="top-link" href="/">콘텐츠 관리로 돌아가기</a><button class="btn" type="button" data-admin-logout>로그아웃</button></div></div></header>
-  <main class="wrap main">
-    <section class="intro"><h1>접수 사진 검토</h1><p>접수번호, 사진, 접수 시각을 확인한 뒤 한 번만 검토 결과를 기록할 수 있습니다.</p></section>
+  <main class="wrap main admin-main" data-admin-page="review">
+    <section class="intro"><p class="eyebrow">신청 관리 · 검토 대기</p><h1>미검토 신청</h1><p>사진을 크게 열어 확인한 뒤, 접수 시각과 중복 의심 표시를 살펴보고 승인 또는 반려를 선택하세요. 결과는 저장 후 바꿀 수 없습니다.</p></section>
+    <div class="admin-alert" role="note"><strong>사진을 이렇게 확인하세요</strong>개통 현황이 보이고 필요한 항목을 읽을 수 있는지 확인하세요. 주민등록번호·인증번호·비밀번호처럼 검토에 필요하지 않은 정보는 가려져 있어야 합니다. 같은 인터넷 접속 표시만으로 같은 사람이라고 단정하지 마세요.</div>
     <div id="queueStatus" class="status" role="status" aria-live="polite">접수 목록을 불러오는 중입니다…</div>
     <section class="panel" aria-labelledby="queueTitle">
-      <div class="panel-head"><h2 id="queueTitle">미검토 신청</h2><span id="count" class="count">0건</span></div>
-      <div id="queue" class="queue" aria-live="polite" aria-busy="true"></div>
+      <div class="panel-head"><h2 id="queueTitle">미검토 신청</h2><div class="panel-head__actions"><span id="count" class="count">0건</span><a id="allQueueLink" class="top-link" href="/admin/review.html" hidden>전체 목록</a></div></div>
+      <div id="queue" class="queue" aria-live="polite" aria-busy="true" tabindex="-1"></div>
       <div class="more-row"><button id="loadMore" class="btn" type="button" hidden>더 불러오기</button></div>
     </section>
-    <p class="note">사진 원본은 권한이 있는 관리자 화면에서만 열립니다. 미검토 사진은 접수 후 30일, 검토한 사진은 결정 후 30일 보관되며 자동 삭제 처리 시점은 저장소 반영 상황에 따라 다를 수 있습니다.</p>
+    <p class="note">사진 원본은 권한이 있는 관리자 화면에서만 열립니다. 미검토 사진은 접수 후 30일, 검토한 사진은 결정 후 30일 보관됩니다. 화면의 시간은 한국 표준시(KST) 기준입니다.</p>
   </main>
   <dialog id="imageDialog" aria-labelledby="dialogTitle">
     <div class="dialog-head"><h2 id="dialogTitle">접수 사진 원본</h2><button id="closeDialog" class="btn close" type="button" aria-label="사진 미리보기 닫기">닫기</button></div>
@@ -34,16 +36,19 @@
     const queueStatus=document.getElementById("queueStatus");
     const loadMore=document.getElementById("loadMore");
     const dialog=document.getElementById("imageDialog");
+    const duplicateSignals=new Map();
+    const duplicateSignalFailures=new Set();
+    const focusedApplication=new URLSearchParams(location.search).get("focus");
     let nextCursor=null;
     let loading=false;
 
     function setStatus(message,error=false){queueStatus.textContent=message;queueStatus.classList.toggle("error",error)}
     function formatBytes(size){return size<1024?`${size} B`:size<1024*1024?`${(size/1024).toFixed(1)} KB`:`${(size/1024/1024).toFixed(1)} MB`}
-    function formatDate(value){const date=new Date(value);return Number.isNaN(date.valueOf())?"시간 정보 없음":date.toLocaleString("ko-KR")}
+    function formatDate(value){const date=new Date(value);return Number.isNaN(date.valueOf())?"시간 정보 없음":date.toLocaleString("ko-KR",{timeZone:"Asia/Seoul",year:"numeric",month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})}
     function metadata(label,value){const dt=document.createElement("dt");dt.textContent=label;const dd=document.createElement("dd");dd.textContent=value;return [dt,dd]}
 
     function createItem(item){
-      const card=document.createElement("article");card.className="item";card.dataset.id=item.id;
+      const card=document.createElement("article");card.className="item";card.dataset.id=item.id;card.tabIndex=-1;
       const preview=document.createElement("button");preview.type="button";preview.className="preview";preview.setAttribute("aria-label",`${item.id} 사진 원본 크게 보기`);
       const thumbnail=document.createElement("img");thumbnail.src=`/api/admin/applications/image?id=${encodeURIComponent(item.id)}`;thumbnail.alt="신청자가 제출한 개통 현황 사진";thumbnail.loading="lazy";
       thumbnail.addEventListener("error",()=>{preview.replaceChildren();preview.textContent="사진을 불러오지 못했습니다.";preview.disabled=true;preview.style.cursor="not-allowed"},{once:true});
@@ -52,10 +57,17 @@
       const heading=document.createElement("h3");heading.textContent=`접수번호 ${item.id}`;
       const dl=document.createElement("dl");dl.className="meta";
       dl.append(...metadata("접수 시각",formatDate(item.createdAt)),...metadata("사진 형식",item.contentType==="image/png"?"PNG":"JPEG"),...metadata("파일 크기",formatBytes(item.sizeBytes)));
+      if(item.id===focusedApplication){const checklist=document.createElement("div");checklist.className="review-checklist";checklist.setAttribute("aria-label","검토 순서");const title=document.createElement("strong");title.textContent="검토 순서";const body=document.createElement("span");body.textContent="사진 내용과 불필요한 개인정보 노출을 확인하고, 접수 이력과 중복 표시를 살핀 뒤 결정하세요.";checklist.append(title,body);info.append(heading,dl,checklist)}else info.append(heading,dl);
+      const signalTypes=duplicateSignals.get(item.id)||[];
+      const signals=document.createElement("div");signals.className="signals";
+      for(const signal of signalTypes){const badge=document.createElement("span");badge.className=`signal-badge${signal==="same_image"?" photo":""}`;badge.textContent=signal==="same_ip"?"같은 인터넷 접속에서 신청":"같은 사진 파일";signals.append(badge)}
+      const signalNote=document.createElement("p");signalNote.className="note";signalNote.textContent="중복 의심 신호입니다. 동일인 판정은 사진과 접수 이력을 확인한 뒤 운영자가 결정하세요.";
+      const signalFailure=document.createElement("p");signalFailure.className="note status error";signalFailure.textContent="중복 확인 정보를 불러오지 못했습니다. 다시 확인할 때까지 이 접수의 검토가 잠겨 있습니다.";
       const actions=document.createElement("div");actions.className="actions";
       const approve=document.createElement("button");approve.type="button";approve.className="btn approve";approve.textContent="승인";approve.addEventListener("click",()=>decide(item.id,"approved",card,actions));
       const reject=document.createElement("button");reject.type="button";reject.className="btn reject";reject.textContent="반려";reject.addEventListener("click",()=>decide(item.id,"rejected",card,actions));
-      actions.append(approve,reject);info.append(heading,dl,actions);card.append(preview,info);return card;
+      const signalsUnavailable=duplicateSignalFailures.has(item.id);approve.disabled=signalsUnavailable;reject.disabled=signalsUnavailable;
+      actions.append(approve,reject);if(signalTypes.length)info.append(signals,signalNote);if(signalsUnavailable)info.append(signalFailure);info.append(actions);card.append(preview,info);return card;
     }
 
     async function decide(id,decision,card,actions){
@@ -65,35 +77,45 @@
       try{
         const response=await fetch("/api/admin/applications/review",{method:"POST",credentials:"same-origin",cache:"no-store",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,decision})});
         const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.error||"검토 결과를 저장하지 못했습니다.");
-        card.remove();const remaining=queue.querySelectorAll(".item").length;document.getElementById("count").textContent=`${remaining}건`;
+        const nextCard=card.nextElementSibling||card.previousElementSibling;card.remove();
+        if(nextCard)nextCard.focus({preventScroll:true});else queue.focus({preventScroll:true});
+        const remaining=queue.querySelectorAll(".item").length;document.getElementById("count").textContent=`${remaining}건`;
         setStatus(`${id} 신청을 ${label} 처리했습니다. 사진은 결정일로부터 30일 뒤 만료됩니다.`);
-        if(!remaining&&!nextCursor)showEmpty();
+      if(!remaining&&!nextCursor)showEmpty(focusedApplication?"선택한 접수를 처리했습니다. 전체 목록에서 다른 접수를 확인할 수 있습니다.":"현재 미검토 신청이 없습니다.");
       }catch(error){setStatus(error.message,true);buttons.forEach(button=>button.disabled=false)}
     }
 
-    function showEmpty(){const empty=document.createElement("div");empty.className="empty";empty.textContent="현재 미검토 신청이 없습니다.";queue.replaceChildren(empty);document.getElementById("count").textContent="0건"}
+    function showEmpty(message="현재 미검토 신청이 없습니다."){const empty=document.createElement("div");empty.className="empty";empty.textContent=message;queue.replaceChildren(empty);document.getElementById("count").textContent="0건"}
 
     async function loadQueue(reset=false){
       if(loading)return;loading=true;queue.setAttribute("aria-busy","true");loadMore.disabled=true;
       if(reset){queue.replaceChildren();nextCursor=null;setStatus("접수 목록을 불러오는 중입니다…")}
       try{
-        const query=nextCursor?`?cursor=${encodeURIComponent(nextCursor)}`:"";
+        const query=reset&&focusedApplication?`?id=${encodeURIComponent(focusedApplication)}`:nextCursor?`?cursor=${encodeURIComponent(nextCursor)}`:"";
         const response=await fetch(`/api/admin/applications${query}`,{credentials:"same-origin",cache:"no-store",headers:{Accept:"application/json"}});
         const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.error||(response.status===401?"로그인 시간이 만료됐습니다. 다시 로그인해 주세요.":"접수 목록을 불러오지 못했습니다."));
-        nextCursor=data.nextCursor||null;for(const item of data.items||[])queue.append(createItem(item));
+        nextCursor=data.nextCursor||null;const items=data.items||[];await loadDuplicateSignals(items.map(item=>item.id));for(const item of items)queue.append(createItem(item));
+        if(reset&&focusedApplication){const focused=[...queue.querySelectorAll(".item")].find(card=>card.dataset.id===focusedApplication);focused?.scrollIntoView({block:"center"});focused?.focus({preventScroll:true})}
         const count=queue.querySelectorAll(".item").length;document.getElementById("count").textContent=`${count}건`;
-        if(!count&&!nextCursor)showEmpty();
-        setStatus(count?`${count}건의 미검토 신청을 표시하고 있습니다.`:"미검토 신청이 없습니다.");
+        if(focusedApplication){document.getElementById("queueTitle").textContent="선택한 접수 검토";document.getElementById("allQueueLink").hidden=false}
+        const emptyMessage=focusedApplication?"선택한 접수를 찾을 수 없습니다. 이미 처리됐거나 사진 보관 기간이 끝났을 수 있습니다.":"현재 미검토 신청이 없습니다.";
+        if(!count&&!nextCursor)showEmpty(emptyMessage);
+        setStatus(duplicateSignalFailures.size?"중복 확인 정보를 불러오지 못했습니다. 표시된 접수는 다시 확인할 때까지 검토할 수 없습니다.":count?(focusedApplication?"선택한 접수 사진과 정보를 확인하세요.":`${count}건의 미검토 신청을 표시하고 있습니다.`):emptyMessage,duplicateSignalFailures.size>0);
         loadMore.hidden=!nextCursor;
       }catch(error){setStatus(error.message,true)}
       finally{loading=false;queue.setAttribute("aria-busy","false");loadMore.disabled=false}
     }
 
+    async function loadDuplicateSignals(ids){
+      if(!ids.length)return;
+      try{const query=new URLSearchParams({applications:ids.join(",")});const response=await fetch(`/api/admin/applications/duplicates?${query}`,{credentials:"same-origin",cache:"no-store",headers:{Accept:"application/json"}});if(!response.ok)throw new Error("duplicate signal request failed");const data=await response.json();if(!Array.isArray(data.items))throw new Error("duplicate signal response invalid");for(const id of ids)duplicateSignalFailures.delete(id);for(const item of data.items)duplicateSignals.set(item.id,item.signals||[]);return true}catch{for(const id of ids)duplicateSignalFailures.add(id);return false}
+    }
     loadMore.addEventListener("click",()=>loadQueue());
     document.getElementById("closeDialog").addEventListener("click",()=>dialog.close());
     dialog.addEventListener("click",event=>{if(event.target===dialog)dialog.close()});
     loadQueue(true);
   </script>
+  <script src="/admin/admin-shell.js" defer></script>
   <script src="/admin/admin-auth.js" defer></script>
 </body>
 </html>

@@ -124,6 +124,21 @@ test("logout revokes the D1 session and clears the cookie", async () => {
   assert.match(response.headers.get("set-cookie"), /Max-Age=0/);
 });
 
+test("logout rejects read-only methods without revoking the current session", async () => {
+  const env = adminEnv();
+  const loggedIn = await loginAdmin(env);
+  const { onRequest } = await import("../functions/api/admin/auth/logout.js");
+  const response = await onRequest({
+    request: new Request("https://admin.climekr.com/api/admin/auth/logout", {
+      method: "GET",
+      headers: { origin: "https://admin.climekr.com", cookie: loggedIn.response.headers.get("set-cookie").split(";", 1)[0] }
+    }),
+    env
+  });
+  assert.equal(response.status, 405);
+  assert.equal(env.adminSessions.size, 1);
+});
+
 test("rejects external or malformed post-login return paths", async () => {
   const env = adminEnv();
   const { response } = await loginAdmin(env, { returnTo: "//evil.example/path" });

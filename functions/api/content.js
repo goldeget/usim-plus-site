@@ -1,18 +1,22 @@
 import { isAdminRequest, readBoundedRequestBody } from "../_lib/applications.js";
 
 const DEFAULT_CONTENT = {
-  headline: "유심 가입 전, 조건부터 확인하세요.",
-  intro: "요금제와 개통 조건은 통신사·상품별로 다를 수 있습니다. 가입을 진행하기 전에 해당 통신사의 공식 홈페이지나 고객센터에서 최신 안내와 계약 조건을 확인하세요.",
+  schemaVersion: 2,
+  headline: "개통 현황 확인 후\n사진으로 사전 검토 신청",
+  intro: "KAIT에서 조회한 개통 현황을 사진으로 첨부해 사전 검토를 요청합니다.",
   checklist: [
-    { title: "월 요금과 제공 내용", body: "기본료, 데이터·통화 제공량, 부가서비스와 할인 종료 시점까지 확인하세요." },
-    { title: "개통 조건과 기기 호환", body: "본인 확인에 필요한 절차, 이용 가능한 단말기와 유심 종류를 공식 채널에서 확인하세요." },
-    { title: "약정·해지 조건", body: "약정 기간, 해지 신청 방법, 위약금이나 반환 비용이 발생하는 조건을 계약 전에 살펴보세요." }
+    { title: "1. 개통 현황 확인", body: "KAIT(한국정보통신진흥협회) 공식 사이트에서 본인인증 후 확인합니다." },
+    { title: "2. 사진 사전 검토 신청", body: "현재 개통 현황이 확인되는 화면을 사진으로 첨부합니다." },
+    { title: "3. 접수번호로 결과 확인", body: "신청이 접수되면 받은 접수번호와 조회 코드로 상태를 확인합니다." }
   ],
   faqs: [
-    { question: "통신사별 개통 조건은 어디서 확인하나요?", answer: "가입하려는 통신사의 공식 홈페이지, 공식 앱 또는 고객센터에서 현재 조건을 확인하세요. 판매처 안내와 계약서 내용도 함께 비교하는 것이 좋습니다." },
-    { question: "이 페이지에서 유심 신청이나 개통 가능 여부 확인을 할 수 있나요?", answer: "아니요. 이 페이지는 일반 정보 안내용이며 가입 신청, 개통 판정, 사진·신분증 접수를 하지 않습니다." },
-    { question: "가입 후 해지할 때 비용이 발생할 수 있나요?", answer: "요금제와 계약 조건에 따라 달라질 수 있습니다. 약정, 할인 반환, 단말기 할부 등 관련 항목을 해당 통신사의 공식 약관과 계약서에서 확인하세요." },
-    { question: "인증번호나 개통 화면을 전달해도 되나요?", answer: "인증번호, 비밀번호, 신분증 사진, 계정 화면은 타인에게 전달하지 마세요. 요청을 받으면 공식 고객센터를 통해 먼저 확인하세요." }
+    { question: "사진을 첨부하면 누가 확인하나요?", answer: "로그인한 운영자가 사진을 확인합니다. 사진은 검토 결정 후 30일, 미검토 신청은 접수 후 30일 동안 비공개로 보관합니다." },
+    { question: "사진에는 어떤 내용을 보여야 하나요?", answer: "현재 개통 현황과 심사에 필요한 항목이 식별되도록 첨부해 주세요. 주민등록번호 전체, 인증번호, 비밀번호 등 심사와 무관한 민감정보는 가려 주세요. 실제 제출 범위는 운영자의 개인정보 처리 안내를 확인하세요." },
+    { question: "지급 금액과 신청 가능 건수는 어떻게 되나요?", answer: "각 조건을 충족하고 유지 기간이 확인되면 개통 1건당 3일 5만원, 15일 추가 5만원, 30일 추가 7만원의 지급 대상이 됩니다. 한 사람 최대 3건이며 모든 조건이 확인되면 최대 51만원입니다. 3일 유지가 확인되지 않으면 첫 5만원은 지급 대상에서 제외됩니다. 실제 지급 기준과 시점은 신청 전에 문의해 확인하세요." },
+    { question: "가입 전에 무엇을 확인해야 하나요?", answer: "통신사 공식 안내에서 월 요금, 약정 기간, 해지 절차와 비용을 확인하세요. 사진 사전 검토는 통신사 개통 승인이나 지급 확정이 아닙니다." },
+    { question: "왜 참여자를 모집하나요?", answer: "통신사 개통 실적 향상을 위해 참여자를 모집합니다." },
+    { question: "사진 검토를 통과하면 개통이나 지급이 확정되나요?", answer: "아닙니다. 사진 검토는 제출한 정보의 사전 확인입니다. 실제 개통 가능 여부는 통신사가 결정하며, 지급 여부와 시점은 신청 조건을 확인해 주세요." },
+    { question: "클라임유심·climekr유심 후기와 참여 정보를 확인할 때 무엇을 살펴봐야 하나요?", answer: "신청 전에는 사진 사전 검토 범위, 지급 조건, 통신사 요금·약정·해지 비용, 개인정보 사진 보관 기간을 함께 확인하세요. 검토 결과는 통신사 개통 승인이나 지급 확정을 뜻하지 않습니다." }
   ]
 };
 
@@ -25,7 +29,7 @@ function validateContent(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return "잘못된 요청입니다.";
   if (typeof value.headline !== "string" || value.headline.trim().length < 1 || value.headline.length > 100) return "제목은 1~100자로 입력하세요.";
   if (typeof value.intro !== "string" || value.intro.trim().length < 1 || value.intro.length > 500) return "안내 문구는 1~500자로 입력하세요.";
-  if (!Array.isArray(value.checklist) || value.checklist.length < 1 || value.checklist.length > 6) return "확인 항목은 1~6개로 입력하세요.";
+  if (!Array.isArray(value.checklist) || value.checklist.length !== 3) return "참여 단계는 세 개로 고정되어 있습니다.";
   if (!Array.isArray(value.faqs) || value.faqs.length < 1 || value.faqs.length > 10) return "FAQ는 1~10개로 입력하세요.";
   for (const item of value.checklist) {
     if (!item || typeof item.title !== "string" || item.title.trim().length < 1 || item.title.length > 80 || typeof item.body !== "string" || item.body.trim().length < 1 || item.body.length > 300) return "확인 항목의 제목과 설명 길이를 확인하세요.";
@@ -39,10 +43,15 @@ function validateContent(value) {
 export async function onRequest({ request, env }) {
   if (request.method === "GET") {
     if (!env.CONTENT_DB) return json({ ...DEFAULT_CONTENT, cmsReady: false });
-    const row = await env.CONTENT_DB.prepare("SELECT content, updated_at FROM site_content WHERE id = ?").bind("home").first();
+    let row;
+    try { row = await env.CONTENT_DB.prepare("SELECT content, updated_at FROM site_content WHERE id = ?").bind("home").first(); }
+    catch { return json({ ...DEFAULT_CONTENT, cmsReady: false, error: "홈페이지 안내 저장소를 불러오지 못했습니다." }, 503); }
     if (!row) return json({ ...DEFAULT_CONTENT, cmsReady: true });
-    try { return json({ ...JSON.parse(row.content), updatedAt: row.updated_at, cmsReady: true }); }
-    catch { return json({ ...DEFAULT_CONTENT, cmsReady: true }); }
+    try {
+      const stored = JSON.parse(row.content);
+      if (stored.schemaVersion !== 2 || validateContent(stored)) return json({ ...DEFAULT_CONTENT, updatedAt: row.updated_at, cmsReady: true, legacyContent: true });
+      return json({ ...DEFAULT_CONTENT, ...stored, updatedAt: row.updated_at, cmsReady: true });
+    } catch { return json({ ...DEFAULT_CONTENT, updatedAt: row.updated_at, cmsReady: true, legacyContent: true }); }
   }
 
   if (request.method !== "PUT") return json({ error: "Method not allowed" }, 405);
@@ -61,12 +70,26 @@ export async function onRequest({ request, env }) {
   const issue = validateContent(content);
   if (issue) return json({ error: issue }, 400);
   const safe = {
+    schemaVersion: 2,
     headline: content.headline.trim(), intro: content.intro.trim(),
     checklist: content.checklist.map(x => ({ title: x.title.trim(), body: x.body.trim() })),
     faqs: content.faqs.map(x => ({ question: x.question.trim(), answer: x.answer.trim() }))
   };
   const updatedAt = new Date().toISOString();
-  await env.CONTENT_DB.prepare("INSERT INTO site_content (id, content, updated_at) VALUES (?, ?, ?) ON CONFLICT(id) DO UPDATE SET content = excluded.content, updated_at = excluded.updated_at")
-    .bind("home", JSON.stringify(safe), updatedAt).run();
+  try {
+    const previous = await env.CONTENT_DB.prepare("SELECT content, updated_at FROM site_content WHERE id = ?").bind("home").first();
+    if (previous) {
+      let current = null;
+      try { current = JSON.parse(previous.content); } catch {}
+      if (!current || current.schemaVersion !== 2 || validateContent(current)) {
+        await env.CONTENT_DB.prepare("INSERT INTO site_content (id, content, updated_at) VALUES (?, ?, ?) ON CONFLICT(id) DO NOTHING")
+          .bind("home_legacy", previous.content, previous.updated_at || updatedAt).run();
+      }
+    }
+    await env.CONTENT_DB.prepare("INSERT INTO site_content (id, content, updated_at) VALUES (?, ?, ?) ON CONFLICT(id) DO UPDATE SET content = excluded.content, updated_at = excluded.updated_at")
+      .bind("home", JSON.stringify(safe), updatedAt).run();
+  } catch {
+    return json({ error: "홈페이지 안내를 저장하지 못했습니다. 잠시 후 다시 확인해 주세요." }, 503);
+  }
   return json({ content: safe, updatedAt });
 }

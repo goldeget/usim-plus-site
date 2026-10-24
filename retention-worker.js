@@ -18,8 +18,35 @@ export async function purgeExpiredAdminAuth(env, now = Date.now()) {
   return { sessions: sessions?.meta?.changes || 0, attempts: attempts?.meta?.changes || 0 };
 }
 
+export async function purgeOrphanedReviewedImages(env) {
+  if (!env.CONTENT_DB || !env.APPLICATIONS_BUCKET?.list) return { checked: 0, deleted: 0, failed: 0 };
+  let checked = 0;
+  let deleted = 0;
+  let failed = 0;
+  let cursor;
+  do {
+    const page = await env.APPLICATIONS_BUCKET.list({ prefix: "reviewed/", cursor, limit: 500 });
+    for (const object of page.objects || []) {
+      const match = /^reviewed\/([A-Za-z0-9_-]{22})\/(?:approved|rejected)\.(?:jpg|png)$/.exec(object.key || "");
+      if (!match) continue;
+      checked += 1;
+      const id = `UP-${match[1]}`;
+      try {
+        const row = await env.CONTENT_DB.prepare("SELECT id, object_key FROM application_submissions WHERE id = ?").bind(id).first();
+        if (row?.object_key === object.key) continue;
+        await env.APPLICATIONS_BUCKET.delete(object.key);
+        deleted += 1;
+      } catch { failed += 1; }
+    }
+    cursor = page.truncated ? page.cursor : undefined;
+  } while (cursor);
+  return { checked, deleted, failed };
+}
+
 export default {
   async scheduled(_controller, env) {
-    await Promise.all([purgeExpiredApplicationMetadata(env), purgeExpiredAdminAuth(env)]);
+    await purgeExpiredApplicationMetadata(env);
+    await purgeExpiredAdminAuth(env);
+    await purgeOrphanedReviewedImages(env);
   }
 };

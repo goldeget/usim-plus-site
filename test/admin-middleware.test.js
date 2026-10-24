@@ -53,6 +53,19 @@ test("keeps public-host and preview-host admin routes inaccessible", async () =>
   }
 });
 
+test("redirects the www alias to the canonical host and marks Pages previews noindex", async () => {
+  const env = createAdminEnvironment({ cloudflare: createMemoryCloudflare() });
+  const www = context("http://www.climekr.com/guides/usim?from=search", env);
+  const wwwResponse = await onRequest(www.value);
+  assert.equal(wwwResponse.status, 308);
+  assert.equal(wwwResponse.headers.get("location"), "https://climekr.com/guides/usim?from=search");
+
+  const preview = context("https://usim-plus-site.pages.dev/", env);
+  const previewResponse = await onRequest(preview.value);
+  assert.equal(previewResponse.status, 200);
+  assert.equal(previewResponse.headers.get("x-robots-tag"), "noindex, nofollow");
+});
+
 test("serves the editor and review assets only after a valid session", async () => {
   const env = createAdminEnvironment({ cloudflare: createMemoryCloudflare() });
   const headers = await createAdminSessionHeaders(env);

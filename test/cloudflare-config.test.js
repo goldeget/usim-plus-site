@@ -35,6 +35,17 @@ test("declares the password-session schema and safe Pages secret setup", async (
   }
 });
 
+test("documents and migrates privacy-preserving duplicate-review signals", async () => {
+  const migration = await readProjectFile("migrations/0004_application_review_signals.sql");
+  const readme = await readProjectFile("README.md");
+  assert.match(migration, /ADD COLUMN source_ip_hash TEXT/);
+  assert.match(migration, /ADD COLUMN image_hash TEXT/);
+  assert.match(migration, /application_submissions_source_ip_hash/);
+  assert.match(migration, /application_submissions_image_hash/);
+  assert.match(readme, /raw source IP is not stored/i);
+  assert.match(readme, /never automatically approved or rejected/);
+});
+
 test("describes the photo-only collection accurately in the repository README", async () => {
   const readme = await readProjectFile("README.md");
   assert.ok(readme.includes("application photo flow"));

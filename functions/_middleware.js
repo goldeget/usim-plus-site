@@ -14,6 +14,12 @@ function noStore(response) {
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
+function noIndex(response) {
+  const headers = new Headers(response.headers);
+  headers.set("X-Robots-Tag", "noindex, nofollow");
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
+
 function apiUnauthorized() {
   return new Response(JSON.stringify({ error: "관리자 로그인이 필요합니다.", code: "unauthenticated" }), {
     status: 401,
@@ -41,6 +47,13 @@ export async function onRequest(context) {
   if (host !== ADMIN_HOST && adminPath) {
     return new Response("Not Found", { status: 404, headers: { "Cache-Control": "no-store" } });
   }
+  if (host === "www.climekr.com") {
+    const canonicalUrl = new URL(url.href);
+    canonicalUrl.protocol = "https:";
+    canonicalUrl.hostname = "climekr.com";
+    return Response.redirect(canonicalUrl, 308);
+  }
+  if (host !== ADMIN_HOST && host !== "climekr.com") return noIndex(await context.next());
   if (host !== ADMIN_HOST) return context.next();
 
   if (LOGIN_PAGE_ALIASES.has(url.pathname)) {

@@ -2,9 +2,11 @@ import {
   MAX_IMAGE_BYTES,
   generateReceiptToken,
   generateReferenceId,
+  hmacSubmissionSignal,
   hashReceiptToken,
   jsonResponse,
   readBoundedRequestBody,
+  sha256Image,
   validateImage,
   verifyTurnstile
 } from "../_lib/applications.js";
@@ -27,7 +29,7 @@ function validPublicOrigin(request) {
 export async function onRequest({ request, env }) {
   if (request.method !== "POST") return jsonResponse({ error: "허용되지 않은 요청입니다." }, 405);
   if (!validPublicOrigin(request)) return jsonResponse({ error: "요청 출처를 확인할 수 없습니다." }, 403);
-  if (!env.CONTENT_DB || !env.APPLICATIONS_BUCKET || !env.TURNSTILE_SECRET_KEY || !env.TURNSTILE_SITE_KEY) {
+  if (!env.CONTENT_DB || !env.APPLICATIONS_BUCKET || !env.TURNSTILE_SECRET_KEY || !env.TURNSTILE_SITE_KEY || new TextEncoder().encode(String(env.ADMIN_AUTH_SECRET || "")).byteLength < 32) {
     return jsonResponse({ error: "신청 접수 설정이 완료되지 않았습니다. 운영자에게 문의해 주세요." }, 503);
   }
 
@@ -65,6 +67,11 @@ export async function onRequest({ request, env }) {
   const objectKey = `pending/${id.slice(3)}.${file.type === "image/png" ? "png" : "jpg"}`;
   const createdAt = new Date().toISOString();
   const tokenHash = await hashReceiptToken(token);
+  const sourceAddress = String(request.headers.get("cf-connecting-ip") || "").trim();
+  const sourceIpHash = sourceAddress && sourceAddress.length <= 45
+    ? await hmacSubmissionSignal(env.ADMIN_AUTH_SECRET, "source-ip", sourceAddress)
+    : null;
+  const imageHash = await sha256Image(bytes);
   try {
     await env.APPLICATIONS_BUCKET.put(objectKey, bytes, {
       httpMetadata: { contentType: file.type },
@@ -76,8 +83,8 @@ export async function onRequest({ request, env }) {
 
   try {
     const result = await env.CONTENT_DB.prepare(
-      "INSERT INTO application_submissions (id, token_hash, object_key, content_type, size_bytes, status, created_at, reviewed_at) VALUES (?, ?, ?, ?, ?, 'pending', ?, NULL)"
-    ).bind(id, tokenHash, objectKey, file.type, file.size, createdAt).run();
+      "INSERT INTO application_submissions (id, token_hash, object_key, content_type, size_bytes, source_ip_hash, image_hash, status, created_at, reviewed_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, NULL)"
+    ).bind(id, tokenHash, objectKey, file.type, file.size, sourceIpHash, imageHash, createdAt).run();
     if (result?.meta?.changes !== 1) throw new Error("application insert failed");
   } catch {
     try { await env.APPLICATIONS_BUCKET.delete(objectKey); } catch {}

@@ -41,6 +41,20 @@ export async function hashReceiptToken(token, cryptoApi = crypto) {
   return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, "0")).join("");
 }
 
+export async function hmacSubmissionSignal(secret, purpose, value, cryptoApi = crypto) {
+  const keyBytes = new TextEncoder().encode(String(secret));
+  if (keyBytes.byteLength < 32) throw new TypeError("A 32-byte review secret is required.");
+  const key = await cryptoApi.subtle.importKey("raw", keyBytes, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const message = new TextEncoder().encode(`usim-plus-review-signal\u0000${purpose}\u0000${value}`);
+  const digest = await cryptoApi.subtle.sign("HMAC", key, message);
+  return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, "0")).join("");
+}
+
+export async function sha256Image(bytes, cryptoApi = crypto) {
+  const digest = await cryptoApi.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, "0")).join("");
+}
+
 export function privateImageHeaders(contentType) {
   return {
     "Content-Type": contentType,

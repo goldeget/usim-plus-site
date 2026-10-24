@@ -188,6 +188,7 @@ export async function loginAdminRequest(request, env, now = Date.now()) {
 }
 
 export async function logoutAdminRequest(request, env) {
+  if (request.method !== "POST") return jsonResponse({ error: "허용되지 않은 요청입니다." }, 405);
   if (!(await isAdminRequest(request, env, { requireOrigin: true }))) {
     return jsonResponse({ error: "관리자 인증이 필요합니다." }, 401);
   }

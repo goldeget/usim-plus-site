@@ -1,4 +1,4 @@
-import { isAdminRequest, jsonResponse, isExpiredPending, privateImageHeaders } from "../../../_lib/applications.js";
+import { isAdminRequest, jsonResponse, PHOTO_RETENTION_MS, privateImageHeaders } from "../../../_lib/applications.js";
 
 const ID_PATTERN = /^UP-[A-Za-z0-9_-]{22}$/;
 
@@ -14,7 +14,9 @@ export async function onRequest({ request, env }) {
     row = await env.CONTENT_DB.prepare("SELECT id, object_key, content_type, status, created_at, reviewed_at FROM application_submissions WHERE id = ?").bind(id).first();
   } catch { return jsonResponse({ error: "사진 정보를 불러오지 못했습니다." }, 503); }
   if (!row) return jsonResponse({ error: "사진을 찾을 수 없습니다." }, 404);
-  if (row.status === "pending" && isExpiredPending(row.created_at)) return jsonResponse({ error: "보관 기간이 지나 사진이 만료되었습니다." }, 410);
+  if (!["pending", "approved", "rejected"].includes(row.status)) return jsonResponse({ error: "사진을 찾을 수 없습니다." }, 404);
+  const retainedAt = Date.parse(row.status === "pending" ? row.created_at : row.reviewed_at);
+  if (!Number.isFinite(retainedAt) || Date.now() - retainedAt >= PHOTO_RETENTION_MS) return jsonResponse({ error: "보관 기간이 지나 사진이 만료되었습니다." }, 410);
   if (!["image/jpeg", "image/png"].includes(row.content_type)) return jsonResponse({ error: "지원하지 않는 사진 형식입니다." }, 415);
 
   let object;
