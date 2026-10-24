@@ -1,0 +1,8 @@
+name = "usim-plus-site"
+compatibility_date = "2026-10-24"
+pages_build_output_dir = "public"
+
+[[d1_databases]]
+binding = "CONTENT_DB"
+database_name = "usim-plus-content"
+database_id = "23f98117-e3e7-4804-9d72-c8f15d812aa7"
