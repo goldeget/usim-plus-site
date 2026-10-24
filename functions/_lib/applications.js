@@ -1,36 +1,9 @@
+import { constantTimeEqual, jsonResponse, readBoundedRequestBody } from "./http.js";
+import { isAdminRequest } from "./admin-auth.js";
+
 export const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 export const PHOTO_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
-
-export async function readBoundedRequestBody(request, maxBytes) {
-  const lengthHeader = request.headers.get("content-length");
-  if (lengthHeader && (!/^\d+$/.test(lengthHeader) || Number(lengthHeader) > maxBytes)) {
-    return { bytes: null, tooLarge: true };
-  }
-
-  const reader = request.body?.getReader();
-  if (!reader) return { bytes: new Uint8Array(0), tooLarge: false };
-
-  const chunks = [];
-  let size = 0;
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    size += value.byteLength;
-    if (size > maxBytes) {
-      try { await reader.cancel(); } catch {}
-      return { bytes: null, tooLarge: true };
-    }
-    chunks.push(value);
-  }
-
-  const bytes = new Uint8Array(size);
-  let offset = 0;
-  for (const chunk of chunks) {
-    bytes.set(chunk, offset);
-    offset += chunk.byteLength;
-  }
-  return { bytes, tooLarge: false };
-}
+export { constantTimeEqual, jsonResponse, readBoundedRequestBody, isAdminRequest };
 
 const JPEG_START = [0xff, 0xd8, 0xff];
 const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
@@ -66,37 +39,6 @@ export async function hashReceiptToken(token, cryptoApi = crypto) {
   const bytes = new TextEncoder().encode(String(token));
   const digest = await cryptoApi.subtle.digest("SHA-256", bytes);
   return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, "0")).join("");
-}
-
-export function constantTimeEqual(left, right) {
-  const a = String(left || "");
-  const b = String(right || "");
-  let mismatch = a.length ^ b.length;
-  const count = Math.max(a.length, b.length);
-  for (let i = 0; i < count; i += 1) mismatch |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);
-  return mismatch === 0;
-}
-
-export function isAdminRequest(request, env, { requireOrigin = false } = {}) {
-  const url = new URL(request.url);
-  const expectedEmail = String(env?.ADMIN_EMAIL || "").trim().toLowerCase();
-  const authenticatedEmail = String(request.headers.get("cf-access-authenticated-user-email") || "").trim().toLowerCase();
-  const assertion = String(request.headers.get("cf-access-jwt-assertion") || "");
-  if (url.hostname.toLowerCase() !== "admin.climekr.com" || url.protocol !== "https:") return false;
-  if (!expectedEmail || !authenticatedEmail || authenticatedEmail !== expectedEmail || !assertion) return false;
-  if (requireOrigin && request.headers.get("origin") !== "https://admin.climekr.com") return false;
-  return true;
-}
-
-export function jsonResponse(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      "Content-Type": "application/json; charset=utf-8",
-      "Cache-Control": "no-store",
-      "X-Content-Type-Options": "nosniff"
-    }
-  });
 }
 
 export function privateImageHeaders(contentType) {

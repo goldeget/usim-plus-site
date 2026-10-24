@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { webcrypto } from "node:crypto";
+import { createMemoryCloudflare } from "../test-support/cloudflare.js";
+import { createAdminEnvironment, createAdminSessionHeaders } from "../test-support/admin-auth.js";
 
 const helpersPath = "../functions/_lib/applications.js";
 const jpeg = Uint8Array.from([0xff, 0xd8, 0xff, 0xdb, 0x00, 0x00, 0xff, 0xd9]);
@@ -45,31 +47,25 @@ test("hashes the receipt token without storing its plaintext", async () => {
   assert.notEqual(first, await hashReceiptToken("other-token", webcrypto));
 });
 
-test("requires the exact admin host, configured email, and Access assertion", async () => {
+test("requires a valid session on the exact HTTPS admin host", async () => {
   const { isAdminRequest } = await import(helpersPath);
-  const env = { ADMIN_EMAIL: "admin@example.test" };
-  const validHeaders = {
-    "cf-access-authenticated-user-email": "ADMIN@example.test",
-    "cf-access-jwt-assertion": "verified-by-access"
-  };
-  assert.equal(isAdminRequest(new Request("https://admin.climekr.com/api/admin/applications", { headers: validHeaders }), env), true);
-  assert.equal(isAdminRequest(new Request("https://climekr.com/api/admin/applications", { headers: validHeaders }), env), false);
-  assert.equal(isAdminRequest(new Request("https://admin.climekr.com/api/admin/applications", { headers: { ...validHeaders, "cf-access-authenticated-user-email": "other@example.test" } }), env), false);
-  assert.equal(isAdminRequest(new Request("https://admin.climekr.com/api/admin/applications", { headers: { "cf-access-authenticated-user-email": "admin@example.test" } }), env), false);
-  assert.equal(isAdminRequest(new Request("https://admin.climekr.com/api/admin/applications", { headers: validHeaders }), {}), false);
+  const env = createAdminEnvironment({ cloudflare: createMemoryCloudflare() });
+  const headers = await createAdminSessionHeaders(env);
+  assert.equal(await isAdminRequest(new Request("https://admin.climekr.com/api/admin/applications", { headers }), env), true);
+  assert.equal(await isAdminRequest(new Request("https://climekr.com/api/admin/applications", { headers }), env), false);
+  assert.equal(await isAdminRequest(new Request("http://admin.climekr.com/api/admin/applications", { headers }), env), false);
+  assert.equal(await isAdminRequest(new Request("https://admin.climekr.com/api/admin/applications", { headers: { "cf-access-authenticated-user-email": env.ADMIN_EMAIL, "cf-access-jwt-assertion": "forged" } }), env), false);
+  assert.equal(await isAdminRequest(new Request("https://admin.climekr.com/api/admin/applications", { headers }), {}), false);
 });
 
 test("requires the admin origin for mutating requests", async () => {
   const { isAdminRequest } = await import(helpersPath);
-  const env = { ADMIN_EMAIL: "admin@example.test" };
-  const headers = {
-    "cf-access-authenticated-user-email": "admin@example.test",
-    "cf-access-jwt-assertion": "verified-by-access",
-    origin: "https://evil.example"
-  };
-  assert.equal(isAdminRequest(new Request("https://admin.climekr.com/api/admin/applications/review", { method: "POST", headers }), env, { requireOrigin: true }), false);
+  const env = createAdminEnvironment({ cloudflare: createMemoryCloudflare() });
+  const sessionHeaders = await createAdminSessionHeaders(env);
+  const headers = { ...sessionHeaders, origin: "https://evil.example" };
+  assert.equal(await isAdminRequest(new Request("https://admin.climekr.com/api/admin/applications/review", { method: "POST", headers }), env, { requireOrigin: true }), false);
   headers.origin = "https://admin.climekr.com";
-  assert.equal(isAdminRequest(new Request("https://admin.climekr.com/api/admin/applications/review", { method: "POST", headers }), env, { requireOrigin: true }), true);
+  assert.equal(await isAdminRequest(new Request("https://admin.climekr.com/api/admin/applications/review", { method: "POST", headers }), env, { requireOrigin: true }), true);
 });
 
 test("JSON responses are private, non-cacheable, and nosniff", async () => {

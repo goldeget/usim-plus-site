@@ -21,7 +21,7 @@ async function discardIfUnreferenced(bucket, key, row) {
 }
 
 export async function onRequest({ request, env }) {
-  if (!isAdminRequest(request, env, { requireOrigin: true })) return jsonResponse({ error: "관리자 인증 또는 요청 출처를 확인할 수 없습니다." }, 403);
+  if (!(await isAdminRequest(request, env, { requireOrigin: true }))) return jsonResponse({ error: "관리자 로그인 또는 요청 출처를 확인할 수 없습니다." }, 401);
   if (request.method !== "POST") return jsonResponse({ error: "허용되지 않은 요청입니다." }, 405);
   if (!env.CONTENT_DB || !env.APPLICATIONS_BUCKET) return jsonResponse({ error: "신청 저장소가 연결되지 않았습니다." }, 503);
   const parsed = await readReviewRequest(request);

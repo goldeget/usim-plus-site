@@ -3,7 +3,7 @@ import { isAdminRequest, jsonResponse, isExpiredPending, privateImageHeaders } f
 const ID_PATTERN = /^UP-[A-Za-z0-9_-]{22}$/;
 
 export async function onRequest({ request, env }) {
-  if (!isAdminRequest(request, env)) return jsonResponse({ error: "관리자 인증이 필요합니다." }, 403);
+  if (!(await isAdminRequest(request, env))) return jsonResponse({ error: "관리자 로그인이 필요합니다." }, 401);
   if (request.method !== "GET") return jsonResponse({ error: "허용되지 않은 요청입니다." }, 405);
   if (!env.CONTENT_DB || !env.APPLICATIONS_BUCKET) return jsonResponse({ error: "사진 저장소가 연결되지 않았습니다." }, 503);
 

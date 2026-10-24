@@ -2,12 +2,9 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 import { createMemoryCloudflare } from "../test-support/cloudflare.js";
+import { createAdminEnvironment, createAdminSessionHeaders } from "../test-support/admin-auth.js";
 
 const imageBytes = Uint8Array.from([0xff, 0xd8, 0xff, 0xdb, 0x00, 0x00, 0xff, 0xd9]);
-const adminHeaders = {
-  "cf-access-authenticated-user-email": "admin@example.test",
-  "cf-access-jwt-assertion": "assertion-present"
-};
 
 function makeId(seed = "A") { return `UP-${seed.repeat(22)}`; }
 
@@ -19,17 +16,17 @@ async function seedSubmission(env, { id = makeId(), ageDays = 1, status = "pendi
   return env.rows.get(id);
 }
 
-async function callQueue(env, { headers = adminHeaders, cursor = "" } = {}) {
+async function callQueue(env, { headers = env.adminHeaders, cursor = "" } = {}) {
   const { onRequest } = await import("../functions/api/admin/applications.js");
   return onRequest({ request: new Request(`https://admin.climekr.com/api/admin/applications${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`, { headers }), env });
 }
 
-async function callImage(env, id, headers = adminHeaders) {
+async function callImage(env, id, headers = env.adminHeaders) {
   const { onRequest } = await import("../functions/api/admin/applications/image.js");
   return onRequest({ request: new Request(`https://admin.climekr.com/api/admin/applications/image?id=${encodeURIComponent(id)}`, { headers }), env });
 }
 
-async function callReview(env, id, decision, { headers = adminHeaders, origin = "https://admin.climekr.com" } = {}) {
+async function callReview(env, id, decision, { headers = env.adminHeaders, origin = "https://admin.climekr.com" } = {}) {
   const { onRequest } = await import("../functions/api/admin/applications/review.js");
   return onRequest({
     request: new Request("https://admin.climekr.com/api/admin/applications/review", {
@@ -41,27 +38,31 @@ async function callReview(env, id, decision, { headers = adminHeaders, origin = 
   });
 }
 
-function adminEnv(options) { return { ...createMemoryCloudflare(options), ADMIN_EMAIL: "admin@example.test" }; }
+async function adminEnv(options) {
+  const env = createAdminEnvironment({ cloudflare: createMemoryCloudflare(options), email: "admin@example.test" });
+  env.adminHeaders = await createAdminSessionHeaders(env);
+  return env;
+}
 
-test("denies queue, image, and decision requests without Cloudflare Access identity", async () => {
-  const env = adminEnv();
+test("denies queue, image, and decision requests without an application session", async () => {
+  const env = await adminEnv();
   const row = await seedSubmission(env);
-  assert.equal((await callQueue(env, { headers: {} })).status, 403);
-  assert.equal((await callImage(env, row.id, {})).status, 403);
-  assert.equal((await callReview(env, row.id, "approved", { headers: {} })).status, 403);
+  assert.equal((await callQueue(env, { headers: {} })).status, 401);
+  assert.equal((await callImage(env, row.id, {})).status, 401);
+  assert.equal((await callReview(env, row.id, "approved", { headers: {} })).status, 401);
 });
 
-test("requires the Access-authenticated administrator email", async () => {
-  const env = adminEnv();
+test("ignores forged Cloudflare Access headers without an application session", async () => {
+  const env = await adminEnv();
   const row = await seedSubmission(env);
-  const headers = { ...adminHeaders, "cf-access-authenticated-user-email": "intruder@example.test" };
-  assert.equal((await callQueue(env, { headers })).status, 403);
-  assert.equal((await callImage(env, row.id, headers)).status, 403);
-  assert.equal((await callReview(env, row.id, "approved", { headers })).status, 403);
+  const headers = { "cf-access-authenticated-user-email": "admin@example.test", "cf-access-jwt-assertion": "forged" };
+  assert.equal((await callQueue(env, { headers })).status, 401);
+  assert.equal((await callImage(env, row.id, headers)).status, 401);
+  assert.equal((await callReview(env, row.id, "approved", { headers })).status, 401);
 });
 
 test("lists only fresh pending items without exposing R2 keys or receipt hashes", async () => {
-  const env = adminEnv();
+  const env = await adminEnv();
   const pending = await seedSubmission(env, { id: makeId("B") });
   await seedSubmission(env, { id: makeId("C"), ageDays: 31 });
   await seedSubmission(env, { id: makeId("D"), status: "approved" });
@@ -82,7 +83,7 @@ test("lists only fresh pending items without exposing R2 keys or receipt hashes"
 });
 
 test("paginates the review queue without skipping same-time submissions", async () => {
-  const env = adminEnv();
+  const env = await adminEnv();
   const createdAt = new Date().toISOString();
   for (let i = 0; i < 51; i += 1) {
     const id = `UP-${String(i).padStart(22, "0")}`;
@@ -98,7 +99,7 @@ test("paginates the review queue without skipping same-time submissions", async 
 });
 
 test("serves an original image only to an authorized administrator with private headers", async () => {
-  const env = adminEnv();
+  const env = await adminEnv();
   const row = await seedSubmission(env, { id: makeId("E") });
   const response = await callImage(env, row.id);
   assert.equal(response.status, 200);
@@ -109,7 +110,7 @@ test("serves an original image only to an authorized administrator with private 
 });
 
 test("approves a pending photo once and starts a fresh 30-day R2 object age", async () => {
-  const env = adminEnv();
+  const env = await adminEnv();
   const row = await seedSubmission(env, { id: makeId("F"), ageDays: 20 });
   const response = await callReview(env, row.id, "approved");
   const result = await response.json();
@@ -123,15 +124,15 @@ test("approves a pending photo once and starts a fresh 30-day R2 object age", as
 });
 
 test("rejects wrong origins and invalid decisions without changing the queue", async () => {
-  const env = adminEnv();
+  const env = await adminEnv();
   const row = await seedSubmission(env, { id: makeId("G") });
-  assert.equal((await callReview(env, row.id, "approved", { origin: "https://evil.example" })).status, 403);
+  assert.equal((await callReview(env, row.id, "approved", { origin: "https://evil.example" })).status, 401);
   assert.equal((await callReview(env, row.id, "pending")).status, 400);
   assert.equal(row.status, "pending");
 });
 
 test("bounds the admin decision body stream when Content-Length is missing", async () => {
-  const env = adminEnv();
+  const env = await adminEnv();
   const { onRequest } = await import("../functions/api/admin/applications/review.js");
   let cancelled = false;
   let closeTimer;
@@ -144,7 +145,7 @@ test("bounds the admin decision body stream when Content-Length is missing", asy
   });
   const request = new Request("https://admin.climekr.com/api/admin/applications/review", {
     method: "POST",
-    headers: { ...adminHeaders, origin: "https://admin.climekr.com", "Content-Type": "application/json" },
+    headers: { ...env.adminHeaders, origin: "https://admin.climekr.com", "Content-Type": "application/json" },
     body: stream,
     duplex: "half"
   });
@@ -155,7 +156,7 @@ test("bounds the admin decision body stream when Content-Length is missing", asy
 });
 
 test("does not allow a second, different review decision", async () => {
-  const env = adminEnv();
+  const env = await adminEnv();
   const row = await seedSubmission(env, { id: makeId("H") });
   assert.equal((await callReview(env, row.id, "approved")).status, 200);
   assert.equal((await callReview(env, row.id, "rejected")).status, 409);
@@ -163,7 +164,7 @@ test("does not allow a second, different review decision", async () => {
 });
 
 test("removes the copied object if the conditional D1 decision fails", async () => {
-  const env = adminEnv({ failUpdate: true });
+  const env = await adminEnv({ failUpdate: true });
   const row = await seedSubmission(env, { id: makeId("I") });
   const response = await callReview(env, row.id, "rejected");
   assert.equal(response.status, 503);
@@ -172,7 +173,7 @@ test("removes the copied object if the conditional D1 decision fails", async () 
 });
 
 test("preserves the reviewed image if D1 commits before its response fails", async () => {
-  const env = adminEnv({ failUpdateAfterCommit: true });
+  const env = await adminEnv({ failUpdateAfterCommit: true });
   const row = await seedSubmission(env, { id: makeId("L") });
   const response = await callReview(env, row.id, "approved");
   assert.equal(response.status, 200);
@@ -181,7 +182,7 @@ test("preserves the reviewed image if D1 commits before its response fails", asy
 });
 
 test("leaves no losing photo copy after concurrent conflicting decisions", async () => {
-  const env = adminEnv();
+  const env = await adminEnv();
   const row = await seedSubmission(env, { id: makeId("J") });
   const responses = await Promise.all([
     callReview(env, row.id, "approved"),
@@ -195,7 +196,7 @@ test("leaves no losing photo copy after concurrent conflicting decisions", async
 });
 
 test("does not change the decision if copying the image into reviewed retention fails", async () => {
-  const env = adminEnv();
+  const env = await adminEnv();
   const row = await seedSubmission(env, { id: makeId("K") });
   env.failures.put = true;
   const response = await callReview(env, row.id, "approved");
@@ -214,7 +215,7 @@ test("provides an accessible review queue, image dialog, and explicit decision c
   assert.match(html, /더 불러오기/);
 });
 
-test("links the existing Access-protected content editor to photo review", async () => {
+test("links the protected content editor to photo review", async () => {
   const html = await readFile(new URL("../public/admin/index.html", import.meta.url), "utf8");
   assert.match(html, /review\.html/);
 });

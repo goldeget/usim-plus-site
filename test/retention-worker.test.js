@@ -32,3 +32,19 @@ test("scheduled handler runs the metadata purge against the bound D1 database", 
   await worker.scheduled({}, env, {});
   assert.equal(env.rows.has("expired-pending"), false);
 });
+
+test("purges expired login sessions and old hashed-IP throttling records", async () => {
+  const env = createMemoryCloudflare();
+  const now = Date.now();
+  env.adminSessions.set("a".repeat(64), { token_hash: "a".repeat(64), password_version: "b".repeat(64), created_at: new Date(now - 9 * 60 * 60 * 1000).toISOString(), expires_at: new Date(now - 60_000).toISOString() });
+  env.adminSessions.set("c".repeat(64), { token_hash: "c".repeat(64), password_version: "b".repeat(64), created_at: new Date(now - 60_000).toISOString(), expires_at: new Date(now + 60_000).toISOString() });
+  env.adminLoginAttempts.set("d".repeat(64), { ip_hash: "d".repeat(64), window_started_at: new Date(now - 25 * 60 * 60 * 1000).toISOString(), attempts: 10, updated_at: new Date(now - 25 * 60 * 60 * 1000).toISOString() });
+  env.adminLoginAttempts.set("e".repeat(64), { ip_hash: "e".repeat(64), window_started_at: new Date(now - 5 * 60 * 1000).toISOString(), attempts: 2, updated_at: new Date(now - 5 * 60 * 1000).toISOString() });
+  const { purgeExpiredAdminAuth } = await import(retentionFile);
+  const result = await purgeExpiredAdminAuth(env, now);
+  assert.deepEqual(result, { sessions: 1, attempts: 1 });
+  assert.equal(env.adminSessions.has("a".repeat(64)), false);
+  assert.equal(env.adminSessions.has("c".repeat(64)), true);
+  assert.equal(env.adminLoginAttempts.has("d".repeat(64)), false);
+  assert.equal(env.adminLoginAttempts.has("e".repeat(64)), true);
+});

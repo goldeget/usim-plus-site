@@ -1,6 +1,8 @@
 export function createMemoryCloudflare({ failInsert = false, failPut = false, failDelete = false, failUpdate = false, failUpdateAfterCommit = false, failRead = false } = {}) {
   const rows = new Map();
   const objects = new Map();
+  const adminSessions = new Map();
+  const adminLoginAttempts = new Map();
   const failures = { insert: failInsert, put: failPut, delete: failDelete, update: failUpdate, updateAfterCommit: failUpdateAfterCommit, read: failRead };
   const db = {
     rows,
@@ -10,6 +12,24 @@ export function createMemoryCloudflare({ failInsert = false, failPut = false, fa
           return {
             async first() {
               if (failures.read) throw new Error("injected D1 read failure");
+              if (/FROM admin_sessions\s+WHERE token_hash\s*=\s*\?/i.test(sql)) {
+                const row = adminSessions.get(values[0]);
+                return row ? { ...row } : null;
+              }
+              if (/FROM admin_login_attempts\s+WHERE ip_hash\s*=\s*\?/i.test(sql)) {
+                const row = adminLoginAttempts.get(values[0]);
+                return row ? { ...row } : null;
+              }
+              if (/INSERT INTO admin_login_attempts/i.test(sql) && /RETURNING attempts/i.test(sql)) {
+                const [ipHash, windowStartedAt, updatedAt, firstCutoff, secondCutoff] = values;
+                const previous = adminLoginAttempts.get(ipHash);
+                const expired = !previous || previous.window_started_at <= firstCutoff || previous.window_started_at <= secondCutoff;
+                const row = expired
+                  ? { ip_hash: ipHash, window_started_at: windowStartedAt, attempts: 1, updated_at: updatedAt }
+                  : { ...previous, attempts: previous.attempts + 1, updated_at: updatedAt };
+                adminLoginAttempts.set(ipHash, row);
+                return { attempts: row.attempts };
+              }
               if (/FROM application_submissions\s+WHERE id\s*=\s*\?/i.test(sql)) {
                 const row = rows.get(values[0]);
                 return row ? { ...row } : null;
@@ -31,6 +51,29 @@ export function createMemoryCloudflare({ failInsert = false, failPut = false, fa
               return { results: [] };
             },
             async run() {
+              if (/INSERT INTO admin_sessions/i.test(sql)) {
+                const [tokenHash, passwordVersion, createdAt, expiresAt] = values;
+                adminSessions.set(tokenHash, { token_hash: tokenHash, password_version: passwordVersion, created_at: createdAt, expires_at: expiresAt });
+                return { meta: { changes: 1 } };
+              }
+              if (/DELETE FROM admin_sessions WHERE token_hash\s*=\s*\?/i.test(sql)) {
+                const changed = adminSessions.delete(values[0]);
+                return { meta: { changes: changed ? 1 : 0 } };
+              }
+              if (/DELETE FROM admin_sessions WHERE expires_at\s*<=\s*\?/i.test(sql)) {
+                let changes = 0;
+                for (const [hash, row] of adminSessions) if (row.expires_at <= values[0]) { adminSessions.delete(hash); changes += 1; }
+                return { meta: { changes } };
+              }
+              if (/DELETE FROM admin_login_attempts WHERE window_started_at\s*<=\s*\?/i.test(sql)) {
+                let changes = 0;
+                for (const [hash, row] of adminLoginAttempts) if (row.window_started_at <= values[0]) { adminLoginAttempts.delete(hash); changes += 1; }
+                return { meta: { changes } };
+              }
+              if (/DELETE FROM admin_login_attempts WHERE ip_hash\s*=\s*\?/i.test(sql)) {
+                const changed = adminLoginAttempts.delete(values[0]);
+                return { meta: { changes: changed ? 1 : 0 } };
+              }
               if (/INSERT INTO application_submissions/i.test(sql)) {
                 if (failures.insert) throw new Error("injected D1 insert failure");
                 const [id, token_hash, object_key, content_type, size_bytes, created_at] = values;
@@ -81,7 +124,7 @@ export function createMemoryCloudflare({ failInsert = false, failPut = false, fa
       objects.delete(key);
     }
   };
-  return { CONTENT_DB: db, APPLICATIONS_BUCKET: bucket, rows, objects, failures };
+  return { CONTENT_DB: db, APPLICATIONS_BUCKET: bucket, rows, objects, adminSessions, adminLoginAttempts, failures };
 }
 
 export function createSubmissionForm({

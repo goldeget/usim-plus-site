@@ -2,7 +2,7 @@ name = "usim-plus-site"
 compatibility_date = "2026-10-24"
 pages_build_output_dir = "public"
 
-# ADMIN_EMAIL is stored as a Cloudflare Pages secret, not in this repository.
+# ADMIN_EMAIL, ADMIN_PASSWORD, and ADMIN_AUTH_SECRET are encrypted Pages secrets, not repository values.
 
 [[d1_databases]]
 binding = "CONTENT_DB"

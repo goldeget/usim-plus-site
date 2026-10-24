@@ -1,4 +1,4 @@
-import { readBoundedRequestBody } from "../_lib/applications.js";
+import { isAdminRequest, readBoundedRequestBody } from "../_lib/applications.js";
 
 const DEFAULT_CONTENT = {
   headline: "유심 가입 전, 조건부터 확인하세요.",
@@ -46,12 +46,7 @@ export async function onRequest({ request, env }) {
   }
 
   if (request.method !== "PUT") return json({ error: "Method not allowed" }, 405);
-  const url = new URL(request.url);
-  if (url.hostname.toLowerCase() !== "admin.climekr.com") return json({ error: "관리용 도메인에서만 저장할 수 있습니다." }, 403);
-  const expectedEmail = String(env.ADMIN_EMAIL || "").trim().toLowerCase();
-  const authenticatedEmail = String(request.headers.get("cf-access-authenticated-user-email") || "").trim().toLowerCase();
-  if (!expectedEmail || !authenticatedEmail || authenticatedEmail !== expectedEmail || !request.headers.get("cf-access-jwt-assertion")) return json({ error: "Cloudflare Access 관리자 인증이 필요합니다." }, 401);
-  if (request.headers.get("origin") !== "https://admin.climekr.com") return json({ error: "요청 출처를 확인할 수 없습니다." }, 403);
+  if (!(await isAdminRequest(request, env, { requireOrigin: true }))) return json({ error: "관리자 로그인 또는 요청 출처를 확인할 수 없습니다." }, 401);
   if (!env.CONTENT_DB) return json({ error: "콘텐츠 저장소가 아직 연결되지 않았습니다." }, 503);
 
   let content;

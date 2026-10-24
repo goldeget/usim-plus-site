@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createMemoryCloudflare } from "../test-support/cloudflare.js";
+import { createAdminEnvironment, createAdminSessionHeaders } from "../test-support/admin-auth.js";
 
-test("bounds Access-protected CMS writes when Content-Length is missing", async () => {
+test("bounds authenticated CMS writes when Content-Length is missing", async () => {
   const { onRequest } = await import("../functions/api/content.js");
-  const env = { ...createMemoryCloudflare(), ADMIN_EMAIL: "admin@example.test" };
+  const env = createAdminEnvironment({ cloudflare: createMemoryCloudflare() });
+  const sessionHeaders = await createAdminSessionHeaders(env);
   let cancelled = false;
   let closeTimer;
   const stream = new ReadableStream({
@@ -17,9 +19,8 @@ test("bounds Access-protected CMS writes when Content-Length is missing", async 
   const request = new Request("https://admin.climekr.com/api/content", {
     method: "PUT",
     headers: {
+      ...sessionHeaders,
       "Content-Type": "application/json",
-      "cf-access-authenticated-user-email": "admin@example.test",
-      "cf-access-jwt-assertion": "local-test",
       origin: "https://admin.climekr.com"
     },
     body: stream,
@@ -33,7 +34,8 @@ test("bounds Access-protected CMS writes when Content-Length is missing", async 
 
 test("accepts the existing 12000-character CMS limit with Korean UTF-8 text", async () => {
   const { onRequest } = await import("../functions/api/content.js");
-  const env = { ...createMemoryCloudflare(), ADMIN_EMAIL: "admin@example.test" };
+  const env = createAdminEnvironment({ cloudflare: createMemoryCloudflare() });
+  const sessionHeaders = await createAdminSessionHeaders(env);
   const content = {
     headline: "가".repeat(100),
     intro: "나".repeat(500),
@@ -46,9 +48,8 @@ test("accepts the existing 12000-character CMS limit with Korean UTF-8 text", as
   const request = new Request("https://admin.climekr.com/api/content", {
     method: "PUT",
     headers: {
+      ...sessionHeaders,
       "Content-Type": "application/json",
-      "cf-access-authenticated-user-email": "admin@example.test",
-      "cf-access-jwt-assertion": "local-test",
       origin: "https://admin.climekr.com"
     },
     body

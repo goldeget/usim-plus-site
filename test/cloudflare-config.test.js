@@ -25,6 +25,16 @@ test("documents the required private R2 lifecycle, Turnstile, and Access configu
   assert.equal(docs.includes("at most 30 days after the photo's 30-day retention window"), false);
 });
 
+test("declares the password-session schema and safe Pages secret setup", async () => {
+  const migration = await readProjectFile("migrations/0003_admin_password_auth.sql");
+  const docs = await readProjectFile("docs/cloudflare-application-review-setup.md");
+  assert.match(migration, /CREATE TABLE IF NOT EXISTS admin_sessions/);
+  assert.match(migration, /CREATE TABLE IF NOT EXISTS admin_login_attempts/);
+  for (const content of ["ADMIN_PASSWORD", "ADMIN_AUTH_SECRET", "4tencpkr@gmail.com", "Bypass for Everyone", "password-authenticated session"]) {
+    assert.ok(docs.includes(content), `missing admin authentication setup instruction: ${content}`);
+  }
+});
+
 test("describes the photo-only collection accurately in the repository README", async () => {
   const readme = await readProjectFile("README.md");
   assert.ok(readme.includes("application photo flow"));

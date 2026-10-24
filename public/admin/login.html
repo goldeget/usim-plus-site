@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#07121d">
+  <title>운영자 로그인 · USIM PLUS</title>
+  <style>
+    :root{color-scheme:dark;--bg:#07121d;--panel:#0c1d2b;--line:#244052;--text:#eaf5fa;--muted:#a2b6c4;--mint:#72e5d6;--blue:#65c7ed;--red:#ffaaa5}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 50% -22%,#1b4257 0,transparent 57%),var(--bg);color:var(--text);font:15px/1.6 system-ui,-apple-system,"Noto Sans KR",sans-serif}
+    main{width:min(100%,430px)}.brand{display:flex;align-items:center;gap:11px;margin:0 0 22px;font-size:16px;font-weight:850;letter-spacing:.04em}.mark{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:#143749;color:var(--mint);font-size:19px}.card{padding:30px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(155deg,#0e2332,#091824);box-shadow:0 26px 75px #0005}.eyebrow{margin:0 0 5px;color:var(--mint);font-size:12px;font-weight:800;letter-spacing:.1em}.title{margin:0;color:var(--text);font-size:30px;line-height:1.25;letter-spacing:-.045em}.lead{margin:10px 0 24px;color:var(--muted);font-size:14px}.field{margin:16px 0}.field label{display:block;margin:0 0 7px;font-size:13px;font-weight:750}.field input{width:100%;min-height:48px;padding:11px 13px;border:1px solid #38576a;border-radius:10px;background:#071723;color:var(--text);font:inherit}.field input:focus{outline:3px solid #57cabb55;border-color:var(--mint)}.field input::placeholder{color:#718898}.help{margin:7px 0 0;color:#93aabb;font-size:12px}.button{width:100%;min-height:48px;margin:8px 0 0;border:1px solid #40b7a6;border-radius:10px;background:linear-gradient(120deg,#176f70,#125b73);color:#f2fffd;font:inherit;font-weight:850;cursor:pointer}.button:hover{filter:brightness(1.1)}.button:focus-visible{outline:3px solid var(--mint);outline-offset:3px}.button:disabled{opacity:.6;cursor:wait}.message{min-height:25px;margin:0 0 5px;color:var(--red);font-size:13px}.security{display:flex;align-items:flex-start;gap:9px;margin:18px 0 0;padding:12px;border:1px solid #274354;border-radius:10px;background:#091923;color:#9eb4c2;font-size:12px}.security strong{display:block;color:#c6d6df;font-size:12px}.security p{margin:2px 0 0}.security-icon{color:var(--mint);font-size:16px}.foot{margin:17px 3px 0;color:#7f96a5;text-align:center;font-size:11px}
+    @media(max-width:480px){body{padding:17px}.card{padding:23px 20px}.title{font-size:27px}}
+  </style>
+</head>
+<body>
+  <main>
+    <p class="brand"><span class="mark" aria-hidden="true">U</span> USIM PLUS · 운영자</p>
+    <section class="card" aria-labelledby="loginTitle">
+      <p class="eyebrow">ADMINISTRATION</p>
+      <h1 id="loginTitle" class="title">최고 운영자 로그인</h1>
+      <p class="lead">등록된 이메일과 비밀번호로 안전하게 로그인하세요.</p>
+      <div id="message" class="message" role="alert" aria-live="polite"></div>
+      <form id="loginForm" action="/api/admin/auth/login" method="post" enctype="application/x-www-form-urlencoded">
+        <input id="returnTo" name="returnTo" type="hidden" value="/">
+        <div class="field">
+          <label for="email">이메일</label>
+          <input id="email" name="email" type="email" autocomplete="username" maxlength="320" value="4tencpkr@gmail.com" required autofocus>
+        </div>
+        <div class="field">
+          <label for="password">비밀번호</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" minlength="12" maxlength="256" required>
+          <p class="help">최소 12자</p>
+        </div>
+        <button id="submit" class="button" type="submit">로그인</button>
+      </form>
+      <aside class="security">
+        <span class="security-icon" aria-hidden="true">●</span>
+        <div><strong>관리자 계정 보호</strong><p>처음 설정할 비밀번호는 이 대화창에 보내지 마세요. <a href="https://dash.cloudflare.com/8359160c37fcc4cd253e2ca1df2fd63b/workers-and-pages/view/usim-plus-site/settings" target="_blank" rel="noopener noreferrer">Cloudflare Pages 설정</a>의 Production · Variables and Secrets에서 12자 이상의 암호화된 <code>ADMIN_PASSWORD</code> Secret으로 등록한 뒤 새 배포가 완료되면 로그인할 수 있습니다.</p></div>
+      </aside>
+    </section>
+    <p class="foot">관리자 권한이 없는 사용자는 접속할 수 없습니다.</p>
+  </main>
+  <script>
+    const params=new URLSearchParams(location.search);
+    const returnTo=params.get("returnTo")||"/";
+    document.getElementById("returnTo").value=returnTo;
+    const messages={credentials:"이메일 또는 비밀번호를 확인해 주세요.",rate_limited:"로그인 시도가 많습니다. 15분 후 다시 시도해 주세요.",setup_required:"로그인 설정이 완료되지 않았습니다. Cloudflare Pages Production에 ADMIN_PASSWORD Secret을 등록해 주세요."};
+    const message=document.getElementById("message");
+    if(messages[params.get("error")])message.textContent=messages[params.get("error")];
+    document.getElementById("loginForm").addEventListener("submit",async event=>{
+      event.preventDefault();
+      const button=document.getElementById("submit");button.disabled=true;message.textContent="로그인 확인 중입니다…";
+      try{
+        const response=await fetch(event.currentTarget.action,{method:"POST",credentials:"same-origin",cache:"no-store",headers:{Accept:"application/json"},body:new URLSearchParams(new FormData(event.currentTarget))});
+        if(response.redirected){location.replace(response.url);return}
+        const result=await response.json().catch(()=>({}));
+        message.textContent=result.code==="setup_required"?messages.setup_required:result.error||"로그인할 수 없습니다. 잠시 후 다시 시도해 주세요.";
+      }catch{message.textContent="로그인 요청에 실패했습니다. 네트워크 연결을 확인해 주세요."}
+      finally{button.disabled=false}
+    });
+  </script>
+</body>
+</html>

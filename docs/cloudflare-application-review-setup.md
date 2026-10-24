@@ -40,16 +40,18 @@ npx wrangler deploy --config wrangler-retention.toml
 
 `wrangler-retention.toml` binds the Worker to the existing `usim-plus-content` database and schedules cleanup daily at `03:17 KST` (`18:17 UTC`, because Cloudflare Cron uses UTC). Pending rows become eligible for deletion 60 days after submission; reviewed rows become eligible 60 days after the decision. Actual deletion time follows the scheduled run. Applicants can see `expired` during this period; after the D1 row is deleted, status lookup returns not found.
 
-## 5. Configure Turnstile and admin access
+## 5. Configure Turnstile and password-based admin access
 
 1. Create a Turnstile widget that allows `climekr.com` and `www.climekr.com`.
 2. Set the Pages production variable `TURNSTILE_SITE_KEY` to its public site key.
 3. Set `TURNSTILE_SECRET_KEY` as an encrypted Pages secret. Never commit either key to this repository. Turnstile test keys are for local testing only.
-4. Confirm `ADMIN_EMAIL` is set to the operator's permitted email.
-5. In Cloudflare Access, protect all paths on `admin.climekr.com`; permit only the intended operator. Keep the existing ACME challenge exception path-scoped.
-6. Confirm `https://admin.climekr.com/` opens the content editor and `https://admin.climekr.com/admin/review.html` opens the photo queue after Access login.
+4. Set `ADMIN_EMAIL` as an encrypted Pages Production Secret. The configured operator email is `4tencpkr@gmail.com`.
+5. Have the operator choose a unique password of at least 12 characters and set it as the encrypted Pages Production Secret `ADMIN_PASSWORD`. Do not put the password in code, deployment logs, or chat.
+6. Set `ADMIN_AUTH_SECRET` as an encrypted Pages Production Secret using at least 32 random bytes. Generate it with `openssl rand -base64 48`; pipe the output directly into `npx wrangler pages secret put ADMIN_AUTH_SECRET --project-name usim-plus-site` so the value is never printed or saved in a file. This key protects the password-version and IP-throttle hashes and must stay independent from the password.
+7. Keep Cloudflare Access in place through the code and D1 migration deployment. Run the auth and route-guard checks first. After they pass, set the `USIM Plus Admin` Access application to Bypass for Everyone; the Pages middleware and every admin API enforce the D1-backed session. Immediately verify production: the login page returns 200, `/` redirects to login, and unauthenticated admin APIs return 401. If any check fails, restore the previous Access allow policy before proceeding. Keep any ACME challenge exception path-scoped.
+8. After production route checks pass, remove the unused one-time PIN identity provider. Set the `ADMIN_PASSWORD` production Secret if it is not already set, then confirm `https://admin.climekr.com/` opens the content editor and `https://admin.climekr.com/admin/review.html` opens the photo queue after email/password login. Use the logout button to end the session.
 
-The Functions independently check the host, `ADMIN_EMAIL`, Access identity and assertion; decision requests also require the exact admin origin.
+The login is available only on `admin.climekr.com`, requires the exact same-origin POST, and creates an eight-hour secure HttpOnly session. Changing the password invalidates existing sessions. Login is limited to ten attempts per IP in 15 minutes; only a keyed hash of the address is stored.
 
 ## 6. Verify before opening public submissions
 
@@ -58,7 +60,7 @@ After deployment, verify all of the following with a real Turnstile challenge an
 - A consented JPEG and PNG submission returns one receipt ID and one receipt token.
 - Unsupported content, mismatched image signatures, files over 10 MiB, missing consent, and failed Turnstile challenges are rejected.
 - The receipt ID/token returns only pending, approved, rejected, or expired status. A wrong token returns no submission details.
-- Public and `pages.dev` hosts cannot access admin pages or APIs. A non-admin Access identity cannot list the queue, open photos, or decide applications.
+- Public and `pages.dev` hosts cannot access admin pages or APIs. A request without a current password-authenticated session cannot list the queue, open photos, edit content, or decide applications.
 - The admin can view the original image and record one approval or rejection. The reviewed image is under `reviewed/`; the previous `pending/` key is removed.
 - The R2 bucket has no public URL, and both lifecycle rules are enabled.
 - The `usim-plus-application-retention` Worker is deployed with its daily Cron Trigger.
