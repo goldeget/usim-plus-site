@@ -18,7 +18,9 @@ The main domain and existing `admin.climekr.com` are intentionally left with the
 
 The editor is stored under `public/admin/index.html` and is served only from `manage.climekr.com` by `functions/_middleware.js`. The intended management hostname must be protected by Cloudflare Access with an allow policy for the administrator. The editor saves only public copy (headline, checklist, and FAQs) to D1. It has no applicant records, image intake, identity-document fields, or payment/reward workflow.
 
-Before using the editor, enable Cloudflare Zero Trust Access, create an allow policy for the administrator, attach `manage.climekr.com` to the Pages project, and attach the `CONTENT_DB` D1 binding. Access is not enabled on the connected account yet. The Pages Function also rejects writes from other hostnames and requires the Cloudflare Access identity header.
+Before using the editor, enable Cloudflare Zero Trust Access, create an allow policy for the administrator's exact email, attach `manage.climekr.com` to the Pages project, and set the Pages environment variable `ADMIN_EMAIL` to that same email. Access is not enabled on the connected account yet. The Pages Function rejects writes from other hostnames and requires matching Cloudflare Access identity and JWT headers.
+
+`migrations/0001_init.sql` creates the content table. The existing Cloudflare D1 database was initialized with this schema and the default public content; apply the migration to any replacement database before deployment.
 
 ## Local files
 
