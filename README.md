@@ -9,15 +9,17 @@ Responsive Korean informational site for checking mobile plan and SIM activation
 - Build command: none; output directory: `public`
 - Pages Functions: `functions/`
 - Git integration automatically deploys pushes to `main`
-- Current Pages hostname: [usim-plus-site.pages.dev](https://usim-plus-site.pages.dev)
+- Pages hostname: [usim-plus-site.pages.dev](https://usim-plus-site.pages.dev)
+- Public domains: [climekr.com](https://climekr.com) and [www.climekr.com](https://www.climekr.com)
+- Admin domain: [admin.climekr.com](https://admin.climekr.com), protected by Cloudflare Access
 
-The custom hostnames `climekr.com` and `admin.climekr.com` have not yet been attached to this Pages project. Existing Vercel DNS records are being preserved until the Pages deployment and Access protection are ready to serve those hosts.
+The three web hostnames point to the Pages project. Existing MX and TXT records for email and domain verification remain in place.
 
 ## Content management
 
 The editor is stored in `public/admin/index.html` and is routed by `functions/_middleware.js` for the management hostname. It edits public copy (headline, checklist, and FAQs) stored in the Cloudflare D1 binding `CONTENT_DB`.
 
-Cloudflare Access has an allow policy for the administrator's account on `admin.climekr.com`. The Pages production environment also has `ADMIN_EMAIL` configured for that account. Attach the custom hostname and update its DNS after the production deployment includes that setting. The Function checks the hostname and Cloudflare Access identity before accepting editor writes.
+Cloudflare Access allows the administrator's account on `admin.climekr.com`. A separate path-scoped bypass is configured only for `/.well-known/acme-challenge/*` so Cloudflare can validate the admin hostname's certificate. The Pages production environment has `ADMIN_EMAIL` configured for the same administrator. The Function checks the hostname and Access identity before accepting editor writes.
 
 `migrations/0001_init.sql` creates the content table. Apply the migration to any replacement database before deployment.
 
