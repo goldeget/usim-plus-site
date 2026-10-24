@@ -38,7 +38,7 @@ Deploy `retention-worker.js` as a separate Worker after applying the D1 migratio
 npx wrangler deploy --config wrangler-retention.toml
 ```
 
-`wrangler-retention.toml` binds the Worker to the existing `usim-plus-content` database and schedules cleanup daily at `03:17 UTC`. Pending rows become eligible for deletion 60 days after submission; reviewed rows become eligible 60 days after the decision. Actual deletion time follows the scheduled run. Applicants can see `expired` during this period; after the D1 row is deleted, status lookup returns not found.
+`wrangler-retention.toml` binds the Worker to the existing `usim-plus-content` database and schedules cleanup daily at `03:17 KST` (`18:17 UTC`, because Cloudflare Cron uses UTC). Pending rows become eligible for deletion 60 days after submission; reviewed rows become eligible 60 days after the decision. Actual deletion time follows the scheduled run. Applicants can see `expired` during this period; after the D1 row is deleted, status lookup returns not found.
 
 ## 5. Configure Turnstile and admin access
 
