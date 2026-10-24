@@ -598,7 +598,7 @@
             <label class="consent-box"><input id="privacyConsent" name="privacyConsent" type="checkbox" value="on" required /><span>개통 현황 사진 수집·이용 안내와 보관 기간을 확인했고, 사진 제출에 동의합니다.</span></label>
             <div id="turnstileWidget" class="turnstile-wrap" aria-label="자동 접수 방지 확인"></div>
             <div class="submit-row"><button class="cta-main" id="submitApplication" type="submit" disabled>개통 현황 사진 접수 →</button><small>접수 후 발급되는 접수번호와 조회 토큰을 복사해 보관해 주세요. 분실 시 복구할 수 없습니다.</small></div>
-            <p class="lookup-result" id="formStatus" role="status" aria-live="polite">접수 설정을 확인하고 있습니다…</p>
+            <p class="lookup-result" id="formStatus" role="status" aria-live="polite">접수 영역에 가까워지면 자동 확인을 불러옵니다.</p>
           </form>
           <section class="receipt-panel" id="receiptPanel" aria-labelledby="receiptTitle" hidden>
             <h3 id="receiptTitle">사진 접수가 완료되었습니다</h3>
@@ -740,7 +740,16 @@
           turnstileWidget=window.turnstile.render('#turnstileWidget',{sitekey:config.siteKey,action:'submit',callback:()=>{submitButton.disabled=false;formStatus.classList.remove('error');formStatus.textContent='자동 접수 방지 확인 완료. 사진을 접수할 수 있습니다.';formStatusBadge.textContent='접수 준비 완료';},'expired-callback':()=>{submitButton.disabled=true;formStatus.textContent='자동 접수 방지 확인이 만료되었습니다. 다시 확인해 주세요.';},'error-callback':()=>{submitButton.disabled=true;formStatus.textContent='자동 접수 방지 확인을 완료하지 못했습니다.';formStatus.classList.add('error');}});
         }catch(error){formStatus.textContent=error.message;formStatus.classList.add('error');formStatusBadge.textContent='접수 설정 필요';submitButton.disabled=true;}
       }
-      setupTurnstile();
+      function loadTurnstileWhenNeeded(){
+        let started=false;
+        const start=()=>{if(started)return;started=true;setupTurnstile()};
+        if(!('IntersectionObserver' in window)){start();return}
+        const observer=new IntersectionObserver(entries=>{
+          if(entries.some(entry=>entry.isIntersecting)){observer.disconnect();start()}
+        },{rootMargin:'240px 0px'});
+        observer.observe(document.getElementById('apply'));
+      }
+      loadTurnstileWhenNeeded();
       function showToast(message){const el=document.getElementById('toast');el.textContent=message;el.classList.add('show');clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>el.classList.remove('show'),3300)}
     })();
   </script>

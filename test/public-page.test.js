@@ -27,6 +27,14 @@ test("requires consent and a Turnstile challenge before upload", () => {
   assert.match(html, /10MB|10MB/);
 });
 
+test("defers the Turnstile script until the application section is near the viewport", () => {
+  assert.match(html, /new IntersectionObserver/);
+  assert.match(html, /rootMargin:\s*['"]240px 0px['"]/);
+  assert.match(html, /observe\(document\.getElementById\(['"]apply['"]\)\)/);
+  assert.match(html, /접수 영역에 가까워지면 자동 확인을 불러옵니다/);
+  assert.doesNotMatch(html, /^\s*setupTurnstile\(\);\s*$/m);
+});
+
 test("discloses the photo purpose, selected retention, controller, contact, and refusal right", () => {
   for (const content of ["개통 현황 사진", "30일", "에스씨아이평가정보(주)", "임동훈", "help@climekr.com", "동의하지 않으면", "Cloudflare"]) {
     assert.ok(html.includes(content), `missing privacy disclosure: ${content}`);
