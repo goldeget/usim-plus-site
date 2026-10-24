@@ -41,4 +41,4 @@
 - [x] Run affected tests and confirm they fail on today's misleading flow.
 - [x] Update public page, CMS defaults, SEO, AI guide and the prior design note to agree on one sequence.
 - [x] Run all tests and inspect the diff for content inconsistencies.
-- [ ] Deploy with Wrangler Pages to the existing production project and verify the public homepage and content API return the new flow.
+- [x] Deploy with Wrangler Pages to the existing production project and verify the public homepage and content API return the new flow.
