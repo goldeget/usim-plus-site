@@ -9,3 +9,8 @@ binding = "CONTENT_DB"
 database_name = "usim-plus-content"
 database_id = "23f98117-e3e7-4804-9d72-c8f15d812aa7"
 migrations_dir = "migrations"
+
+# Keep the bucket private. Do not attach a public R2 domain.
+[[r2_buckets]]
+binding = "APPLICATIONS_BUCKET"
+bucket_name = "usim-plus-applications"

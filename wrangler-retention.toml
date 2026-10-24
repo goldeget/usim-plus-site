@@ -1,0 +1,12 @@
+name = "usim-plus-application-retention"
+main = "retention-worker.js"
+compatibility_date = "2026-10-24"
+workers_dev = false
+
+[triggers]
+crons = ["17 3 * * *"]
+
+[[d1_databases]]
+binding = "CONTENT_DB"
+database_name = "usim-plus-content"
+database_id = "23f98117-e3e7-4804-9d72-c8f15d812aa7"

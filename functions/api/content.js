@@ -1,3 +1,5 @@
+import { readBoundedRequestBody } from "../_lib/applications.js";
+
 const DEFAULT_CONTENT = {
   headline: "유심 가입 전, 조건부터 확인하세요.",
   intro: "요금제와 개통 조건은 통신사·상품별로 다를 수 있습니다. 가입을 진행하기 전에 해당 통신사의 공식 홈페이지나 고객센터에서 최신 안내와 계약 조건을 확인하세요.",
@@ -54,7 +56,9 @@ export async function onRequest({ request, env }) {
 
   let content;
   try {
-    const raw = await request.text();
+    const boundedBody = await readBoundedRequestBody(request, 36000);
+    if (boundedBody.tooLarge) return json({ error: "요청 크기가 너무 큽니다." }, 413);
+    const raw = new TextDecoder().decode(boundedBody.bytes);
     if (raw.length > 12000) return json({ error: "요청 크기가 너무 큽니다." }, 413);
     content = JSON.parse(raw);
   } catch { return json({ error: "JSON 형식의 요청이 필요합니다." }, 400); }
