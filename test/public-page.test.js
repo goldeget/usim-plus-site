@@ -5,9 +5,10 @@ import { test } from "node:test";
 const html = await readFile(new URL("../public/index.html", import.meta.url), "utf8");
 const adminContent = await readFile(new URL("../public/admin/content.html", import.meta.url), "utf8");
 const contentApi = await readFile(new URL("../functions/api/content.js", import.meta.url), "utf8");
+const userFlowCss = await readFile(new URL("../public/user-flow.css", import.meta.url), "utf8");
 
 test("preserves the supplied Korean responsive page and its main visual sections", () => {
-  for (const content of ["<html lang=\"ko\">", "class=\"application-reward\"", "id=\"precheckForm\"", "id=\"applicationFormDetails\"", "id=\"statusLookupDetails\"", "id=\"faq\"", "id=\"contact\"", "class=\"sim-image\""]) {
+  for (const content of ["<html lang=\"ko\">", "class=\"application-reward\"", "id=\"precheckForm\"", "id=\"statusLookupDetails\"", "id=\"faq\"", "id=\"contact\"", "class=\"sim-image\""]) {
     assert.ok(html.includes(content), `missing existing page element: ${content}`);
   }
 });
@@ -29,26 +30,55 @@ test("requires consent and a Turnstile challenge before upload", () => {
   assert.match(html, /10MB|10MB/);
 });
 
-test("defers the Turnstile script until the application section is near the viewport", () => {
-  assert.match(html, /new IntersectionObserver/);
-  assert.match(html, /rootMargin:\s*['"]240px 0px['"]/);
-  assert.match(html, /observe\(form\)/);
-  assert.match(html, /applicationFormDetails\.addEventListener\(['"]toggle['"],observeWhenOpen\)/);
-  assert.match(html, /접수 영역에 가까워지면 자동 확인을 불러옵니다/);
-  assert.doesNotMatch(html, /^\s*setupTurnstile\(\);\s*$/m);
+test("organizes the public tasks into four focused views with compatible deep links", () => {
+  for (const view of ["steps", "apply", "status", "guide"]) assert.match(html, new RegExp(`data-view-panel="${view}"`));
+  for (const [hash, view] of [["#steps", "steps"], ["#apply", "apply"], ["#statusLookupDetails", "status"], ["#benefits", "guide"], ["#faq", "guide"], ["#contact", "guide"]]) {
+    assert.match(html, new RegExp(`href="${hash}"`));
+    assert.ok(html.includes(`"${hash}":"${view}"`) || html.includes(`'${hash}':'${view}'`) || html.includes(`${hash}.*${view}`), `missing view mapping for ${hash}`);
+  }
+  assert.match(html, /aria-label="서비스 메뉴"/);
+  assert.match(html, /aria-current="page"/);
+  assert.match(html, /자세한 안내/);
+  assert.match(html, /id="steps" data-view-panel="steps"/);
+  assert.match(html, /href="#apply">사진 신청하기/);
+  assert.match(html, /href="#statusLookupDetails">신청 상태 조회/);
+  assert.match(html, /id="apply" data-view-panel="apply"[^>]*hidden/);
+  assert.match(html, /id="statusView" data-view-panel="status"[^>]*hidden/);
+  assert.match(html, /id="benefits" data-view-panel="guide"[^>]*hidden/);
+  assert.match(html, /href="\/user-flow\.css"/);
 });
 
-test("splits the long user flow into a photo form and a separate status lookup", () => {
+test("loads Turnstile only after a valid submission attempt and lets users retry failures", () => {
+  assert.match(html, /form\.addEventListener\(['"]submit['"]/);
+  assert.match(html, /await setupTurnstile\(\)/);
+  assert.match(html, /turnstile\.execute\(turnstileWidget\)/);
+  assert.match(html, /id="retryTurnstile"/);
+  assert.match(html, /retryTurnstile\.addEventListener/);
+  assert.doesNotMatch(html, /loadTurnstileWhenNeeded|observeWhenOpen|접수 영역에 가까워지면 자동 확인을 불러옵니다/);
+});
+
+test("shows one task at a time and puts the photo action directly in its view", () => {
   assert.match(html, /참여 방법 3단계/);
-  assert.match(html, /id="hero-title">개통 현황 확인 후<br>사진으로 사전 검토 신청<\/h1>/);
-  assert.match(html, /class="cta-main" href="#steps">참여 순서 먼저 확인하기/);
-  assert.match(html, /href="#apply"[^>]*>사진으로 사전 검토 신청/);
+  assert.match(html, /id="hero-title">유심 개통 현황을<br>사진으로 사전 검토 신청<\/h1>/);
+  assert.match(html, /class="cta-main" href="#steps">참여 방법 3단계 보기/);
+  assert.match(html, /href="#apply">사진 신청하기/);
   assert.match(html, /href="#statusLookupDetails"[^>]*>신청 상태 조회/);
-  assert.match(html, /id="homeIntro">KAIT에서 조회한 개통 현황을 사진으로 첨부해 사전 검토를 요청합니다\./);
-  assert.match(html, /<details class="application-details" id="applicationFormDetails">/);
+  assert.match(html, /id="homeIntro">먼저 한국정보통신진흥협회\(KAIT\) 공식 사이트에서 개통 현황을 확인하고, 결과 화면을 첨부해 사전 검토를 요청합니다\.<\/p>/);
+  assert.match(html, /<div class="application-form-content">\s*<form id="precheckForm">/);
   assert.match(html, /<details class="lookup-details" id="statusLookupDetails">/);
-  assert.match(html, /a href="#statusLookupDetails">상태 조회/);
   assert.match(html, /statusLookupDetails\.open=true/);
+  assert.match(html, /activateView\('status'/);
+});
+
+test("keeps feedback and footer copy legible and wrapped on small screens", () => {
+  assert.match(html, /class="site-footer__brand"/);
+  assert.match(html, /class="site-footer__terms"/);
+  assert.doesNotMatch(html, /class="demo-chip"/);
+  assert.match(userFlowCss, /#toast\.toast[^}]*font-size:\s*16px/);
+  assert.match(userFlowCss, /\.site-footer\s*\{[^}]*display:\s*grid/);
+  assert.match(userFlowCss, /@media\s*\(max-width:\s*760px\)[\s\S]*\.site-footer\s*\{[^}]*font-size:\s*13px/);
+  assert.match(userFlowCss, /\.site-footer__terms[^}]*line-height:\s*1\.75/);
+  assert.match(userFlowCss, /\.hero-art \{ display: block; width: min\(100%, 270px\)/);
 });
 
 test("keeps the public participation flow at exactly three CMS-editable steps", () => {
@@ -75,7 +105,7 @@ test("discloses receipt status metadata cleanup in plain Korean", () => {
   assert.match(html, /접수 상태.*60일이 지나면 정기 삭제/);
   assert.match(html, /접수 또는 검토 결정 후 60일이 지나면 정기 삭제 대상/);
   assert.match(html, /60일.*정기 삭제 대상/);
-  assert.match(html, /정리 시각에 따라 실제 삭제가 조금 늦어질 수/);
+  assert.match(html, /정기 삭제 시각에 따라 실제 삭제가 조금 늦어질 수/);
   assert.doesNotMatch(html, /최대 30일 더 보관|예약 작업/);
 });
 

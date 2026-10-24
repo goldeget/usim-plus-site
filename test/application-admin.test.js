@@ -130,6 +130,30 @@ test("keeps expired pending submissions visible in retained history without offe
   assert.equal(all.items[0].photoExpired, true);
 });
 
+test("finds one retained application by exact receipt number without bypassing retention", async () => {
+  const env = await adminEnv();
+  const approved = await seedSubmission(env, { id: makeId("L"), status: "approved" });
+  const pendingExpired = await seedSubmission(env, { id: makeId("M"), ageDays: 45 });
+  await seedSubmission(env, { id: makeId("N"), status: "rejected" });
+
+  const approvedResult = await (await callQueue(env, { status: "all", id: approved.id })).json();
+  assert.deepEqual(approvedResult.items.map(item => item.id), [approved.id]);
+  assert.equal(approvedResult.nextCursor, null);
+
+  const expiredResult = await (await callQueue(env, { status: "all", id: pendingExpired.id })).json();
+  assert.deepEqual(expiredResult.items.map(item => item.id), [pendingExpired.id]);
+  assert.equal(expiredResult.items[0].photoExpired, true);
+  assert.equal((await callQueue(env, { status: "all", id: "UP-invalid" })).status, 400);
+});
+
+test("preserves case-sensitive Base64URL characters in receipt numbers", async () => {
+  const env = await adminEnv();
+  const id = `UP-${"aB".repeat(11)}`;
+  await seedSubmission(env, { id, status: "approved" });
+  const result = await (await callQueue(env, { status: "all", id })).json();
+  assert.deepEqual(result.items.map(item => item.id), [id]);
+});
+
 test("opens one selected pending application directly from duplicate review", async () => {
   const env = await adminEnv();
   const selected = await seedSubmission(env, { id: makeId("W"), sourceIpHash: "7".repeat(64) });
@@ -289,20 +313,23 @@ test("lists only fresh pending items without exposing R2 keys or receipt hashes"
   assert.equal(response.headers.get("cache-control"), "no-store");
 });
 
-test("paginates the review queue without skipping same-time submissions", async () => {
+test("paginates application history into bounded pages without skipping same-time submissions", async () => {
   const env = await adminEnv();
   const createdAt = new Date().toISOString();
-  for (let i = 0; i < 51; i += 1) {
+  for (let i = 0; i < 21; i += 1) {
     const id = `UP-${String(i).padStart(22, "0")}`;
     env.rows.set(id, { id, token_hash: "a".repeat(64), object_key: `pending/${i}.jpg`, content_type: "image/jpeg", size_bytes: 8, status: "pending", created_at: createdAt, reviewed_at: null });
   }
   const first = await (await callQueue(env)).json();
-  assert.equal(first.items.length, 50);
+  assert.equal(first.items.length, 10);
   assert.ok(first.nextCursor);
   const second = await (await callQueue(env, { cursor: first.nextCursor })).json();
-  assert.equal(second.items.length, 1);
-  assert.equal(second.items[0].id, `UP-${String(50).padStart(22, "0")}`);
-  assert.equal(second.nextCursor, null);
+  assert.equal(second.items.length, 10);
+  assert.ok(second.nextCursor);
+  const third = await (await callQueue(env, { cursor: second.nextCursor })).json();
+  assert.equal(third.items.length, 1);
+  assert.equal(third.items[0].id, `UP-${String(20).padStart(22, "0")}`);
+  assert.equal(third.nextCursor, null);
 });
 
 test("serves an original image only to an authorized administrator with private headers", async () => {
@@ -451,23 +478,35 @@ test("links the protected content editor to photo review", async () => {
 });
 
 test("provides dashboard, history, duplicate review, and the preserved editor inside the admin shell", async () => {
-  const [dashboard, history, duplicates, content, shell, styles] = await Promise.all([
+  const [dashboard, history, duplicates, content, shell, styles, applicationStyles] = await Promise.all([
     readFile(new URL("../public/admin/index.html", import.meta.url), "utf8"),
     readFile(new URL("../public/admin/applications.html", import.meta.url), "utf8"),
     readFile(new URL("../public/admin/duplicates.html", import.meta.url), "utf8"),
     readFile(new URL("../public/admin/content.html", import.meta.url), "utf8"),
     readFile(new URL("../public/admin/admin-shell.js", import.meta.url), "utf8"),
-    readFile(new URL("../public/admin/admin-shell.css", import.meta.url), "utf8")
+    readFile(new URL("../public/admin/admin-shell.css", import.meta.url), "utf8"),
+    readFile(new URL("../public/admin/applications.css", import.meta.url), "utf8")
   ]);
   assert.match(dashboard, /\/api\/admin\/dashboard/);
   assert.match(history, /status=pending|URLSearchParams/);
+  assert.match(history, /id="applicationSearch"/);
+  assert.match(history, /id="previousPage"/);
+  assert.match(history, /id="nextPage"/);
+  assert.match(history, /cursorStack\[pageIndex \+ 1\] = nextCursor/);
+  assert.match(history, /rawValue\.slice\(3\)/);
+  assert.doesNotMatch(history, /searchInput\.value\.trim\(\)\.toUpperCase\(\)/);
+  assert.match(history, /setControlsBusy\(true\)/);
+  assert.match(history, /preserveRows: true, rollback/);
+  assert.doesNotMatch(history, /id="loadMore"/);
   assert.match(duplicates, /\/api\/admin\/applications\/duplicates/);
   assert.match(content, /id="editor"/);
   assert.match(shell, /aria-expanded/);
   assert.match(shell, /data-admin-menu-close/);
   assert.match(shell, /sidebarCloseButton\.addEventListener\("click",\s*closeMenu\)/);
+  assert.match(shell, /title: "현황"/);
   for (const href of ["/", "/admin/review.html", "/admin/applications.html", "/admin/duplicates.html", "/admin/content.html"]) assert.ok(shell.includes(href), `missing navigation destination ${href}`);
   assert.match(styles, /min-height:\s*44px|--admin-touch-target:\s*44px/);
   assert.match(styles, /admin-sidebar-close[^}]*width:44px/);
   assert.match(styles, /@media\s*\(max-width:\s*\d+px\)/);
+  assert.match(applicationStyles, /@media\s*\(max-width:900px\)/);
 });

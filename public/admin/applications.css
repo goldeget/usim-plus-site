@@ -1,0 +1,16 @@
+.application-controls{display:grid;grid-template-columns:minmax(250px,.85fr) minmax(300px,1.15fr);gap:14px;align-items:end;margin:0 0 12px;padding:16px;border:1px solid var(--admin-line);border-radius:15px;background:#fff}
+.application-controls .admin-toolbar{margin:0;gap:10px}
+.admin-search{min-width:0}
+.admin-search label{display:block;margin:0 0 5px;color:var(--admin-muted);font-size:12px;font-weight:750}
+.admin-search__row{display:flex;gap:8px;min-width:0}
+.admin-search input{flex:1;min-width:0;min-height:44px;padding:0 12px;border:1px solid #cbd8e1;border-radius:9px;background:#fff;color:var(--admin-ink)}
+.admin-search button,.admin-pagination button{min-height:44px;padding:0 15px;border:1px solid #cbd8e1;border-radius:9px;background:#fff;color:var(--admin-navy);font-weight:750;cursor:pointer}
+.admin-search button[type=submit],.admin-pagination button:not(:disabled){border-color:var(--admin-blue);background:var(--admin-blue);color:#fff}
+.admin-search button:disabled,.admin-pagination button:disabled{opacity:.48;cursor:not-allowed}
+.admin-search__clear[hidden]{display:none}
+.admin-pagination{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px;padding:10px 12px;border:1px solid var(--admin-line);border-radius:12px;background:#fff}
+.admin-pagination span{color:var(--admin-muted);font-size:13px;font-weight:700;text-align:center}
+.admin-main #applicationStatus{min-height:24px;margin:7px 0;color:var(--admin-muted);font-size:13px}
+.admin-main #applicationStatus.error{color:#a33737}
+@media(max-width:900px){.application-controls{grid-template-columns:1fr}}
+@media(max-width:780px){.application-controls{padding:12px;gap:12px}.application-controls .admin-toolbar{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px}.application-controls .admin-toolbar label{font-size:12px}.application-controls .admin-toolbar select{min-width:0}.admin-search__row{display:grid;grid-template-columns:minmax(0,1fr) auto auto}.admin-search button{padding:0 12px}.admin-pagination{position:sticky;top:60px;z-index:10;box-shadow:0 4px 14px #17344a12}}

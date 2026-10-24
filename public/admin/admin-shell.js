@@ -11,7 +11,7 @@
     content: "안내 콘텐츠"
   };
   const groups = [
-    { title: "운영 시작", items: [{ id: "dashboard", label: "대시보드", href: "/", icon: "⌂" }] },
+    { title: "현황", items: [{ id: "dashboard", label: "대시보드", href: "/", icon: "⌂" }] },
     { title: "신청 관리", items: [
       { id: "review", label: "미검토 신청", href: "/admin/review.html", icon: "◷", badge: "queue" },
       { id: "applications", label: "전체 신청", href: "/admin/applications.html", icon: "▤" },

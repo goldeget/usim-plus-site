@@ -1,6 +1,6 @@
 import { isAdminRequest, jsonResponse, PHOTO_RETENTION_MS } from "../../_lib/applications.js";
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 10;
 const ID_PATTERN = /^UP-[A-Za-z0-9_-]{22}$/;
 
 function encodeCursor(row) {
@@ -34,13 +34,32 @@ export async function onRequest({ request, env }) {
   const historyPendingCutoff = reviewedCutoff;
   const selectedId = params.get("id");
   if (selectedId !== null) {
-    if (status !== "pending" || !ID_PATTERN.test(selectedId)) return jsonResponse({ error: "검토할 접수번호를 확인해 주세요." }, 400);
+    if (!ID_PATTERN.test(selectedId)) return jsonResponse({ error: "접수번호를 확인해 주세요." }, 400);
     try {
-      const row = await env.CONTENT_DB.prepare(
-        "SELECT id, status, created_at, content_type, size_bytes FROM application_submissions WHERE id = ? AND status = 'pending' AND created_at > ?"
-      ).bind(selectedId, pendingCutoff).first();
+      let row;
+      if (status === "pending") {
+        row = await env.CONTENT_DB.prepare(
+          "SELECT id, status, created_at, content_type, size_bytes FROM application_submissions WHERE id = ? AND status = 'pending' AND created_at > ?"
+        ).bind(selectedId, pendingCutoff).first();
+      } else if (status === "approved" || status === "rejected") {
+        row = await env.CONTENT_DB.prepare(
+          "SELECT id, status, created_at, reviewed_at, content_type, size_bytes FROM application_submissions WHERE id = ? AND status = ? AND reviewed_at > ?"
+        ).bind(selectedId, status, reviewedCutoff).first();
+      } else {
+        row = await env.CONTENT_DB.prepare(
+          "SELECT id, status, created_at, reviewed_at, content_type, size_bytes FROM application_submissions WHERE id = ? AND ((status = 'pending' AND created_at > ?) OR (status IN ('approved', 'rejected') AND reviewed_at > ?))"
+        ).bind(selectedId, historyPendingCutoff, reviewedCutoff).first();
+      }
       if (!row) return jsonResponse({ error: "해당 접수를 찾을 수 없거나 사진 보관 기간이 끝났습니다." }, 404);
-      return jsonResponse({ items: [{ id: row.id, status: row.status, createdAt: row.created_at, contentType: row.content_type, sizeBytes: row.size_bytes }], nextCursor: null });
+      return jsonResponse({ items: [{
+        id: row.id,
+        status: row.status,
+        createdAt: row.created_at,
+        ...(row.reviewed_at ? { reviewedAt: row.reviewed_at } : {}),
+        contentType: row.content_type,
+        sizeBytes: row.size_bytes,
+        ...(row.status === "pending" && row.created_at <= pendingCutoff ? { photoExpired: true } : {})
+      }], nextCursor: null });
     } catch {
       return jsonResponse({ error: "선택한 접수 정보를 불러오지 못했습니다." }, 503);
     }

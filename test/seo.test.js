@@ -34,8 +34,9 @@ test("covers the requested climekr spellings and gives review searches useful, a
   const graph = JSON.parse(json)["@graph"];
   const organization = graph.find(item => item["@type"] === "Organization");
   assert.ok(organization.alternateName.includes("climekr 유심"));
-  assert.match(page, /<summary>클라임유심·climekr유심 후기와 참여 정보를 확인할 때 무엇을 살펴봐야 하나요\?<\/summary>/);
-  assert.match(page, /신청 전에는 사진 사전 검토 범위, 지급 조건, 통신사 요금·약정·해지 비용, 개인정보 사진 보관 기간을 함께 확인하세요/);
+  assert.match(page, /<summary>클라임유심 후기나 climekr 유심 후기를 살펴볼 때 무엇을 확인해야 하나요\?<\/summary>/);
+  assert.match(page, /후기를 볼 때는 작성 시점, 가입 통신사·요금제·약정 조건, 실제 확인 가능한 이용 경험인지 살펴보세요/);
+  assert.match(llms, /클라임유심 후기[\s\S]*climekr 유심 후기/);
   assert.match(llms, /클라임유심[\s\S]*climekr[\s\S]*실제 참여 절차/);
   assert.doesNotMatch(llms, /관련 검색어|이용 정보 검색어/);
   assert.doesNotMatch(page, /공개된 이용자 후기는 없습니다/);
