@@ -94,6 +94,8 @@ test("keeps the public participation flow at exactly three CMS-editable steps", 
   assert.match(adminContent, /title:"1\. 개통 전 조건 확인"/);
   assert.match(adminContent, /title:"2\. 개통 후 사진 신청"/);
   assert.match(adminContent, /title:"3\. 유지 조건 확인 후 지급"/);
+  assert.match(adminContent, /answer:"아닙니다\. 사진은 제출한 신청 내용과 참여 조건을 운영자가 확인/);
+  assert.doesNotMatch(adminContent, /사진 사전 검토|운영자 사전 검토/);
   assert.doesNotMatch(adminContent, /id="addChecklist"/);
   assert.match(contentApi, /value\.checklist\.length !== 3/);
 });
@@ -126,6 +128,7 @@ test("explains the pre-activation check and post-activation photo review without
   assert.match(hero, /유심 개통하면[\s\S]*최대 51만원/);
   assert.match(hero, /개통 전 참여 조건과 통신사 요금·약정을 먼저 확인하세요/);
   assert.match(hero, /href="#benefits"[^>]*>참여 조건 먼저 확인하기/);
+  assert.doesNotMatch(html, /사진 사전 검토|운영자 사전 검토/);
   assert.doesNotMatch(hero, /사전 검토|KAIT|접수번호|조회 코드/);
   assert.match(html, /개통 승인.*지급 확정/);
   assert.match(html, /조건을 충족.*유지.*확인/);

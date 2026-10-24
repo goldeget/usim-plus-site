@@ -39,6 +39,8 @@ test("covers the requested climekr spellings and gives review searches useful, a
   assert.match(llms, /클라임유심 후기[\s\S]*climekr 유심 후기/);
   assert.match(llms, /클라임유심[\s\S]*climekr[\s\S]*실제 참여 절차/);
   assert.match(llms, /개통 전에 참여 조건, 통신사 요금·약정·해지 비용을 확인합니다[\s\S]*조건에 맞고 참여하기로 결정한 경우 유심을 개통한 뒤[\s\S]*개통 현황 사진/);
+  assert.match(llms, /개통 후 현황 사진으로 참여 신청하고 운영자 검토를 받는 방법/);
+  assert.doesNotMatch(llms, /사진 사전 검토|개통 현황 사진으로 사전 검토|유심 개통 사전 검토 안내/);
   assert.doesNotMatch(llms, /관련 검색어|이용 정보 검색어/);
   assert.doesNotMatch(page, /공개된 이용자 후기는 없습니다/);
   assert.doesNotMatch(llms, /공개된 이용자 후기는 없습니다/);
