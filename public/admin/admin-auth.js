@@ -5,7 +5,7 @@ document.querySelectorAll("[data-admin-logout]").forEach(button=>{
       await fetch("/api/admin/auth/logout",{method:"POST",credentials:"same-origin",cache:"no-store"});
     }catch{}
     finally{
-      location.replace("/admin/login.html");
+      location.replace("/admin/login");
     }
   });
 });

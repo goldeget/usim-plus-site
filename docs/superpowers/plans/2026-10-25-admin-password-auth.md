@@ -69,7 +69,7 @@
 - Modify: `test/content-api.test.js`
 
 **Interfaces:**
-- Middleware allows only `/admin/login.html` and `/api/admin/auth/login` without a session on the admin host.
+- Middleware allows only `/admin/login` (and its `.html` alias) and `/api/admin/auth/login` without a session on the admin host.
 - Unauthenticated HTML paths redirect to login with a validated `/admin/...` return path; unauthenticated API paths return 401 JSON.
 - All admin handlers await `isAdminRequest`; review mutations retain their exact-origin requirement.
 

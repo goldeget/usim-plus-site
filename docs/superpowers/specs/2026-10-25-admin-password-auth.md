@@ -23,7 +23,7 @@ Cloudflare Access will bypass the admin hostname after the application login is 
 
 ## User experience
 
-- `/admin/login.html` is the only public page on the admin hostname.
+- `/admin/login` is the only public page on the admin hostname (`public/admin/login.html` is the source file).
 - `/` opens the content editor for a logged-in operator; `/admin/review.html` opens photo review.
 - Unauthenticated browser requests redirect to the login form with a validated same-host return path. Unauthenticated APIs return JSON 401.
 - The login page matches the existing dark navy and teal admin styling, is responsive, and uses email/password autocomplete semantics.

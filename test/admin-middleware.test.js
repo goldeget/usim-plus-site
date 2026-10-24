@@ -15,11 +15,13 @@ function context(url, env, headers = {}, method = "GET") {
 
 test("serves only the admin login page without a session", async () => {
   const env = createAdminEnvironment({ cloudflare: createMemoryCloudflare() });
-  const login = context("https://admin.climekr.com/admin/login.html", env);
-  const response = await onRequest(login.value);
-  assert.equal(response.status, 200);
-  assert.equal(await response.text(), "asset");
-  assert.equal(response.headers.get("cache-control"), "private, no-store, max-age=0");
+  for (const path of ["/admin/login", "/admin/login.html"]) {
+    const login = context(`https://admin.climekr.com${path}`, env);
+    const response = await onRequest(login.value);
+    assert.equal(response.status, 200);
+    assert.equal(await response.text(), "asset");
+    assert.equal(response.headers.get("cache-control"), "private, no-store, max-age=0");
+  }
 
   const loginPost = context("https://admin.climekr.com/api/admin/auth/login", env, { origin: "https://admin.climekr.com" }, "POST");
   assert.equal((await onRequest(loginPost.value)).status, 200);
@@ -31,7 +33,7 @@ test("redirects browser pages and returns JSON 401 for APIs without a session", 
   const page = context("https://admin.climekr.com/admin/review.html?from=bookmark", env);
   const pageResponse = await onRequest(page.value);
   assert.equal(pageResponse.status, 302);
-  assert.equal(new URL(pageResponse.headers.get("location")).pathname, "/admin/login.html");
+  assert.equal(new URL(pageResponse.headers.get("location")).pathname, "/admin/login");
   assert.equal(new URL(pageResponse.headers.get("location")).searchParams.get("returnTo"), "/admin/review.html?from=bookmark");
 
   const root = context("https://admin.climekr.com/", env);
@@ -72,7 +74,7 @@ test("serves the editor and review assets only after a valid session", async () 
 test("redirects a session holder away from the login page to an allowed return path", async () => {
   const env = createAdminEnvironment({ cloudflare: createMemoryCloudflare() });
   const headers = await createAdminSessionHeaders(env);
-  const page = context("https://admin.climekr.com/admin/login.html?returnTo=https%3A%2F%2Fevil.example", env, headers);
+  const page = context("https://admin.climekr.com/admin/login?returnTo=https%3A%2F%2Fevil.example", env, headers);
   const response = await onRequest(page.value);
   assert.equal(response.status, 302);
   assert.equal(response.headers.get("location"), "https://admin.climekr.com/");

@@ -1,7 +1,8 @@
 import { getAdminSession, validatedAdminReturnPath } from "./_lib/admin-auth.js";
 
 const ADMIN_HOST = "admin.climekr.com";
-const LOGIN_PAGE = "/admin/login.html";
+const LOGIN_PAGE = "/admin/login";
+const LOGIN_PAGE_ALIASES = new Set([LOGIN_PAGE, "/admin/login.html"]);
 const LOGIN_ENDPOINT = "/api/admin/auth/login";
 
 function noStore(response) {
@@ -42,7 +43,7 @@ export async function onRequest(context) {
   }
   if (host !== ADMIN_HOST) return context.next();
 
-  if (url.pathname === LOGIN_PAGE) {
+  if (LOGIN_PAGE_ALIASES.has(url.pathname)) {
     const session = await getAdminSession(request, env);
     if (session) return Response.redirect(new URL(validatedAdminReturnPath(url.searchParams.get("returnTo") || "/"), url.origin), 302);
     return noStore(await context.next());

@@ -128,6 +128,8 @@ test("rejects external or malformed post-login return paths", async () => {
   const env = adminEnv();
   const { response } = await loginAdmin(env, { returnTo: "//evil.example/path" });
   assert.equal((await response.json()).redirectTo, "/");
+  assert.equal((await import("../functions/_lib/admin-auth.js")).validatedAdminReturnPath("/admin/login"), "/");
+  assert.equal((await import("../functions/_lib/admin-auth.js")).validatedAdminReturnPath("/admin/login.html"), "/");
 });
 
 test("compares credentials across a fixed byte count", async () => {

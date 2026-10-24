@@ -58,7 +58,7 @@ export function validatedAdminReturnPath(value) {
   let url;
   try { url = new URL(candidate, ADMIN_ORIGIN); } catch { return "/"; }
   if (url.origin !== ADMIN_ORIGIN || (url.pathname !== "/" && !url.pathname.startsWith("/admin/"))) return "/";
-  if (url.pathname === "/admin/login.html") return "/";
+  if (url.pathname === "/admin/login" || url.pathname === "/admin/login.html") return "/";
   return `${url.pathname}${url.search}${url.hash}`;
 }
 
@@ -142,7 +142,7 @@ function loginRedirect(path, cookie) {
 function formErrorResponse(returnTo, error, status, isForm) {
   if (isForm) {
     const query = new URLSearchParams({ error, returnTo });
-    return loginRedirect(`/admin/login.html?${query}`, null);
+    return loginRedirect(`/admin/login?${query}`, null);
   }
   return jsonResponse({ error: "로그인할 수 없습니다.", code: error }, status);
 }
