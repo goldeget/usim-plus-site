@@ -13,7 +13,7 @@ test('benefits guide has unique self-canonical and describes actual service', ()
   assert.match(guide, /rel="canonical" href="https:\/\/climekr\.com\/guide\/"/);
   assert.match(guide, /대출·대부·당일대출 서비스가 아니며/);
   assert.match(guide, /혜택은 상담이나 개통 직후 지급되는 것이 아니며/);
-  assert.match(guide, /개통비·월 통신요금·유지비·위약금/);
+  assert.match(guide, /고객 비용 0원 · 회사 전액 부담/);
   assert.match(guide, /운영사가 제공한 조건은 고객 부담금 0원/);
 });
 
