@@ -147,9 +147,10 @@ main { padding-bottom: 36px; }
 .channel strong,.channel small { display: block; }
 .channel strong { color: var(--flow-ink); font-size: 13px; }
 .channel small { margin-top: 2px; color: var(--flow-muted); font-size: 12px; }
-.operator-info { display: block; min-width: 0; margin: 0; color: var(--flow-muted); font-size: 12px; text-align: left; }
+.operator-info { display: block; grid-column: 1 / -1; min-width: 0; margin: 0; color: var(--flow-muted); font-size: 12px; text-align: left; }
 .operator-info summary { display: inline-flex; min-height: 42px; align-items: center; color: var(--flow-blue-dark); font-weight: 700; cursor: pointer; }
 .operator-info span { display: block; margin-top: 2px; overflow-wrap: anywhere; }
+.operator-info__details span { display: inline; margin: 0; }
 .site-footer { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.5fr) minmax(145px, .65fr); align-items: start; gap: 10px 22px; padding: 20px 10px 26px; border-top: 1px solid var(--flow-line); color: var(--flow-muted); font-size: 12px; line-height: 1.7; }
 .site-footer__brand { display: grid; min-width: 0; gap: 2px; }
 .site-footer__terms { min-width: 0; margin: 0; font-size: 12px; line-height: 1.75; overflow-wrap: anywhere; }
