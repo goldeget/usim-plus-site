@@ -1,0 +1,54 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+
+const read = path => readFileSync(new URL(path, import.meta.url), 'utf8');
+const guide = read('../public/guide/index.html');
+const social = read('../public/links/index.html');
+const home = read('../public/index.html');
+const sitemap = read('../public/sitemap.xml');
+
+test('benefits guide has unique self-canonical and describes actual service', () => {
+  assert.match(guide, /<title>자금이 급할 때 알아둘 유심 개통 혜택과 지급 조건/);
+  assert.match(guide, /rel="canonical" href="https:\/\/climekr\.com\/guide\/"/);
+  assert.match(guide, /대출·대부·당일대출 서비스가 아니며/);
+  assert.match(guide, /상담하거나 유심을 개통한다고 곧바로 현금을 받는 것은 아닙니다/);
+  assert.match(guide, /개통비, 통신요금, 요금제, 해지 비용/);
+  assert.doesNotMatch(guide, /본인 부담금 0원 (?:확정|보장)/);
+});
+
+test('benefits guide displays payout amounts from the current public API', () => {
+  assert.match(guide, /fetch\('\/api\/content'/);
+  assert.match(guide, /content\.payout/);
+  assert.match(guide, /stage\.days/);
+  assert.match(guide, /stage\.amount/);
+  assert.match(guide, /payout\.maxCases/);
+  assert.doesNotMatch(guide, /<strong data-total[^>]*>66만원</);
+});
+
+test('consultation links are direct, HTTPS, and restricted to known hosts', () => {
+  for (const page of [guide, social]) {
+    assert.match(page, /https:\/\/t\.me\/climeusim/);
+    assert.match(page, /https:\/\/climeusim\.channel\.io/);
+    assert.match(page, /data-channel="telegram"/);
+    assert.match(page, /data-channel="channeltalk"/);
+    assert.match(page, /url\.protocol\s*!==?\s*'https:'/);
+    assert.match(page, /noopener noreferrer/);
+    assert.doesNotMatch(page, /https:\/\/line\.me/);
+  }
+});
+
+test('social links page is noindex; guide is indexed only on official host', () => {
+  assert.match(social, /name="robots" content="noindex,follow"/);
+  assert.match(guide, /name="robots" content="index,follow/);
+  const middleware = read('../functions/_middleware.js');
+  assert.match(middleware, /host !== ADMIN_HOST && host !== "climekr\.com"/);
+  assert.match(middleware, /noIndex\(await context\.next\(\)\)/);
+});
+
+test('site navigation and sitemap include original guide but not social noindex page', () => {
+  assert.match(home, /href="\/guide\/"/);
+  assert.match(home, /href="\/links\/"/);
+  assert.match(sitemap, /<loc>https:\/\/climekr\.com\/guide\/<\/loc>/);
+  assert.doesNotMatch(sitemap, /climekr\.com\/links/);
+});
