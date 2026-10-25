@@ -61,3 +61,13 @@ test('clarifies that a rejected loan does not bar consultation or benefit applic
   assert.doesNotMatch(guide, /대출이 거절되었는데 유심 혜택은 무조건 가능한가요/);
   assert.doesNotMatch(guide, /모든 신청자에게 무조건 지급/);
 });
+
+test('does not show unsolicited five-point pre-consultation checklist', () => {
+  assert.doesNotMatch(guide, /상담 전에 확인할 다섯 가지|상담전에 확인할 다섯가지/);
+  assert.doesNotMatch(guide, /check-title|class="checklist"|\\.checklist/);
+  assert.match(guide, /id="criteria"/);
+  assert.match(guide, /aria-labelledby="faq-title"/);
+  assert.match(guide, /대출이 거절되어도 CLIME 유심 혜택을 신청할 수 있나요/);
+  assert.match(guide, /data-channel="telegram"/);
+  assert.match(guide, /data-channel="channeltalk"/);
+});
