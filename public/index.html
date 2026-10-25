@@ -687,6 +687,10 @@
     .operator-info {flex-basis:100%;color:#a8bcc9;font-size:12px;text-align:right}
     .operator-info summary {display:inline-block;cursor:pointer;color:#c9dbe5;text-decoration:underline;text-underline-offset:3px}
     .operator-info span {display:block;margin-top:4px}
+    .operator-info__details {display:grid;gap:4px;margin-top:12px;line-height:1.7;overflow-wrap:anywhere}
+    .operator-info__details p {margin:0}
+    .operator-info__details p strong {color:#c9dbe5;font-weight:650}
+    .operator-info__details span {display:inline;margin:0}
     .channel[aria-disabled="true"] {opacity:.68;cursor:pointer}
     .channel[aria-disabled="true"]:hover {transform:none;border-color:#365369}
     .channel:not([aria-disabled="true"]) {cursor:pointer}
@@ -855,7 +859,21 @@
       <div class="site-footer__brand"><strong class="footer-mark">USIM+</strong><span id="footerBrand">클라임유심 · climekr.com</span><span>© <span id="footerYear">2026</span></span></div>
       <p class="site-footer__terms" id="footerTerms">유지 조건 확인 후 단계별 지급 대상
 한 사람 최대 3건</p>
-      <details class="operator-info"><summary id="operatorSummary">운영자 정보</summary><span><span id="operatorCompanyLabel">법인명</span>: <span id="operatorCompany">에스씨아이평가정보(주)</span></span><span><span id="operatorRepresentativeLabel">대표자</span>: <span id="operatorRepresentative">임동훈</span></span><span><span id="operatorEmailLabel">문의</span>: <a id="operatorEmailLink" href="mailto:help@climekr.com"><span id="operatorEmail">help@climekr.com</span></a></span></details>
+      <details class="operator-info">
+        <summary id="operatorSummary">사업자 정보 · 사업자등록번호 114-81-47958</summary>
+        <div class="operator-info__details">
+          <p><strong>법인명</strong>: <span id="operatorCompany">에스씨아이평가정보(주)</span></p>
+          <p><strong>대표자</strong>: <span id="operatorRepresentative">임동훈</span></p>
+          <p><strong>사업자등록번호</strong>: 114-81-47958</p>
+          <p><strong>법인등록번호</strong>: 110111-0853419</p>
+          <p><strong>사업장·본점 소재지</strong>: 서울특별시 마포구 토정로 144 (상수동, 건양사빌딩)</p>
+          <p><strong>개업연월일</strong>: 1992년 7월 27일</p>
+          <p><strong>업태</strong>: 정보서비스, 금융·보험서비스, 정보서비스, 서비스</p>
+          <p><strong>종목</strong>: 데이터베이스 및 온라인정보 제공업, 신용조회업, 자료처리업, 신용조사, 채권추심업</p>
+          <p><strong>전자세금계산서 전용 전자우편주소</strong>: <a href="mailto:sci0001@hometax.go.kr">sci0001@hometax.go.kr</a></p>
+          <p><strong>고객 문의</strong>: <a id="operatorEmailLink" href="mailto:help@climekr.com"><span id="operatorEmail">help@climekr.com</span></a></p>
+        </div>
+      </details>
     </footer>
   </div>
   <div class="toast toast-info" id="toast" role="status" aria-live="polite" aria-atomic="true" aria-hidden="true">
