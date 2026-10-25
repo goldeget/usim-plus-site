@@ -27,18 +27,12 @@ function expandTokens(value, content) {
   return String(value || "").replace(/\{\{([A-Z0-9_]+)\}\}/g, (match, key) => Object.hasOwn(tokens, key) ? tokens[key] : match);
 }
 
-function payoutFaq(content) {
-  const stages = content.payout.milestones.map((item, index) => `${item.days}일 유지 후 ${formatMoney(item.amount)}${index ? " 추가" : ""}`).join(", ");
-  const perCase = content.payout.milestones.reduce((sum, item) => sum + item.amount, 0);
-  return `각 유지 기간이 확인되면 단계별 지급 대상이 됩니다: ${stages}.\n한 사람 최대 ${content.payout.maxCases}건이며, 모든 조건을 충족하면 최대 ${formatMoney(perCase * content.payout.maxCases)}입니다.\n실제 지급 여부와 시점은 신청 내용과 유지 조건 확인 후 결정됩니다.`;
-}
 
 function buildStructuredData(content, meta) {
   const organizationId = "https://climekr.com/#organization";
   const websiteId = "https://climekr.com/#website";
   const pageId = "https://climekr.com/#webpage";
   const serviceId = "https://climekr.com/#service";
-  const answer = item => item.key === "payoutSchedule" ? payoutFaq(content) : expandTokens(item.answer, content);
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -85,16 +79,6 @@ function buildStructuredData(content, meta) {
         areaServed: { "@type": "Country", name: "대한민국" },
         availableLanguage: "Korean",
         description: meta.description
-      },
-      {
-        "@type": "FAQPage",
-        "@id": "https://climekr.com/#faq",
-        isPartOf: { "@id": pageId },
-        mainEntity: content.faqs.map(item => ({
-          "@type": "Question",
-          name: item.question,
-          acceptedAnswer: { "@type": "Answer", text: answer(item) }
-        }))
       }
     ]
   };
