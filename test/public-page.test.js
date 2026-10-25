@@ -28,10 +28,12 @@ test("keeps existing receipt status lookup and privacy information after new sub
 });
 
 test("consultation addresses remain managed by the authenticated editor", () => {
-  for(const key of ['line','telegram','channeltalk']) {
+  for(const key of ['telegram','channeltalk']) {
     assert.match(html,new RegExp(`data-contact="${key}"`));
     assert.match(adminContent,new RegExp(`id="${key}Link"`));
   }
+  assert.doesNotMatch(html,/data-contact="line"/,"LINE is intentionally hidden from the public homepage");
+  assert.match(adminContent,/id="lineLink"/,"admin configuration retains LINE for possible future reactivation");
   assert.match(html,/updateContactLinks\(content\.supportLinks,copy,content\.operator\)/);
   assert.match(html,/content\.schemaVersion===4/);
   assert.match(html,/candidate\.protocol==='https:'/);
@@ -49,10 +51,10 @@ test("keeps visible centered feedback for lookup and unavailable channels", () =
   assert.match(userFlowCss,/#toast\.toast\s*\{[^}]*left:\s*50%[^}]*top:\s*50%/);
 });
 
-test("protects the supplied business certificate while showing minimal operator identity", () => {
+test("shows the operator registration details requested for the current footer", () => {
   assert.match(html,/에스씨아이평가정보\(주\)/);
   assert.match(html,/대표자.*임동훈/);
-  for(const value of ['114-81-47958','110111-0853419','sci0001@hometax.go.kr']) assert.equal(html.includes(value),false);
+  for(const value of ['114-81-47958','110111-0853419','sci0001@hometax.go.kr']) assert.equal(html.includes(value),true);
 });
 
 
