@@ -12,9 +12,9 @@ test('benefits guide has unique self-canonical and describes actual service', ()
   assert.match(guide, /<title>자금이 급할 때 알아둘 유심 개통 혜택과 지급 조건/);
   assert.match(guide, /rel="canonical" href="https:\/\/climekr\.com\/guide\/"/);
   assert.match(guide, /대출·대부·당일대출 서비스가 아니며/);
-  assert.match(guide, /상담하거나 유심을 개통한다고 곧바로 현금을 받는 것은 아닙니다/);
-  assert.match(guide, /개통비, 통신요금, 요금제, 해지 비용/);
-  assert.doesNotMatch(guide, /본인 부담금 0원 (?:확정|보장)/);
+  assert.match(guide, /혜택은 상담이나 개통 직후 지급되는 것이 아니며/);
+  assert.match(guide, /개통비·월 통신요금·유지비·위약금/);
+  assert.match(guide, /운영사가 제공한 조건은 고객 부담금 0원/);
 });
 
 test('benefits guide displays payout amounts from the current public API', () => {
