@@ -52,9 +52,7 @@
     .rows{border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-top:17px;background:#091b34}
     .row{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:17px 24px;border-bottom:1px solid var(--line)}
     .row:last-child{border:0}.row span{color:#c2d3e9}.row strong{text-align:right}.row em{font-style:normal;color:#96eef0}
-    .checklist{padding:0;list-style:none;display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.checklist li{display:flex;gap:11px;border:1px solid var(--line);border-radius:14px;padding:18px;background:#101f36;color:#d3e1ee;line-height:1.65}
-    .checklist li::before{content:"✓";flex-shrink:0;color:var(--cyan);font-weight:900}
-    details{border:1px solid var(--line);border-radius:15px;background:#101f37;padding:0 20px;margin:11px 0}
+            details{border:1px solid var(--line);border-radius:15px;background:#101f37;padding:0 20px;margin:11px 0}
     summary{padding:18px 0;cursor:pointer;font-weight:750;line-height:1.55}
     details p{margin:0 0 19px;line-height:1.75;color:#bfd0e5}
     .end{margin:25px 0 76px;padding:36px;border-radius:27px;text-align:center;background:linear-gradient(135deg,#123e6d,#0c2549);border:1px solid #397db680}
@@ -63,7 +61,7 @@
     footer{border-top:1px solid #ffffff24;padding:25px 0 38px;color:#a4b4ca;font-size:13px;line-height:1.8}
     footer a{text-decoration:underline;text-underline-offset:3px}
     @media(max-width:760px){.header-inner{min-height:66px}.logo{font-size:18px}nav{gap:13px}nav a{font-size:12px}.hero{padding:55px 0 34px}
-      .grid,.checklist{grid-template-columns:1fr}.card{padding:22px}.band{padding:24px}.row{padding:16px}.wrap{padding:0 18px}
+      .grid{grid-template-columns:1fr}.card{padding:22px}.band{padding:24px}.row{padding:16px}.wrap{padding:0 18px}
       .actions{flex-direction:column}.actions .button{width:100%}.end{padding:25px;margin-bottom:46px}.end h2{font-size:25px}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.button{transition:none}}
   </style>
@@ -110,16 +108,6 @@
       <p class="micro" data-criteria-note>혜택은 확정 수익이 아니며, 최대 금액은 모든 적용 조건을 만족하는 경우에 한합니다. 지급 약속의 구체적인 서면 조건을 확인해 주세요.</p>
     </section>
 
-    <section class="section wrap" aria-labelledby="check-title">
-      <h2 id="check-title">상담 전에 확인할 다섯 가지</h2>
-      <ul class="checklist">
-        <li>유심·회선은 반드시 본인 명의로 개통하고, 가입 내용을 본인이 이해하고 동의하는지</li>
-        <li>개통비·월 통신요금·유지비·위약금 등 관련 비용을 회사가 전액 부담하는 범위와 청구 방식이 서면에 명시되어 있는지</li>
-        <li>지급일, 지급 조건, 지급 제외 조건과 지급주체를 문서로 확인할 수 있는지</li>
-        <li>개통한 유심이나 회선, 문자 인증번호를 다른 사람에게 넘기지 않아도 되는지</li>
-        <li>운영사 정보와 상담자가 안내하는 약관이 실제 통신사 개통 계약과 일치하는지</li>
-      </ul>
-    </section>
 
     <section class="section wrap" aria-labelledby="faq-title">
       <h2 id="faq-title">자주 묻는 질문</h2>
