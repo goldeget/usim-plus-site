@@ -11,7 +11,7 @@ const userFlowCss = await readFile(new URL("../public/user-flow.css", import.met
 test("preserves the dark visual identity and exposes direct consultation without a file form", () => {
   for (const element of ['<html lang="ko">','class="hero-payouts"','class="sim-image"','id="contact"','id="heroApplyButton" href="#contact"']) assert.ok(html.includes(element), element);
   assert.doesNotMatch(html, /type="file"|id="precheckForm"|FormData|challenges\.cloudflare\.com|turnstile\.render/);
-  assert.match(html, /조회 사진은 상담창으로 보내 주세요/);
+  assert.match(html, /고객의 유심 개통·통신 관련 비용은 회사가 전액 부담합니다/);
   assert.match(html, /name="color-scheme" content="dark"/);
 });
 
