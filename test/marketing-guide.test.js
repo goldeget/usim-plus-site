@@ -64,7 +64,8 @@ test('clarifies that a rejected loan does not bar consultation or benefit applic
 
 test('does not show unsolicited five-point pre-consultation checklist', () => {
   assert.doesNotMatch(guide, /상담 전에 확인할 다섯 가지|상담전에 확인할 다섯가지/);
-  assert.doesNotMatch(guide, /check-title|class="checklist"|\\.checklist/);
+  assert.doesNotMatch(guide, /check-title|class="checklist"/);
+  assert.equal(guide.includes('.checklist'), false);
   assert.match(guide, /id="criteria"/);
   assert.match(guide, /aria-labelledby="faq-title"/);
   assert.match(guide, /대출이 거절되어도 CLIME 유심 혜택을 신청할 수 있나요/);
