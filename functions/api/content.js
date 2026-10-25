@@ -110,7 +110,7 @@ export const DEFAULT_CONTENT = {
     "operatorSummary": "사업자 정보 · 사업자등록번호 114-81-47958",
     "operatorCompanyLabel": "법인명",
     "operatorRepresentativeLabel": "대표자",
-    "operatorEmailLabel": "문의"
+    "operatorEmailLabel": "고객 문의"
   },
   "faqs": [
     {
