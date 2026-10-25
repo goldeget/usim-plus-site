@@ -72,3 +72,16 @@ test('does not show unsolicited five-point pre-consultation checklist', () => {
   assert.match(guide, /data-channel="telegram"/);
   assert.match(guide, /data-channel="channeltalk"/);
 });
+
+test('bottom consultation panel stays centered and matches main content gutters on desktop and mobile', () => {
+  // On desktop, the FAQ and CTA both use .wrap's 1100px max width; auto margins center the CTA.
+  assert.match(guide, /\.wrap\{max-width:1100px;margin:auto;padding:0 24px\}/);
+  assert.match(guide, /\.end\{margin:25px auto 76px;padding:36px;/);
+  // Mobile main container has 18px side padding, so CTA keeps 18px side gutters.
+  assert.match(guide, /\.wrap\{padding:0 18px\}/);
+  assert.match(guide, /\.end\{width:calc\(100% - 36px\);padding:25px;margin-bottom:46px\}/);
+  assert.match(guide, /<section class="end wrap" id="contact" aria-labelledby="contact-title">/);
+  assert.match(guide, /<section class="section wrap" aria-labelledby="faq-title">/);
+  assert.match(guide, /data-channel="telegram"/);
+  assert.match(guide, /data-channel="channeltalk"/);
+});
