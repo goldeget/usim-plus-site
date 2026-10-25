@@ -110,10 +110,10 @@ test("keeps legacy editor content out of the current homepage while showing vers
   assert.equal(data.schemaVersion, 2);
   assert.equal(data.legacyContent, true);
   assert.equal(data.headline, "유심 개통 가능하면\n최대 51만원");
-  assert.equal(data.intro, "먼저 개통 가능 여부를 확인하세요.\n개통 후 사진 한 장으로 신청하세요.");
-  assert.deepEqual(data.checklist.map(step => step.title), ["1. 개통 가능 여부 확인", "2. 개통 후 사진 신청", "3. 유지 조건 확인 후 지급"]);
-  assert.match(data.checklist[0].body, /본인 명의 개통 현황을 조회/);
-  assert.match(data.checklist[1].body, /개통하셨다면 사진 한 장으로 신청/);
+  assert.equal(data.intro, "먼저 개통 가능 여부를 확인하세요.\n조회 후 사진 한 장으로 신청하세요.");
+  assert.deepEqual(data.checklist.map(step => step.title), ["1. 개통 가능 여부 확인", "2. 가능 여부 심사 신청", "3. 유지 조건 확인 후 지급"]);
+  assert.match(data.checklist[0].body, /본인 명의 개통 가능 여부를 조회/);
+  assert.equal(data.checklist[1].body, "조회하셨다면 조회하신 내역을 캡처해서 신청하세요.");
   assert.match(data.faqs.find(item => item.question === "사진 확인 후 바로 지급되나요?").answer, /신청 내용과 유지 조건을 확인/);
   assert.doesNotMatch(JSON.stringify(data), /통신사|요금·약정|월 요금|해지 비용|사진 사전 검토/);
   assert.equal(cloudflare.siteContent.get("home").content, JSON.stringify(legacy));

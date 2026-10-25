@@ -10,7 +10,7 @@ const indexNowKey = "2cc7263262b5a365ad26c37e214acd2b";
 test("publishes a canonical Korean title, description, and social preview metadata", () => {
   assert.match(page, /<title>클라임유심 \| 유심 개통 가능하면 최대 51만원<\/title>/);
   assert.match(page, /<link rel="canonical" href="https:\/\/climekr\.com\/"\s*\/>/);
-  assert.match(page, /name="description" content="[^\"]*클라임유심[^\"]*climekr 유심[^\"]*개통 가능 여부[^\"]*개통 후[^\"]*현황 사진[^\"]*최대 51만원[^\"]*"/);
+  assert.match(page, /name="description" content="[^\"]*클라임유심[^\"]*climekr 유심[^\"]*개통 가능 여부[^\"]*조회 내역[^\"]*캡처[^\"]*최대 51만원[^\"]*"/);
   assert.doesNotMatch(page, /통신사|요금·약정|월 요금|해지 비용/);
   assert.match(page, /property="og:url" content="https:\/\/climekr\.com\/"/);
   assert.match(page, /name="robots" content="index,follow/);
@@ -39,8 +39,8 @@ test("covers the requested climekr spellings and gives review searches useful, a
   assert.match(page, /후기를 볼 때 작성 시점과 실제 이용 경험인지 확인해 주세요/);
   assert.match(llms, /클라임유심 후기[\s\S]*climekr 유심 후기/);
   assert.match(llms, /클라임유심[\s\S]*climekr[\s\S]*참여 방법/);
-  assert.match(llms, /본인 명의로 유심을 개통할 수 있는지 확인합니다[\s\S]*개통을 마친 뒤 현황 사진 한 장으로 신청합니다[\s\S]*유지 조건을 확인한 뒤 지급 대상이 결정됩니다/);
-  assert.match(llms, /개통 후 사진 한 장으로 신청하는 방법과 유지 기간별 지급 금액/);
+  assert.match(llms, /본인 명의 개통 가능 여부를 확인합니다[\s\S]*조회 결과를 캡처해 심사를 신청합니다[\s\S]*유지 조건을 확인한 뒤 지급 대상이 결정됩니다/);
+  assert.match(llms, /조회 결과를 캡처해 심사를 신청하는 방법과 유지 기간별 지급 금액/);
   assert.doesNotMatch(llms, /통신사|요금·약정|월 요금|해지 비용/);
   assert.doesNotMatch(llms, /사진 사전 검토|개통 현황 사진으로 사전 검토|유심 개통 사전 검토 안내/);
   assert.doesNotMatch(llms, /관련 검색어|이용 정보 검색어/);

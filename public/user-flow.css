@@ -64,7 +64,7 @@ main { padding-bottom: 36px; }
 .step-icon svg { width: 23px; height: 23px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .step h3 { margin: 1px 0 7px; color: #17354a; font-size: 15px; font-weight: 800; letter-spacing: -.035em; line-height: 1.4; }
 .step p { margin: 0; color: var(--flow-muted); font-size: 13px; line-height: 1.65; word-break: keep-all; }
-.step-action { display: flex; width: fit-content; max-width: 100%; min-height: 40px; align-items: center; margin-top: 10px; font-size: 14px; font-weight: 800; white-space: normal; }
+.step-action { display: flex; width: fit-content; max-width: 100%; min-height: 40px; align-items: center; margin-top: 10px; padding-inline: 4px; white-space: nowrap; font-size: 13px; font-weight: 800; letter-spacing: -.035em; }
 .step-action + .step-action { margin-top: 6px; }
 .flow-note { margin: 14px 0 0; padding: 12px 14px; border-radius: 12px; background: #f3f7f9; color: var(--flow-muted); font-size: 13px; line-height: 1.6; word-break: keep-all; }
 .application { scroll-margin-top: 132px; }
@@ -191,7 +191,7 @@ main { padding-bottom: 36px; }
   .step-icon svg { width: 20px; height: 20px; }
   .step h3 { font-size: 14px; }
   .step p { font-size: 14px; line-height: 1.6; }
-  .step-action { min-height: 42px; margin-top: 4px; font-size: 14px; }
+  .step-action { min-height: 42px; margin-top: 4px; padding-inline: 4px; white-space: nowrap; font-size: 13px; }
   .flow-note { margin-top: 10px; padding: 10px 11px; font-size: 12px; }
   .application-head { gap: 8px; }
   .application-head p { font-size: 13px; }

@@ -34,7 +34,7 @@ test("leads with the offer and keeps secondary tasks out of the way", () => {
   assert.doesNotMatch(html, /class="task-nav"|data-view-link|data-view-panel/);
   assert.match(html, /id="hero-title">유심 개통 가능하면<br>최대 51만원<\/h1>/);
   assert.match(html, /id="eligibilityButton"[^>]*>개통 가능 여부 확인하기/);
-  assert.match(html, /id="heroApplyButton"[^>]*href="#apply">개통 후 신청하기/);
+  assert.match(html, /id="heroApplyButton"[^>]*href="#apply">사진 심사 신청하기/);
   assert.match(html, /href="#statusLookupDetails"[^>]*>이미 신청했어요\? 접수 조회/);
   assert.match(html, /<details class="application-details" id="apply"/);
   assert.match(html, /<details class="guide-disclosure" id="benefits"/);
@@ -53,16 +53,18 @@ test("loads Turnstile only after a valid submission attempt and lets users retry
 });
 
 test("explains eligibility, the payout amounts, and the photo application in one simple flow", () => {
-  assert.match(html, /id="homeIntro">먼저 개통 가능 여부를 확인하세요\.\n개통 후 사진 한 장으로 신청하세요\.<\/p>/);
+  assert.match(html, /id="homeIntro">먼저 개통 가능 여부를 확인하세요\.\n조회 후 사진 한 장으로 신청하세요\.<\/p>/);
   assert.match(html, /class="hero-payouts"[\s\S]*3일 유지 후[\s\S]*5만원 지급[\s\S]*15일 유지 후[\s\S]*5만원 추가 지급[\s\S]*30일 유지 후[\s\S]*7만원 추가 지급/);
   assert.match(html, /한 건 최대 17만원 · 최대 3건 · 총 최대 51만원/);
-  assert.match(html, /id="quickFlow"><span>가능 여부 확인<\/span><span aria-hidden="true">→<\/span><span>개통 후 사진 신청<\/span><span aria-hidden="true">→<\/span><span>유지 확인 후 지급<\/span>/);
+  assert.match(html, /id="quickFlow"><span>가능 여부 확인<\/span><span aria-hidden="true">→<\/span><span>심사 신청<\/span><span aria-hidden="true">→<\/span><span>유지 확인 후 지급<\/span>/);
   assert.match(html, /id="eligibilityButton"[^>]*href="https:\/\/www\.credit\.or\.kr\/credit\/search"/);
-  assert.match(html, /class="application-trigger"><span>개통 후 신청하기<\/span>/);
-  assert.match(userFlowCss, /\.step-action \{[^}]*display:\s*flex[^}]*max-width:\s*100%[^}]*white-space:\s*normal/);
+  assert.match(html, /class="application-trigger"><span>사진 심사 신청하기<\/span>/);
+  assert.match(userFlowCss, /\.step-action \{[^}]*display:\s*flex[^}]*max-width:\s*100%[^}]*white-space:\s*nowrap[^}]*font-size:\s*13px/);
   assert.match(userFlowCss, /\.step-action \+ \.step-action \{[^}]*margin-top:\s*6px/);
-  assert.match(html, /id="apply-title">개통 현황 사진으로 신청하기/);
-  assert.match(html, /개통 현황 사진 한 장을 첨부해 주세요/);
+  assert.match(html, /id="apply-title">가능 여부 심사 신청/);
+  assert.match(html, /조회 후 사진 한 장으로 신청하세요/);
+  assert.match(html, /조회하신 내역을 캡처해서 신청하세요/);
+  assert.match(html, /<h4>2\. 가능 여부 심사 신청<\/h4><p>조회하셨다면 조회하신 내역을 캡처해서 신청하세요\.<\/p>/);
   assert.match(html, /heroApplyButton\.addEventListener\(['"]click['"]/);
   assert.match(html, /heroApplyButton\.addEventListener[\s\S]*?applyDisclosure\.open=true/);
   assert.doesNotMatch(html, /guideDisclosure\.open\s*=\s*true/);
@@ -85,8 +87,8 @@ test("keeps feedback and footer copy legible and wrapped on small screens", () =
 });
 
 test("preserves intentional sentence breaks in public and published copy", () => {
-  assert.match(contentApi, /intro:\s*"먼저 개통 가능 여부를 확인하세요\.\\n개통 후 사진 한 장으로 신청하세요\."/);
-  assert.match(adminContent, /intro:"먼저 개통 가능 여부를 확인하세요\.\\n개통 후 사진 한 장으로 신청하세요\."/);
+  assert.match(contentApi, /intro:\s*"먼저 개통 가능 여부를 확인하세요\.\\n조회 후 사진 한 장으로 신청하세요\."/);
+  assert.match(adminContent, /intro:"먼저 개통 가능 여부를 확인하세요\.\\n조회 후 사진 한 장으로 신청하세요\."/);
   assert.match(userFlowCss, /\.hero-intro,.terms-hint,.hero-caveat,[\s\S]*?\.site-footer__terms\s*\{\s*white-space:\s*pre-line;\s*line-height:\s*1\.85/);
   assert.match(userFlowCss, /\.hero-intro[^}]*line-height:\s*1\.85/);
   assert.match(adminContent, /Enter로 줄을 나눌 수 있습니다/);
@@ -106,9 +108,10 @@ test("restores the original dark navy and mint visual palette", () => {
 
 test("keeps the public participation flow at exactly three CMS-editable steps", () => {
   assert.match(adminContent, /참여 단계는 세 개로 고정되어 있습니다/);
-  assert.match(adminContent, /intro:"먼저 개통 가능 여부를 확인하세요\.\\n개통 후 사진 한 장으로 신청하세요\."/);
+  assert.match(adminContent, /intro:"먼저 개통 가능 여부를 확인하세요\.\\n조회 후 사진 한 장으로 신청하세요\."/);
   assert.match(adminContent, /title:"1\. 개통 가능 여부 확인"/);
-  assert.match(adminContent, /title:"2\. 개통 후 사진 신청"/);
+  assert.match(adminContent, /title:"2\. 가능 여부 심사 신청"/);
+  assert.match(adminContent, /body:"조회하셨다면 조회하신 내역을 캡처해서 신청하세요\."/);
   assert.match(adminContent, /title:"3\. 유지 조건 확인 후 지급"/);
   assert.match(adminContent, /question:"사진 확인 후 바로 지급되나요\?"/);
   assert.doesNotMatch(adminContent, /사진 사전 검토|운영자 사전 검토/);
@@ -125,7 +128,7 @@ test("progressively applies saved homepage content and keeps FAQ structured data
 });
 
 test("discloses the photo purpose, selected retention, controller, contact, and refusal right", () => {
-  for (const content of ["개통 현황 사진", "30일", "에스씨아이평가정보(주)", "임동훈", "help@climekr.com", "동의하지 않으면", "Cloudflare"]) {
+  for (const content of ["조회 내역 캡처", "30일", "에스씨아이평가정보(주)", "임동훈", "help@climekr.com", "동의하지 않으면", "Cloudflare"]) {
     assert.ok(html.includes(content), `missing privacy disclosure: ${content}`);
   }
 });
@@ -143,7 +146,8 @@ test("keeps the public offer short and removes telecom price and contract wordin
   assert.ok(hero, "hero offer exists");
   assert.match(hero, /유심 개통 가능하면[\s\S]*최대 51만원/);
   assert.match(hero, /개통 가능 여부 확인하기/);
-  assert.match(hero, /개통 후 신청하기/);
+  assert.match(hero, /사진 심사 신청하기/);
+  assert.doesNotMatch(html, /개통 후 사진 신청|개통 후 신청하기|개통 후 사진 한 장으로 신청|개통하셨다면 사진/);
   assert.doesNotMatch(html, /통신사|요금·약정|월 요금|해지 비용|KAIT/);
   assert.doesNotMatch(html, /사진 사전 검토|운영자 사전 검토/);
   assert.doesNotMatch(hero, /접수번호|조회 코드/);
