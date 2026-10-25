@@ -3,7 +3,7 @@ import { isAdminRequest, readBoundedRequestBody } from "../_lib/applications.js"
 export const DEFAULT_CONTENT = {
   "schemaVersion": 4,
   "headline": "유심 개통 가능하면\n최대 {{MAX_TOTAL}}",
-  "intro": "먼저 개통 가능 여부를 조회하세요.\n조회 사진은 상담창으로 보내 주세요.",
+  "intro": "고객 개통·통신 관련 비용은 회사가 전액 부담합니다.\n개통 가능 여부를 확인하고 상담창으로 문의해 주세요.",
   "checklist": [
     {
       "title": "1. 개통 가능 여부 확인",
@@ -30,8 +30,8 @@ export const DEFAULT_CONTENT = {
   "payout": {
     "milestones": [
       { "days": 3, "amount": 50000 },
-      { "days": 15, "amount": 50000 },
-      { "days": 30, "amount": 70000 }
+      { "days": 15, "amount": 70000 },
+      { "days": 30, "amount": 100000 }
     ],
     "maxCases": 3
   },
@@ -42,17 +42,17 @@ export const DEFAULT_CONTENT = {
   },
   "seo": {
     "title": "클라임유심 | 유심 개통 가능하면 최대 {{MAX_TOTAL}}",
-    "description": "클라임유심(climekr 유심) 개통 가능 여부와 지급 조건을 상담하고, 조회 내역 캡처는 상담창으로 보내 주세요. 유지 기간별 지급 금액과 신청 방법을 확인할 수 있습니다.",
+    "description": "클라임유심(CLIME) 개통·통신 비용은 운영사 안내 기준 회사 전액 부담. 대출이 아닌 유심 개통 혜택이며 유지 조건 충족 시 최대 {{MAX_TOTAL}}. 텔레그램·채널톡으로 가입 조건을 문의하세요.",
     "socialTitle": "클라임유심 | 유심 개통 가능 여부와 지급 안내",
-    "socialDescription": "개통 가능 여부와 참여 조건을 확인하고, 조회 내역 캡처는 텔레그램·채널톡 상담창으로 보내 주세요."
+    "socialDescription": "회사 개통·통신비 전액 부담(고객 비용 없음). 유심 개통 혜택은 유지 조건 충족 시 최대 {{MAX_TOTAL}}. 텔레그램·채널톡 상담."
   },
   "copy": {
     "brandSub": "유심 개통 · 간편 참여 안내",
     "headerHelp": "상담하기",
-    "heroEyebrow": "유심 개통 혜택 참여",
+    "heroEyebrow": "고객 비용 회사 전액 부담 · 유심 혜택",
     "heroApplyLabel": "사진 심사 신청하기",
     "heroChatNote": "이미 조회하셨다면 상담창에 사진을 보내 주세요.",
-    "payoutNote": "유지 조건을 확인한 뒤 지급 대상이 결정됩니다.",
+    "payoutNote": "고객 개통·통신비는 회사 전액 부담. 지급은 유지 조건 확인 후 결정됩니다.",
     "payoutAriaLabel": "유지 기간별 지급 금액",
     "contactKicker": "운영자와 직접 상담",
     "contactTitle": "사진 보내고 상담하기",
@@ -106,7 +106,7 @@ export const DEFAULT_CONTENT = {
     "privacyProvider": "사이트 운영과 기존 신청 사진 보관에 Cloudflare의 클라우드 서비스를 이용합니다.",
     "privacyProviderLabel": "처리 서비스",
     "footerBrand": "클라임유심 · climekr.com",
-    "footerTerms": "유지 조건 확인 후 단계별 지급 대상\n한 사람 최대 {{MAX_CASES}}건, 모두 충족 시 최대 {{MAX_TOTAL}}",
+    "footerTerms": "고객 개통·통신 비용 회사 전액 부담\n유지 조건 충족 시 최대 {{MAX_CASES}}건 · 최대 {{MAX_TOTAL}} 지급 대상",
     "operatorSummary": "사업자 정보 · 사업자등록번호 114-81-47958",
     "operatorCompanyLabel": "법인명",
     "operatorRepresentativeLabel": "대표자",
@@ -132,7 +132,11 @@ export const DEFAULT_CONTENT = {
     },
     {
       "question": "왜 참여자를 모집하나요?",
-      "answer": "유심 개통을 검토하는 분께 참여 조건과 지급 기준을 안내하고, 조건을 충족한 분에게 약속된 금액을 지급하기 위해 모집합니다.\n지급 대상과 금액은 조회 결과와 유지 조건을 확인한 뒤 결정됩니다."
+      "answer": "회사의 고객 유치와 유심 개통 혜택 홍보를 위한 참여 안내입니다. 회사에서 고객의 개통·통신 관련 비용을 부담한다고 안내하고 있으며, 지급 대상과 금액은 조회 결과와 유지 조건 확인 후 결정됩니다."
+    },
+    {
+      "question": "유심 개통·통신요금은 누가 부담하나요?",
+      "answer": "CLIME 운영사 안내 기준 고객의 개통·통신·회선 유지 관련 비용은 회사가 전액 부담합니다. 지급 혜택은 별도의 유지 조건이 충족되어야 받을 수 있습니다. 신청 전 본인 명의 회선 계약의 청구·납부 주체 및 회사 부담 범위를 확인하세요."
     },
     {
       "question": "상담하거나 사진을 보내면 바로 지급되나요?",
