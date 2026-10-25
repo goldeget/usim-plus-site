@@ -26,4 +26,4 @@
 - [x] Add admin fields for public display copy, payout schedule and maximum cases, lookup URL, chat links, status wording, contact details and footer; factual privacy statements and retention duration stay fixed to actual system behavior.
 - [x] Apply editor content across all public sections, dynamic status labels, server-rendered search/social metadata, and toasts without HTML injection.
 - [x] Verify the editor and public page at mobile and desktop sizes, preserved lookup/chat workflow, full tests, and local Pages runtime.
-- [ ] Verify the production page after release.
+- [x] Verify the production page after release, including the v4 editor API, preserved lookup URL, server-rendered metadata, and the 15-second edge cache policy.
