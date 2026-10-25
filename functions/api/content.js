@@ -107,7 +107,7 @@ export const DEFAULT_CONTENT = {
     "privacyProviderLabel": "처리 서비스",
     "footerBrand": "클라임유심 · climekr.com",
     "footerTerms": "유지 조건 확인 후 단계별 지급 대상\n한 사람 최대 {{MAX_CASES}}건, 모두 충족 시 최대 {{MAX_TOTAL}}",
-    "operatorSummary": "운영자 정보",
+    "operatorSummary": "사업자 정보 · 사업자등록번호 114-81-47958",
     "operatorCompanyLabel": "법인명",
     "operatorRepresentativeLabel": "대표자",
     "operatorEmailLabel": "문의"
