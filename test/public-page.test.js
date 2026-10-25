@@ -11,7 +11,7 @@ const userFlowCss = await readFile(new URL("../public/user-flow.css", import.met
 test("preserves the dark visual identity and exposes direct consultation without a file form", () => {
   for (const element of ['<html lang="ko">','class="hero-payouts"','class="sim-image"','id="contact"','id="heroApplyButton" href="#contact"']) assert.ok(html.includes(element), element);
   assert.doesNotMatch(html, /type="file"|id="precheckForm"|FormData|challenges\.cloudflare\.com|turnstile\.render/);
-  assert.match(html, /고객의 유심 개통·통신 관련 비용은 회사가 전액 부담합니다/);
+  assert.match(html, /고객의 유심 개통·통신·유지 관련 비용은 회사가 전액 부담합니다/);
   assert.match(html, /name="color-scheme" content="dark"/);
 });
 
@@ -86,4 +86,19 @@ test("admin-managed public copy covers payouts, lookup, privacy, footer, status,
   }
   assert.match(adminContentEditor, /data\.retentionDays\s*\|\|\s*retentionDays/);
   assert.match(adminContentEditor, /Number\.isInteger\(sourceIndex\).*original\.faqs\[sourceIndex\]/s);
+});
+
+
+test("renders a clean two-line homepage announcement and footer without visible backslash-n", () => {
+  const expectedIntro = [
+    "고객의 유심 개통·통신·유지 관련 비용은 회사가 전액 부담합니다.",
+    "개통 가능 여부를 확인하고 텔레그램·채널톡에서 조건을 문의하세요."
+  ].join("\n");
+  assert.ok(html.includes('<p class="hero-intro" id="homeIntro">' + expectedIntro + '</p>'));
+  assert.ok(html.includes('<p class="site-footer__terms" id="footerTerms">고객 개통·통신 비용 회사 전액 부담\n유지 조건 충족 시 최대 3건 · 최대 66만원 지급 대상</p>'));
+  assert.match(html, /normalizeDisplayedLineBreaks\(content\.intro\)/);
+  assert.match(html, /normalizeDisplayedLineBreaks\(expandTokens\(copy\.footerTerms,content\)\)/);
+  assert.match(html, /function normalizeDisplayedLineBreaks\(value\)/);
+  assert.match(userFlowCss, /\.hero-intro,[^{]*\.site-footer__terms \{ white-space: pre-line; line-height: 1\.85; \}/);
+  assert.doesNotMatch(expectedIntro, /\\n/);
 });
