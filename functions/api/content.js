@@ -3,7 +3,7 @@ import { isAdminRequest, readBoundedRequestBody } from "../_lib/applications.js"
 export const DEFAULT_CONTENT = {
   "schemaVersion": 4,
   "headline": "유심 개통 가능하면\n최대 {{MAX_TOTAL}}",
-  "intro": "고객 개통·통신 관련 비용은 회사가 전액 부담합니다.\n개통 가능 여부를 확인하고 상담창으로 문의해 주세요.",
+  "intro": "고객의 유심 개통·통신·유지 관련 비용은 회사가 전액 부담합니다.\n개통 가능 여부를 확인하고 텔레그램·채널톡에서 조건을 문의하세요.",
   "checklist": [
     {
       "title": "1. 개통 가능 여부 확인",
@@ -148,6 +148,10 @@ export const DEFAULT_CONTENT = {
     }
   ]
 };
+
+// CMS prose may contain the literal characters "\n" after a paste or manual edit.
+// Persist actual LF characters so CSS white-space: pre-line renders intended breaks.
+const normalizePublicLineBreaks = value => value.trim().replaceAll("\\n", "\n");
 
 const COPY_LIMITS = Object.fromEntries(Object.keys(DEFAULT_CONTENT.copy).map(key => [key, 500]));
 const RETENTION_DAYS = Object.freeze({ photoAfterDecision: 30, photoIfUnreviewed: 30, statusMetadata: 60 });
@@ -366,7 +370,7 @@ export async function onRequest({ request, env }) {
   const lockedPrivacyCopy = fixedPrivacyCopy();
   const safe = {
     schemaVersion: 4,
-    headline: content.headline.trim(), intro: content.intro.trim(),
+    headline: normalizePublicLineBreaks(content.headline), intro: normalizePublicLineBreaks(content.intro),
     checklist: content.checklist.map(x => ({ title: x.title.trim(), body: x.body.trim() })),
     faqs: content.faqs.map(x => ({ ...(x.key === "payoutSchedule" ? { key: x.key } : {}), question: x.question.trim(), answer: x.answer.trim() })),
     supportLinks: safeSupportLinks(content.supportLinks),
@@ -374,7 +378,7 @@ export async function onRequest({ request, env }) {
     payout: { milestones: content.payout.milestones.map(x => ({ days: x.days, amount: x.amount })), maxCases: content.payout.maxCases },
     operator: { company: content.operator.company.trim(), representative: content.operator.representative.trim(), email: content.operator.email.trim() },
     seo: Object.fromEntries(["title", "description", "socialTitle", "socialDescription"].map(key => [key, content.seo[key].trim()])),
-    copy: Object.fromEntries(Object.keys(DEFAULT_CONTENT.copy).map(key => [key, lockedPrivacyCopy[key] ?? content.copy[key].trim()]))
+    copy: Object.fromEntries(Object.keys(DEFAULT_CONTENT.copy).map(key => [key, lockedPrivacyCopy[key] ?? normalizePublicLineBreaks(content.copy[key])]))
   };
   const updatedAt = new Date().toISOString();
   try {
