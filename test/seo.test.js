@@ -27,6 +27,10 @@ test("includes accurate search structured data that matches visible FAQs", () =>
     assert.ok(page.includes(`<summary>${item.name}</summary>`), `FAQ question is visible: ${item.name}`);
     assert.ok(page.includes(`<p>${item.acceptedAnswer.text}</p>`), `FAQ answer is visible: ${item.name}`);
   }
+  const recruitmentFaq = faq.mainEntity.find(item => item.name === "왜 참여자를 모집하나요?");
+  assert.match(recruitmentFaq.acceptedAnswer.text, /참여 조건과 지급 기준을 안내/);
+  assert.match(recruitmentFaq.acceptedAnswer.text, /지급 대상과 금액은 조회 결과와 유지 조건을 확인한 뒤 결정/);
+  assert.doesNotMatch(recruitmentFaq.acceptedAnswer.text, /실적 향상/);
 });
 
 test("covers the requested climekr spellings and gives review searches useful, accurate guidance", () => {

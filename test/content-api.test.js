@@ -2,6 +2,9 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createMemoryCloudflare } from "../test-support/cloudflare.js";
 import { createAdminEnvironment, createAdminSessionHeaders } from "../test-support/admin-auth.js";
+import { DEFAULT_CONTENT } from "../functions/api/content.js";
+
+const freshContent = () => structuredClone(DEFAULT_CONTENT);
 
 test("bounds authenticated CMS writes when Content-Length is missing", async () => {
   const { onRequest } = await import("../functions/api/content.js");
@@ -11,7 +14,7 @@ test("bounds authenticated CMS writes when Content-Length is missing", async () 
   let closeTimer;
   const stream = new ReadableStream({
     start(controller) {
-      controller.enqueue(new Uint8Array(36001));
+      controller.enqueue(new Uint8Array(160001));
       closeTimer = setTimeout(() => controller.close(), 50);
     },
     cancel() { cancelled = true; clearTimeout(closeTimer); }
@@ -32,20 +35,21 @@ test("bounds authenticated CMS writes when Content-Length is missing", async () 
   assert.equal(cancelled, true);
 });
 
-test("accepts three CMS steps and the existing character limit with Korean UTF-8 text", async () => {
+test("accepts a fully filled CMS document within its bounded UTF-8 request limit", async () => {
   const { onRequest } = await import("../functions/api/content.js");
   const env = createAdminEnvironment({ cloudflare: createMemoryCloudflare() });
   const sessionHeaders = await createAdminSessionHeaders(env);
-  const content = {
-    schemaVersion: 3,
-    headline: "가".repeat(100),
-    intro: "나".repeat(500),
-    checklist: Array.from({ length: 3 }, () => ({ title: "다".repeat(80), body: "라".repeat(300) })),
-    faqs: Array.from({ length: 10 }, () => ({ question: "마".repeat(160), answer: "바".repeat(400) }))
-  };
+  const content = freshContent();
+  content.headline = "가".repeat(100);
+  content.intro = "나".repeat(500);
+  content.checklist = Array.from({ length: 3 }, () => ({ title: "다".repeat(80), body: "라".repeat(300) }));
+  content.faqs = Array.from({ length: 10 }, () => ({ question: "마".repeat(160), answer: "바".repeat(400) }));
+  content.faqs[0].key = "payoutSchedule";
+  content.copy = Object.fromEntries(Object.keys(content.copy).map(key => [key, "사".repeat(500)]));
+  content.seo = { title: "검색 제목 {{MAX_TOTAL}}", description: "아".repeat(500), socialTitle: "공유 제목 {{MAX_TOTAL}}", socialDescription: "자".repeat(500) };
   const body = JSON.stringify(content);
-  assert.ok(body.length <= 12000);
-  assert.ok(Buffer.byteLength(body) > 20000);
+  assert.ok(Buffer.byteLength(body) > 36000);
+  assert.ok(Buffer.byteLength(body) < 160000);
   const request = new Request("https://admin.climekr.com/api/content", {
     method: "PUT",
     headers: {
@@ -59,6 +63,46 @@ test("accepts three CMS steps and the existing character limit with Korean UTF-8
   assert.equal(response.status, 200);
 });
 
+test("keeps factual privacy notices fixed to the actual data handling", async () => {
+  const { onRequest } = await import("../functions/api/content.js");
+  const cloudflare = createMemoryCloudflare();
+  const env = createAdminEnvironment({ cloudflare });
+  const headers = await createAdminSessionHeaders(env);
+  const content = freshContent();
+  for (const key of ["privacyCollection", "privacyPurpose", "privacyStorage", "privacyConsent", "privacyProvider"]) {
+    content.copy[key] = "실제 운영과 다른 문구";
+  }
+  const response = await onRequest({ request: new Request("https://admin.climekr.com/api/content", {
+    method: "PUT",
+    headers: { ...headers, origin: "https://admin.climekr.com", "Content-Type": "application/json" },
+    body: JSON.stringify(content)
+  }), env });
+  const data = await response.json();
+  assert.equal(response.status, 200);
+  for (const key of ["privacyCollection", "privacyPurpose", "privacyStorage", "privacyConsent", "privacyProvider"]) {
+    assert.equal(data.content.copy[key], DEFAULT_CONTENT.copy[key], key);
+  }
+  assert.doesNotMatch(cloudflare.siteContent.get("home").content, /실제 운영과 다른 문구/);
+});
+
+test("requires the displayed total payout in the headline and search titles to match payout settings", async () => {
+  const { onRequest } = await import("../functions/api/content.js");
+  const env = createAdminEnvironment({ cloudflare: createMemoryCloudflare() });
+  const headers = await createAdminSessionHeaders(env);
+  const content = freshContent();
+  content.headline = "유심 개통 가능하면 최대 51만원";
+  content.seo.title = "클라임유심 최대 51만원";
+  content.seo.socialTitle = "클라임유심 최대 51만원";
+  content.payout.milestones[0].amount = 60000;
+  const response = await onRequest({ request: new Request("https://admin.climekr.com/api/content", {
+    method: "PUT",
+    headers: { ...headers, origin: "https://admin.climekr.com", "Content-Type": "application/json" },
+    body: JSON.stringify(content)
+  }), env });
+  assert.equal(response.status, 400);
+  assert.match((await response.json()).error, /총액/);
+});
+
 test("saves consultation links in the admin CMS and returns them to the public page", async () => {
   const { onRequest } = await import("../functions/api/content.js");
   const env = createAdminEnvironment({ cloudflare: createMemoryCloudflare() });
@@ -68,18 +112,10 @@ test("saves consultation links in the admin CMS and returns them to the public p
     line: "https://line.me/R/ti/p/@clime",
     channeltalk: "https://desk.channel.io/teams/clime"
   };
-  const content = {
-    schemaVersion: 3,
-    headline: "클라임유심 안내",
-    intro: "개통 가능 여부를 확인하세요.",
-    checklist: [
-      { title: "1. 확인", body: "가능 여부를 조회합니다." },
-      { title: "2. 신청", body: "조회 내역을 캡처합니다." },
-      { title: "3. 확인", body: "유지 조건을 확인합니다." }
-    ],
-    faqs: [{ question: "누가 확인하나요?", answer: "운영자가 확인합니다." }],
-    supportLinks
-  };
+  const content = freshContent();
+  content.headline = "클라임유심 안내";
+  content.intro = "개통 가능 여부를 확인하세요.";
+  content.supportLinks = supportLinks;
   const save = await onRequest({
     request: new Request("https://admin.climekr.com/api/content", {
       method: "PUT",
@@ -115,18 +151,10 @@ test("rejects unsafe consultation link schemes", async () => {
   const { onRequest } = await import("../functions/api/content.js");
   const env = createAdminEnvironment({ cloudflare: createMemoryCloudflare() });
   const sessionHeaders = await createAdminSessionHeaders(env);
-  const content = {
-    schemaVersion: 3,
-    headline: "클라임유심 안내",
-    intro: "개통 가능 여부를 확인하세요.",
-    checklist: [
-      { title: "1. 확인", body: "가능 여부를 조회합니다." },
-      { title: "2. 신청", body: "조회 내역을 캡처합니다." },
-      { title: "3. 확인", body: "유지 조건을 확인합니다." }
-    ],
-    faqs: [{ question: "누가 확인하나요?", answer: "운영자가 확인합니다." }],
-    supportLinks: { telegram: "", line: "", channeltalk: "" }
-  };
+  const content = freshContent();
+  content.headline = "클라임유심 안내";
+  content.intro = "개통 가능 여부를 확인하세요.";
+  content.supportLinks = { telegram: "", line: "", channeltalk: "" };
   for (const unsafeLink of ["javascript:alert(1)", "http://t.me/clime_help", "not-a-url", "https://user:pass@example.com"]) {
     const response = await onRequest({
       request: new Request("https://admin.climekr.com/api/content", {
@@ -145,13 +173,11 @@ test("rejects CMS content that changes the three-step user journey", async () =>
   const { onRequest } = await import("../functions/api/content.js");
   const env = createAdminEnvironment({ cloudflare: createMemoryCloudflare() });
   const sessionHeaders = await createAdminSessionHeaders(env);
-  const base = {
-    schemaVersion: 3,
-    headline: "클라임유심 안내",
-    intro: "현재 개통 현황을 확인하세요.",
-    checklist: [{ title: "개통 현황 조회", body: "KAIT에서 확인합니다." }, { title: "사진 제출", body: "확인 화면을 첨부합니다." }, { title: "상태 조회", body: "접수번호로 확인합니다." }],
-    faqs: [{ question: "누가 확인하나요?", answer: "운영자가 확인합니다." }]
-  };
+  const base = freshContent();
+  base.headline = "클라임유심 안내";
+  base.intro = "현재 개통 현황을 확인하세요.";
+  base.checklist = [{ title: "개통 현황 조회", body: "KAIT에서 확인합니다." }, { title: "사진 제출", body: "확인 화면을 첨부합니다." }, { title: "상태 조회", body: "접수번호로 확인합니다." }];
+  base.faqs = [{ question: "누가 확인하나요?", answer: "운영자가 확인합니다." }];
   for (const checklist of [base.checklist.slice(0, 2), [...base.checklist, { title: "추가 단계", body: "추가 설명" }]]) {
     const response = await onRequest({
       request: new Request("https://admin.climekr.com/api/content", {
@@ -190,9 +216,9 @@ test("keeps legacy editor content out of the current homepage while showing vers
   const response = await onRequest({ request: new Request("https://climekr.com/api/content"), env });
   const data = await response.json();
 
-  assert.equal(data.schemaVersion, 3);
+  assert.equal(data.schemaVersion, 4);
   assert.equal(data.legacyContent, true);
-  assert.equal(data.headline, "유심 개통 가능하면\n최대 51만원");
+  assert.equal(data.headline, "유심 개통 가능하면\n최대 {{MAX_TOTAL}}");
   assert.equal(data.intro, "먼저 개통 가능 여부를 조회하세요.\n조회 사진은 상담창으로 보내 주세요.");
   assert.deepEqual(data.checklist.map(step => step.title), ["1. 개통 가능 여부 확인", "2. 사진 보내고 상담하기", "3. 조건 확인 후 안내"]);
   assert.match(data.checklist[0].body, /조회 사이트/);
@@ -209,17 +235,15 @@ test("archives legacy homepage copy before saving the current editable content",
   cloudflare.siteContent.set("home", { id: "home", content: JSON.stringify(legacy), updated_at: "2026-10-24T00:00:00.000Z" });
   const env = createAdminEnvironment({ cloudflare });
   const sessionHeaders = await createAdminSessionHeaders(env);
-  const content = {
-    schemaVersion: 3,
-    headline: "클라임유심 안내",
-    intro: "현재 홈페이지 첫 안내입니다.",
-    checklist: [
-      { title: "1. 개통 현황 확인", body: "KAIT 공식 조회를 이용하세요." },
-      { title: "2. 사진 사전 검토 신청", body: "확인 화면을 첨부하세요." },
-      { title: "3. 접수번호로 결과 확인", body: "접수번호로 확인하세요." }
-    ],
-    faqs: [{ question: "사진은 누가 확인하나요?", answer: "로그인한 운영자가 확인합니다." }]
-  };
+  const content = freshContent();
+  content.headline = "클라임유심 안내";
+  content.intro = "현재 홈페이지 첫 안내입니다.";
+  content.checklist = [
+    { title: "1. 개통 현황 확인", body: "KAIT 공식 조회를 이용하세요." },
+    { title: "2. 사진 사전 검토 신청", body: "확인 화면을 첨부하세요." },
+    { title: "3. 접수번호로 결과 확인", body: "접수번호로 확인하세요." }
+  ];
+  content.faqs = [{ question: "사진은 누가 확인하나요?", answer: "로그인한 운영자가 확인합니다." }];
   const response = await onRequest({
     request: new Request("https://admin.climekr.com/api/content", {
       method: "PUT",
@@ -231,7 +255,7 @@ test("archives legacy homepage copy before saving the current editable content",
   const data = await response.json();
 
   assert.equal(response.status, 200);
-  assert.equal(data.content.schemaVersion, 3);
+  assert.equal(data.content.schemaVersion, 4);
   assert.equal(JSON.parse(cloudflare.siteContent.get("home").content).headline, content.headline);
   assert.equal(JSON.parse(cloudflare.siteContent.get("home_legacy").content).headline, legacy.headline);
 });
@@ -244,7 +268,7 @@ test("migrates photo-form copy while preserving safe consultation links", async 
   cloudflare.siteContent.set("home",{id:"home",content:JSON.stringify(stored),updated_at:"2026-10-25T00:00:00Z"});
   const response = await onRequest({request:new Request("https://climekr.com/api/content"),env:createAdminEnvironment({cloudflare})});
   const data = await response.json();
-  assert.equal(data.schemaVersion,3);
+  assert.equal(data.schemaVersion,4);
   assert.equal(data.supportLinks.telegram,stored.supportLinks.telegram);
   assert.equal(data.supportLinks.line,"");
   assert.equal(data.supportLinks.channeltalk,"");
@@ -279,4 +303,96 @@ test("rejects null editor payloads with a validation response", async () => {
   const headers=await createAdminSessionHeaders(env);
   const response=await onRequest({request:new Request("https://admin.climekr.com/api/content",{method:"PUT",headers:{...headers,origin:"https://admin.climekr.com","Content-Type":"application/json"},body:"null"}),env});
   assert.equal(response.status,400);
+});
+
+test("upgrades current v3 homepage edits to v4 without losing the lookup or chat links", async () => {
+  const { onRequest } = await import("../functions/api/content.js");
+  const cloudflare = createMemoryCloudflare();
+  const v3 = {
+    schemaVersion: 3,
+    headline: "운영자가 편집한 제목",
+    intro: "운영자가 편집한 안내",
+    checklist: [
+      { title: "1. 조회", body: "현재 가능 여부를 조회합니다." },
+      { title: "2. 신청", body: "결과를 상담창에 보냅니다." },
+      { title: "3. 확인", body: "조건 확인 후 안내합니다." }
+    ],
+    faqs: [
+      { question: "왜 모집하나요?", answer: "조회와 조건 확인을 돕기 위해 안내합니다." },
+      { question: "왜 참여자를 모집하나요?", answer: "유심 개통 실적 향상을 위한 참여 안내입니다." }
+    ],
+    supportLinks: { telegram: "https://t.me/current", line: "", channeltalk: "https://desk.channel.io/current" }
+  };
+  cloudflare.siteContent.set("home", { id: "home", content: JSON.stringify(v3), updated_at: "2026-10-25T00:00:00.000Z" });
+  const response = await onRequest({ request: new Request("https://climekr.com/api/content"), env: createAdminEnvironment({ cloudflare }) });
+  const data = await response.json();
+  assert.equal(data.schemaVersion, 4);
+  assert.equal(data.legacyContent, true);
+  assert.equal(data.headline, v3.headline);
+  assert.equal(data.intro, v3.intro);
+  assert.deepEqual(data.checklist, v3.checklist);
+  assert.deepEqual(data.faqs[0], v3.faqs[0]);
+  assert.equal(data.faqs[1].answer, DEFAULT_CONTENT.faqs.find(item => item.question === "왜 참여자를 모집하나요?").answer);
+  assert.deepEqual(data.supportLinks, v3.supportLinks);
+  assert.equal(data.lookup.url, "https://www.credit.or.kr/credit/search");
+  assert.deepEqual(data.payout.milestones.map(item => item.amount), [50000, 50000, 70000]);
+});
+
+test("saves editable public screen content with derived payout totals and validated lookup links", async () => {
+  const { onRequest, DEFAULT_CONTENT } = await import("../functions/api/content.js");
+  const env = createAdminEnvironment({ cloudflare: createMemoryCloudflare() });
+  const headers = await createAdminSessionHeaders(env);
+  const content = structuredClone(DEFAULT_CONTENT);
+  content.lookup.url = "https://lookup.example/eligibility";
+  content.payout.milestones[0].amount = 60000;
+  content.payout.milestones[1].amount = 40000;
+  content.payout.milestones[2].amount = 50000;
+  content.payout.maxCases = 2;
+  content.copy.contactTitle = "상담 안내";
+  content.copy.statusLoading = "조회 중입니다.";
+  content.copy.privacySummary = "기존 접수 정보 안내";
+  content.operator.email = "help@climekr.com";
+  content.seo.title = "클라임유심 안내";
+  const response = await onRequest({
+    request: new Request("https://admin.climekr.com/api/content", {
+      method: "PUT",
+      headers: { ...headers, origin: "https://admin.climekr.com", "Content-Type": "application/json" },
+      body: JSON.stringify(content)
+    }), env
+  });
+  assert.equal(response.status, 200);
+  const data = await response.json();
+  assert.equal(data.content.schemaVersion, 4);
+  assert.equal(data.content.lookup.url, content.lookup.url);
+  assert.equal(data.content.payout.maxCases, 2);
+  assert.equal(data.content.copy.statusLoading, "조회 중입니다.");
+  assert.equal(data.content.operator.email, "help@climekr.com");
+  assert.equal(data.content.seo.title, "클라임유심 안내");
+  assert.equal(data.content.payout.milestones.reduce((sum, item) => sum + item.amount, 0) * data.content.payout.maxCases, 300000);
+});
+
+test("rejects unsafe lookup URLs, invalid payout schedules, and malformed public contact details", async () => {
+  const { onRequest, DEFAULT_CONTENT } = await import("../functions/api/content.js");
+  const env = createAdminEnvironment({ cloudflare: createMemoryCloudflare() });
+  const headers = await createAdminSessionHeaders(env);
+  const invalidCases = [
+    content => { content.lookup.url = "javascript:alert(1)"; },
+    content => { content.lookup.url = "http://lookup.example"; },
+    content => { content.payout.milestones[1].days = content.payout.milestones[0].days; },
+    content => { content.payout.milestones[0].amount = -1; },
+    content => { content.payout.maxCases = 4; },
+    content => { content.operator.email = "not-an-email"; }
+  ];
+  for (const mutate of invalidCases) {
+    const content = structuredClone(DEFAULT_CONTENT);
+    mutate(content);
+    const response = await onRequest({
+      request: new Request("https://admin.climekr.com/api/content", {
+        method: "PUT",
+        headers: { ...headers, origin: "https://admin.climekr.com", "Content-Type": "application/json" },
+        body: JSON.stringify(content)
+      }), env
+    });
+    assert.equal(response.status, 400);
+  }
 });
