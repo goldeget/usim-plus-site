@@ -45,7 +45,8 @@ test("covers the requested climekr spellings and gives review searches useful, a
   assert.match(llms, /클라임유심[\s\S]*climekr[\s\S]*참여 방법/);
   assert.match(llms, /개통 가능 여부 확인 버튼[\s\S]*상담창으로 사진을 보냅니다[\s\S]*유지 조건을 확인한 뒤 지급 대상이 결정됩니다/);
   assert.match(llms, /상담창에서 조회 결과 사진을 보내는 방법과 유지 기간별 지급 금액/);
-  assert.doesNotMatch(llms, /통신사|요금·약정|월 요금|해지 비용/);
+  assert.match(llms, /회사 전액 부담/);
+  assert.match(llms, /대출·대부·당일대출 상품이 아닙니다/);
   assert.doesNotMatch(llms, /사진 사전 검토|개통 현황 사진으로 사전 검토|유심 개통 사전 검토 안내/);
   assert.doesNotMatch(llms, /관련 검색어|이용 정보 검색어/);
   assert.doesNotMatch(page, /공개된 이용자 후기는 없습니다/);
