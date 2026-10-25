@@ -52,3 +52,12 @@ test('site navigation and sitemap include original guide but not social noindex 
   assert.match(sitemap, /<loc>https:\/\/climekr\.com\/guide\/<\/loc>/);
   assert.doesNotMatch(sitemap, /climekr\.com\/links/);
 });
+
+test('clarifies that a rejected loan does not bar consultation or benefit application', () => {
+  assert.match(guide, /대출이 거절되어도 CLIME 유심 혜택을 신청할 수 있나요\?/);
+  assert.match(guide, /대출이 거절되었더라도 상담과 참여 신청이 가능합니다/);
+  assert.match(guide, /대출 거절만으로 신청이 제한되지는 않습니다/);
+  assert.match(guide, /혜택 지급은 본인 명의 회선 개통과 3일·15일·30일 유지/);
+  assert.doesNotMatch(guide, /대출이 거절되었는데 유심 혜택은 무조건 가능한가요/);
+  assert.doesNotMatch(guide, /모든 신청자에게 무조건 지급/);
+});
