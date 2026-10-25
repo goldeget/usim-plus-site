@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#07172e">
+  <title>CLIME 공식 상담 링크 | 텔레그램 · 채널톡</title>
+  <meta name="description" content="CLIME 유심 개통 혜택 안내 및 상담 링크. 텔레그램과 채널톡 중 편한 채널을 선택하세요.">
+  <meta name="robots" content="noindex,follow">
+  <style>
+  :root{color-scheme:dark}*{box-sizing:border-box}body{min-height:100vh;margin:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 3%,#2668a8,transparent 53%),linear-gradient(#081b3c,#071126);font-family:Pretendard,"Apple SD Gothic Neo",system-ui,-apple-system,sans-serif;color:#f5faff}
+  main{width:min(100%,500px);padding:35px 22px 48px;text-align:center}.logo{width:75px;height:75px;border-radius:23px;background:linear-gradient(135deg,#67eff8,#307dff);display:grid;place-items:center;font-size:46px;font-weight:900;color:#0b2c54;margin:0 auto 19px;box-shadow:0 10px 38px #087ddd60}
+  h1{font-size:29px;margin:0 0 12px;letter-spacing:.18em}.subtitle{font-size:15px;color:#ccdef1;line-height:1.75;margin:0 0 26px}.disclosure{font-size:13px;color:#b5d2e8;background:#102f52;border:1px solid #548db2;border-radius:14px;text-align:left;padding:14px 17px;line-height:1.7;margin-bottom:23px}
+  a{color:inherit}.link{display:flex;align-items:center;gap:14px;margin-bottom:12px;padding:20px;border:1px solid #4a8ed0;border-radius:17px;background:linear-gradient(120deg,#103865,#122850);text-decoration:none;text-align:left;min-height:78px;box-shadow:0 12px 27px #0004;transition:transform .2s}.link:hover{transform:translateY(-2px)}.icon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:#2b79bb;color:#fff;font-size:22px;font-weight:900;flex-shrink:0}.title{font-weight:850;font-size:17px}.detail{font-size:12px;line-height:1.7;color:#c9daf0}.arrow{margin-left:auto;color:#8ceafc;font-size:22px}
+  .home{border-color:#425673;background:#0c213e}small{display:block;color:#b4c8db;font-size:12px;line-height:1.85;margin-top:22px}small a{text-underline-offset:3px}a:focus-visible{outline:3px solid #7bf8eb;outline-offset:4px}
+  @media(max-width:390px){main{padding:25px 18px}.link{padding:16px}.title{font-size:16px}}
+  @media(prefers-reduced-motion:reduce){.link{transition:none}}
+  </style>
+</head>
+<body><main>
+  <div class="logo" aria-hidden="true">C</div>
+  <h1>CLIME</h1>
+  <p class="subtitle">유심 개통 혜택 상담<br>편한 채널에서 실제 참여 조건을 먼저 확인하세요.</p>
+  <div class="disclosure"><strong>대출·당일대출 상품이 아닙니다.</strong><br>상담만으로 금전 지급이 확정되지 않으며, 회선 유지 조건·개통비·통신요금 등을 사전에 확인해야 합니다.</div>
+  <a class="link" data-channel="telegram" href="https://t.me/climeusim" target="_blank" rel="noopener noreferrer">
+    <span class="icon" aria-hidden="true">↗</span><span><span class="title">텔레그램 1:1 상담</span><br><span class="detail">유심 개통 혜택과 조건 문의</span></span><span class="arrow" aria-hidden="true">→</span></a>
+  <a class="link" data-channel="channeltalk" href="https://climeusim.channel.io" target="_blank" rel="noopener noreferrer">
+    <span class="icon" aria-hidden="true">톡</span><span><span class="title">채널톡 상담</span><br><span class="detail">비용·지급 기준 확인</span></span><span class="arrow" aria-hidden="true">→</span></a>
+  <a class="link home" href="/guide/"><span class="icon" aria-hidden="true">i</span><span><span class="title">혜택 조건 자세히 보기</span><br><span class="detail">대출과의 차이 · 지급시점 · 주의사항</span></span><span class="arrow" aria-hidden="true">→</span></a>
+  <small>주민등록번호·인증번호·비밀번호·신분증 전체 사진을 상담창으로 보내지 마세요.<br><a href="/">CLIME 공식 홈페이지</a></small>
+</main>
+<script>
+(async function(){
+ try{
+  const r=await fetch('/api/content',{cache:'no-store',headers:{Accept:'application/json'}});
+  if(!r.ok)return;
+  const c=await r.json();
+  const allowed={telegram:'t.me',channeltalk:'climeusim.channel.io'};
+  for(const key of Object.keys(allowed)){
+   const value=c.supportLinks?.[key];if(typeof value!=='string')continue;
+   const url=new URL(value);
+   if(url.protocol!=='https:'||url.hostname!==allowed[key]||url.username||url.password)continue;
+   document.querySelectorAll('[data-channel="'+key+'"]').forEach(a=>{a.href=url.href;});
+  }
+ }catch{}
+})();
+</script>
+</body></html>
