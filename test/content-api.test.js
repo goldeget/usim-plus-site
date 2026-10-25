@@ -491,3 +491,53 @@ test("rejects unsafe lookup URLs, invalid payout schedules, and malformed public
     assert.equal(response.status, 400);
   }
 });
+
+
+test("converts pasted literal backslash-n into real newlines for public multiline CMS copy", async () => {
+  const { onRequest } = await import("../functions/api/content.js");
+  const cloudflare = createMemoryCloudflare();
+  const env = createAdminEnvironment({ cloudflare });
+  const headers = await createAdminSessionHeaders(env);
+  const content = freshContent();
+  const slashN = String.fromCharCode(92) + "n";
+  const introLines = [
+    "고객의 유심 개통·통신·유지 관련 비용은 회사가 전액 부담합니다.",
+    "개통 가능 여부를 확인하고 텔레그램·채널톡에서 조건을 문의하세요."
+  ];
+  const footerLines = [
+    "고객 개통·통신 비용 회사 전액 부담",
+    "유지 조건 충족 시 최대 {{MAX_CASES}}건 · 최대 {{MAX_TOTAL}} 지급 대상"
+  ];
+  const contactLines = ["편한 상담 채널을 선택해 주세요.", "상담창에서 안내받을 수 있습니다."];
+  content.intro = introLines.join(slashN);
+  content.copy.footerTerms = footerLines.join(slashN);
+  content.copy.contactIntro = contactLines.join(slashN);
+
+  const response = await onRequest({
+    request: new Request("https://admin.climekr.com/api/content", {
+      method: "PUT",
+      headers: { ...headers, origin: "https://admin.climekr.com", "Content-Type": "application/json" },
+      body: JSON.stringify(content)
+    }),
+    env
+  });
+  assert.equal(response.status, 200);
+  const result = await response.json();
+  const expectedIntro = introLines.join("\n");
+  const expectedFooter = footerLines.join("\n");
+  assert.equal(result.content.intro, expectedIntro);
+  assert.equal(result.content.copy.footerTerms, expectedFooter);
+  assert.equal(result.content.copy.contactIntro, contactLines.join("\n"));
+  assert.equal(result.content.intro.includes(slashN), false);
+  assert.equal(result.content.copy.footerTerms.includes(slashN), false);
+  assert.deepEqual(result.content.payout, content.payout, "payout is unchanged");
+
+  const saved = JSON.parse(cloudflare.siteContent.get("home").content);
+  assert.equal(saved.intro, expectedIntro);
+  assert.equal(saved.copy.footerTerms, expectedFooter);
+  const live = await onRequest({ request: new Request("https://climekr.com/api/content"), env });
+  assert.equal(live.status, 200);
+  const publicContent = await live.json();
+  assert.equal(publicContent.intro, expectedIntro);
+  assert.equal(publicContent.copy.footerTerms, expectedFooter);
+});
