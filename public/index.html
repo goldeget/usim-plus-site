@@ -92,7 +92,7 @@
           "name": "어떻게 신청하나요?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "LINE·텔레그램·채널톡 중 연결된 상담 채널을 선택하세요.\n상담창에서 운영자에게 문의하고, 안내에 따라 조회 사진을 보내 주세요."
+            "text": "개통 가능 여부를 조회하고 결과 화면을 캡처하세요.\nLINE·텔레그램·채널톡 중 연결된 상담 채널에서 운영자에게 사진을 보내 주세요."
           }
         },
         {
@@ -116,7 +116,7 @@
           "name": "개통 가능 여부는 어떻게 확인하나요?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "상담창에서 운영자의 안내를 받아 주세요.\n이미 조회했다면 결과 화면을 캡처해 같은 상담창으로 보내 주세요."
+            "text": "홈페이지의 ‘개통 가능 여부 확인’ 버튼으로 조회 사이트를 열어 주세요.\n조회 결과를 캡처해 상담창으로 보내 주세요. 도움이 필요하면 운영자에게 문의하세요."
           }
         },
         {
@@ -717,6 +717,10 @@
     #statusView>.privacy-details{margin-top:12px}
     .anchor-alias{position:absolute;top:0}
     @media(max-width:760px){.consultation-panel{padding:22px 18px}.consultation-panel .channels{grid-template-columns:1fr}.consultation-panel h2{font-size:25px}.consultation-panel .channel{min-height:86px}.consultation-intro{font-size:16px}.hero-chat-note{font-size:14px}}
+      .consultation-query-link{display:grid;gap:5px;margin:0 0 20px;padding:16px;border:1px solid #3a6275;border-radius:12px;color:#bdd0dc;font-size:14px;line-height:1.7;text-decoration:none;word-break:keep-all}
+    .consultation-query-link strong{font-size:17px;color:#79f4df}
+    .hero-actions .cta-main{white-space:nowrap;font-size:17px;gap:10px}
+    @media(max-width:360px){.hero-actions .cta-main{font-size:16px}}
   </style>
   <link rel="stylesheet" href="/user-flow.css" />
 </head>
@@ -732,7 +736,7 @@
         <div class="hero-copy">
           <div class="eyebrow"><span class="point" aria-hidden="true"></span>유심 개통 혜택 참여</div>
           <h1 id="hero-title">유심 개통 가능하면<br>최대 51만원</h1>
-          <p class="hero-intro" id="homeIntro">지급 대상인지 상담으로 확인하세요.
+          <p class="hero-intro" id="homeIntro">먼저 개통 가능 여부를 조회하세요.
 조회 사진은 상담창으로 보내 주세요.</p>
           <div class="hero-payouts" id="payoutConditions" aria-label="유지 기간별 지급 금액">
             <div><small>3일 유지 후</small><strong>5만원 지급</strong></div>
@@ -741,7 +745,8 @@
           </div>
           <p class="terms-hint">한 건 최대 17만원 · 최대 3건 · 총 최대 51만원</p>
           <div class="hero-actions">
-            <a class="cta-main" id="heroApplyButton" href="#contact">지급 대상인지 상담하기 <span aria-hidden="true">→</span></a>
+            <a class="cta-main" id="eligibilityButton" href="https://www.credit.or.kr/credit/search" target="_blank" rel="noopener noreferrer">개통 가능 여부 확인 <span aria-hidden="true">↗</span></a>
+            <a class="cta-secondary" id="heroApplyButton" href="#contact">조회 사진 보내고 상담하기</a>
             <p class="hero-chat-note">이미 조회하셨다면 상담창에 사진을 보내 주세요.</p>
           </div>
           <p class="payout-note">유지 조건을 확인한 뒤 지급 대상이 결정됩니다.</p>
@@ -753,7 +758,7 @@
         </div>
       </section>
       <div class="content">
-        <div class="quick-flow" id="steps" aria-label="참여 순서"><span id="quickFlow"><span>상담 시작</span><span aria-hidden="true">→</span><span>조회 사진 전송</span><span aria-hidden="true">→</span><span>조건 확인 후 안내</span></span></div>
+        <div class="quick-flow" id="steps" aria-label="참여 순서"><span id="quickFlow"><span>가능 여부 확인</span><span aria-hidden="true">→</span><span>조회 사진 전송</span><span aria-hidden="true">→</span><span>조건 확인 후 안내</span></span></div>
 
         <section class="consultation-panel" id="contact" aria-labelledby="contact-title" tabindex="-1">
           <span id="apply" class="anchor-alias" aria-hidden="true"></span>
@@ -761,6 +766,7 @@
           <h2 id="contact-title">사진 보내고 상담하기</h2>
           <p class="consultation-intro">편한 상담 채널을 선택해 주세요.
 조회 사진 전송부터 결과 안내까지, 같은 대화에서 이어집니다.</p>
+          <a class="consultation-query-link" href="https://www.credit.or.kr/credit/search" target="_blank" rel="noopener noreferrer">아직 조회하지 않으셨나요?<strong>개통 가능 여부 확인 ↗</strong></a>
           <div class="channels">
             <a class="channel" data-contact="line" href="#contact" aria-disabled="true"><span class="channel-icon line" aria-hidden="true">LINE</span><span class="channel-copy"><strong>LINE</strong><small>연결 준비 중</small></span><span class="channel-arrow" aria-hidden="true">↗</span></a>
             <a class="channel" data-contact="telegram" href="#contact" aria-disabled="true"><span class="channel-icon " aria-hidden="true">↗</span><span class="channel-copy"><strong>텔레그램</strong><small>연결 준비 중</small></span><span class="channel-arrow" aria-hidden="true">↗</span></a>
@@ -779,16 +785,16 @@
           <section class="full-steps" id="fullSteps" aria-labelledby="stepsHeading">
             <h3 id="stepsHeading">신청 순서</h3>
             <div class="steps-grid" aria-label="간단한 신청 순서">
-              <article class="step"><div class="step-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><circle cx="13.5" cy="13.5" r="8.5"/><path d="m20 20 8 8"/></svg></div><div><h4>1. 상담 시작</h4><p>LINE·텔레그램·채널톡 중 편한 상담 채널을 선택하세요.</p><a class="step-action" href="#contact">상담 채널 선택하기</a></div></article>
-              <article class="step"><div class="step-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><rect x="4" y="5" width="24" height="22" rx="2"/><circle cx="11" cy="12" r="2"/><path d="m5 24 8-8 6 6 4-4 5 5"/></svg></div><div><h4>2. 조회 사진 보내기</h4><p>운영자 안내에 따라 가능 여부를 조회하고, 결과 화면을 상담창으로 보내 주세요.</p><a class="step-action" href="#contact">상담 채널 선택하기</a></div></article>
+              <article class="step"><div class="step-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><circle cx="13.5" cy="13.5" r="8.5"/><path d="m20 20 8 8"/></svg></div><div><h4>1. 개통 가능 여부 확인</h4><p>조회 사이트에서 본인 명의 개통 가능 여부를 확인하세요.</p><a class="step-action" href="https://www.credit.or.kr/credit/search" target="_blank" rel="noopener noreferrer">조회 사이트 열기</a></div></article>
+              <article class="step"><div class="step-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><rect x="4" y="5" width="24" height="22" rx="2"/><circle cx="11" cy="12" r="2"/><path d="m5 24 8-8 6 6 4-4 5 5"/></svg></div><div><h4>2. 사진 보내고 상담하기</h4><p>조회 결과를 캡처해 LINE·텔레그램·채널톡 상담창으로 보내 주세요.</p><a class="step-action" href="#contact">상담 채널 선택하기</a></div></article>
               <article class="step"><div class="step-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M8 4h12l5 5v16a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3z"/><path d="M20 4v6h5M10 15h10M10 19h7m3 5 2 2 5-5"/></svg></div><div><h4>3. 조건 확인 후 안내</h4><p>운영자가 같은 대화에서 다음 절차를 안내합니다. 유지 조건 확인 후 지급 대상이 결정됩니다.</p></div></article>
             </div>
           </section>
           <section class="faq" id="faq" aria-labelledby="faq-title">
             <h2 id="faq-title">자주 묻는 질문</h2>
             <div class="faq-list">
-              <details><summary>어떻게 신청하나요?</summary><p>LINE·텔레그램·채널톡 중 연결된 상담 채널을 선택하세요.
-상담창에서 운영자에게 문의하고, 안내에 따라 조회 사진을 보내 주세요.</p></details>
+              <details><summary>어떻게 신청하나요?</summary><p>개통 가능 여부를 조회하고 결과 화면을 캡처하세요.
+LINE·텔레그램·채널톡 중 연결된 상담 채널에서 운영자에게 사진을 보내 주세요.</p></details>
               <details><summary>어떤 사진을 보내면 되나요?</summary><p>개통 가능 여부를 조회한 결과 화면을 보내 주세요.
 주민등록번호·인증번호·비밀번호는 가려 주세요.
 사진을 보내기 전 상담창에서 개인정보 이용·보관 안내를 확인해 주세요.</p></details>
@@ -796,8 +802,8 @@
 한 사람 최대 3건이며, 모든 조건 충족 시 최대 51만원입니다.
 3일 유지가 확인되지 않으면 해당 건의 첫 5만원은 지급 대상에서 제외됩니다.
 지급 기준과 시점은 상담창에서 확인해 주세요.</p></details>
-              <details><summary>개통 가능 여부는 어떻게 확인하나요?</summary><p>상담창에서 운영자의 안내를 받아 주세요.
-이미 조회했다면 결과 화면을 캡처해 같은 상담창으로 보내 주세요.</p></details>
+              <details><summary>개통 가능 여부는 어떻게 확인하나요?</summary><p>홈페이지의 ‘개통 가능 여부 확인’ 버튼으로 조회 사이트를 열어 주세요.
+조회 결과를 캡처해 상담창으로 보내 주세요. 도움이 필요하면 운영자에게 문의하세요.</p></details>
               <details><summary>왜 참여자를 모집하나요?</summary><p>유심 개통 실적 향상을 위한 참여 안내입니다.</p></details>
               <details><summary>상담하거나 사진을 보내면 바로 지급되나요?</summary><p>아닙니다.
 신청 내용과 유지 조건 확인 후 지급 대상이 결정됩니다.

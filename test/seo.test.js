@@ -39,7 +39,7 @@ test("covers the requested climekr spellings and gives review searches useful, a
   assert.match(page, /후기를 볼 때 작성 시점과 실제 이용 경험인지 확인해 주세요/);
   assert.match(llms, /클라임유심 후기[\s\S]*climekr 유심 후기/);
   assert.match(llms, /클라임유심[\s\S]*climekr[\s\S]*참여 방법/);
-  assert.match(llms, /상담 채널을 선택합니다[\s\S]*조회 결과 사진을 상담창으로 보냅니다[\s\S]*유지 조건을 확인한 뒤 지급 대상이 결정됩니다/);
+  assert.match(llms, /개통 가능 여부 확인 버튼[\s\S]*상담창으로 사진을 보냅니다[\s\S]*유지 조건을 확인한 뒤 지급 대상이 결정됩니다/);
   assert.match(llms, /상담창에서 조회 결과 사진을 보내는 방법과 유지 기간별 지급 금액/);
   assert.doesNotMatch(llms, /통신사|요금·약정|월 요금|해지 비용/);
   assert.doesNotMatch(llms, /사진 사전 검토|개통 현황 사진으로 사전 검토|유심 개통 사전 검토 안내/);

@@ -51,3 +51,13 @@ test("protects the supplied business certificate while showing minimal operator 
   assert.match(html,/대표자.*임동훈/);
   for(const value of ['114-81-47958','110111-0853419','sci0001@hometax.go.kr']) assert.equal(html.includes(value),false);
 });
+
+
+test("preserves the original query destination separately from photo conversations", () => {
+  const links=[...html.matchAll(/<a\b[^>]*href="https:\/\/www\.credit\.or\.kr\/credit\/search"[^>]*>/g)];
+  assert.equal(links.length,3,"query links remain in hero, contact section and instructions");
+  for(const link of links){assert.match(link[0],/target="_blank"/);assert.match(link[0],/rel="noopener noreferrer"/);}
+  assert.match(html, /id="eligibilityButton"/);
+  assert.match(html, /id="heroApplyButton" href="#contact">조회 사진 보내고 상담하기/);
+  assert.doesNotMatch(html,/type="file"/);
+});
