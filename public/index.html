@@ -751,8 +751,8 @@
         <div class="hero-copy">
           <div class="eyebrow"><span class="point" aria-hidden="true"></span><span id="heroEyebrow">유심 개통 혜택 참여</span></div>
           <h1 id="hero-title">유심 개통 가능하면<br>최대 66만원</h1>
-          <p class="hero-intro" id="homeIntro">고객의 유심 개통·통신 관련 비용은 회사가 전액 부담합니다.
-개통 가능 여부를 확인한 뒤 상담창으로 문의해 주세요.</p>
+          <p class="hero-intro" id="homeIntro">고객의 유심 개통·통신·유지 관련 비용은 회사가 전액 부담합니다.
+개통 가능 여부를 확인하고 텔레그램·채널톡에서 조건을 문의하세요.</p>
           <div class="hero-payouts" id="payoutConditions" aria-label="유지 기간별 지급 금액">
             <div><small>3일 유지 후</small><strong>5만원 지급</strong></div>
             <div><small>15일 유지 후</small><strong>7만원 추가 지급</strong></div>
@@ -874,8 +874,8 @@
         <a href="/guide/">유심 혜택·비용·지급 조건</a>
         <a href="/links/">텔레그램·채널톡 상담</a>
       </nav>
-      <p class="site-footer__terms" id="footerTerms">유지 조건 확인 후 단계별 지급 대상
-한 사람 최대 3건</p>
+      <p class="site-footer__terms" id="footerTerms">고객 개통·통신 비용 회사 전액 부담
+유지 조건 충족 시 최대 3건 · 최대 66만원 지급 대상</p>
       <details class="operator-info">
         <summary id="operatorSummary">사업자 정보 · 사업자등록번호 114-81-47958</summary>
         <div class="operator-info__details">
@@ -978,6 +978,9 @@
         if(anchor.getAttribute('aria-disabled')!=='true')return;
         event.preventDefault();const copy=currentContent?.copy;showToast(copy?.channelUnavailableTitle||'상담 채널 준비 중',currentContent?expandTokens(copy.channelUnavailableMessage,currentContent):'이 채널은 아직 연결되지 않았습니다. 연결된 다른 채널이나 help@climekr.com으로 문의해 주세요.','info');
       }));
+      function normalizeDisplayedLineBreaks(value){
+        return String(value).replaceAll("\\n", "\n");
+      }
       function applyPublishedContent(content){
         currentContent=content;
         const copy=content.copy;
@@ -986,7 +989,7 @@
         headline.replaceChildren();
         lines.forEach((line,index)=>{if(index)headline.append(document.createElement('br'));headline.append(document.createTextNode(line))});
         headline.style.whiteSpace='normal';
-        document.getElementById('homeIntro').textContent=content.intro;
+        document.getElementById('homeIntro').textContent=normalizeDisplayedLineBreaks(content.intro);
         document.getElementById('brandSub').textContent=copy.brandSub;
         document.getElementById('headerHelp').textContent=copy.headerHelp;
         document.getElementById('heroEyebrow').textContent=copy.heroEyebrow;
@@ -1020,7 +1023,7 @@
         document.getElementById('privacySummary').textContent=copy.privacySummary;
         for(const key of ['privacyCollectionLabel','privacyPurposeLabel','privacyPhotoRetentionLabel','privacyStatusRetentionLabel','privacyStorageLabel','privacyOperatorLabel','privacyConsentLabel','privacyProviderLabel','privacyCollection','privacyPurpose','privacyStorage','privacyConsent','privacyProvider'])document.getElementById(key).textContent=copy[key];
         document.getElementById('footerBrand').textContent=copy.footerBrand;
-        document.getElementById('footerTerms').textContent=expandTokens(copy.footerTerms,content);
+        document.getElementById('footerTerms').textContent=normalizeDisplayedLineBreaks(expandTokens(copy.footerTerms,content));
         document.getElementById('footerYear').textContent=String(new Date().getFullYear());
         document.getElementById('operatorSummary').textContent=copy.operatorSummary;
         document.getElementById('operatorCompanyLabel').textContent=copy.operatorCompanyLabel;
