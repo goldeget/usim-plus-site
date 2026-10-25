@@ -58,6 +58,88 @@ test("accepts three CMS steps and the existing character limit with Korean UTF-8
   assert.equal(response.status, 200);
 });
 
+test("saves consultation links in the admin CMS and returns them to the public page", async () => {
+  const { onRequest } = await import("../functions/api/content.js");
+  const env = createAdminEnvironment({ cloudflare: createMemoryCloudflare() });
+  const sessionHeaders = await createAdminSessionHeaders(env);
+  const supportLinks = {
+    telegram: "https://t.me/clime_help",
+    line: "https://line.me/R/ti/p/@clime",
+    channeltalk: "https://desk.channel.io/teams/clime"
+  };
+  const content = {
+    schemaVersion: 2,
+    headline: "클라임유심 안내",
+    intro: "개통 가능 여부를 확인하세요.",
+    checklist: [
+      { title: "1. 확인", body: "가능 여부를 조회합니다." },
+      { title: "2. 신청", body: "조회 내역을 캡처합니다." },
+      { title: "3. 확인", body: "유지 조건을 확인합니다." }
+    ],
+    faqs: [{ question: "누가 확인하나요?", answer: "운영자가 확인합니다." }],
+    supportLinks
+  };
+  const save = await onRequest({
+    request: new Request("https://admin.climekr.com/api/content", {
+      method: "PUT",
+      headers: { ...sessionHeaders, origin: "https://admin.climekr.com", "Content-Type": "application/json" },
+      body: JSON.stringify(content)
+    }),
+    env
+  });
+  assert.equal(save.status, 200);
+  assert.equal(save.headers.get("cache-control"), "no-store");
+  assert.deepEqual((await save.json()).content.supportLinks, supportLinks);
+
+  const read = await onRequest({ request: new Request("https://climekr.com/api/content"), env });
+  assert.equal(read.headers.get("cache-control"), "no-store");
+  assert.deepEqual((await read.json()).supportLinks, supportLinks);
+
+  const previousEditorPayload = { ...content };
+  delete previousEditorPayload.supportLinks;
+  previousEditorPayload.headline = "기존 편집기에서 수정한 제목";
+  const previousEditorSave = await onRequest({
+    request: new Request("https://admin.climekr.com/api/content", {
+      method: "PUT",
+      headers: { ...sessionHeaders, origin: "https://admin.climekr.com", "Content-Type": "application/json" },
+      body: JSON.stringify(previousEditorPayload)
+    }),
+    env
+  });
+  assert.equal(previousEditorSave.status, 200);
+  assert.deepEqual((await previousEditorSave.json()).content.supportLinks, supportLinks);
+});
+
+test("rejects unsafe consultation link schemes", async () => {
+  const { onRequest } = await import("../functions/api/content.js");
+  const env = createAdminEnvironment({ cloudflare: createMemoryCloudflare() });
+  const sessionHeaders = await createAdminSessionHeaders(env);
+  const content = {
+    schemaVersion: 2,
+    headline: "클라임유심 안내",
+    intro: "개통 가능 여부를 확인하세요.",
+    checklist: [
+      { title: "1. 확인", body: "가능 여부를 조회합니다." },
+      { title: "2. 신청", body: "조회 내역을 캡처합니다." },
+      { title: "3. 확인", body: "유지 조건을 확인합니다." }
+    ],
+    faqs: [{ question: "누가 확인하나요?", answer: "운영자가 확인합니다." }],
+    supportLinks: { telegram: "", line: "", channeltalk: "" }
+  };
+  for (const unsafeLink of ["javascript:alert(1)", "http://t.me/clime_help", "not-a-url", "https://user:pass@example.com"]) {
+    const response = await onRequest({
+      request: new Request("https://admin.climekr.com/api/content", {
+        method: "PUT",
+        headers: { ...sessionHeaders, origin: "https://admin.climekr.com", "Content-Type": "application/json" },
+        body: JSON.stringify({ ...content, supportLinks: { ...content.supportLinks, telegram: unsafeLink } })
+      }),
+      env
+    });
+    assert.equal(response.status, 400, `unsafe URL should be rejected: ${unsafeLink}`);
+    assert.match((await response.json()).error, /상담 링크/);
+  }
+});
+
 test("rejects CMS content that changes the three-step user journey", async () => {
   const { onRequest } = await import("../functions/api/content.js");
   const env = createAdminEnvironment({ cloudflare: createMemoryCloudflare() });

@@ -79,11 +79,41 @@ test("keeps feedback and footer copy legible and wrapped on small screens", () =
   assert.match(html, /class="site-footer__brand"/);
   assert.match(html, /class="site-footer__terms"/);
   assert.doesNotMatch(html, /class="demo-chip"/);
-  assert.match(userFlowCss, /#toast\.toast[^}]*font-size:\s*16px/);
+  assert.match(userFlowCss, /#toast\.toast \.toast-copy strong[^}]*font-size:\s*18px/);
+  assert.match(userFlowCss, /#toast\.toast \.toast-copy span[^}]*font-size:\s*14px/);
   assert.match(userFlowCss, /\.site-footer\s*\{[^}]*display:\s*grid/);
   assert.match(userFlowCss, /@media\s*\(max-width:\s*760px\)[\s\S]*\.site-footer\s*\{[^}]*font-size:\s*13px/);
   assert.match(userFlowCss, /\.site-footer__terms[^}]*line-height:\s*1\.75/);
   assert.match(userFlowCss, /\.hero-art \{ display: block; width: min\(100%, 270px\)/);
+});
+
+test("shows clear centered toasts for application success, rejection, and uncertain results", () => {
+  assert.match(html, /id="toastTitle"/);
+  assert.match(html, /id="toastMessage"/);
+  assert.match(html, /showToast\('신청이 완료되었습니다','접수번호와 조회 코드를 아래에서 확인하고 안전하게 보관해 주세요\.','success'\)/);
+  assert.match(html, /showToast\('신청이 접수되지 않았습니다',error\.message,'error'\)/);
+  assert.match(html, /showToast\('접수 결과를 확인할 수 없습니다'/);
+  assert.match(html, /showToast\('자동 확인이 필요합니다',message,'error'\)/);
+  assert.match(userFlowCss, /#toast\.toast\s*\{[^}]*left:\s*50%[^}]*top:\s*50%/);
+  assert.match(userFlowCss, /#toast\.toast\.show\s*\{[^}]*translate\(-50%,\s*-50%\)/);
+  assert.match(userFlowCss, /#toast\.toast\.toast-success\s*\{/);
+  assert.match(userFlowCss, /#toast\.toast\.toast-error\s*\{/);
+  assert.match(userFlowCss, /#toast\.toast\s*\{[^}]*max-height:\s*calc\(100vh\s*-\s*32px\)[^}]*overflow-y:\s*auto/);
+  assert.match(html, /el\.setAttribute\('aria-hidden','false'\);el\.classList\.add\('show'\);\s*requestAnimationFrame\(/);
+});
+
+test("restores consultation channels and activates only links saved from the admin editor", () => {
+  for (const channel of ["telegram", "line", "channeltalk"]) {
+    assert.match(html, new RegExp(`data-contact="${channel}"`));
+    assert.match(adminContent, new RegExp(`id="${channel}Link"`));
+  }
+  assert.match(html, /function updateContactLinks\(links\)/);
+  assert.match(html, /updateContactLinks\(content\.supportLinks\)/);
+  assert.match(html, /aria-disabled="true"/);
+  assert.match(html, /if\(anchor\.getAttribute\('aria-disabled'\)!=='true'\)return/);
+  assert.match(adminContent, /상담 주소를 입력하고 저장하면 공개 홈페이지에 바로 반영됩니다/);
+  assert.match(adminContent, /supportLinks:\s*\{/);
+  assert.match(contentApi, /supportLinks:\s*\{/);
 });
 
 test("preserves intentional sentence breaks in public and published copy", () => {
@@ -125,6 +155,8 @@ test("progressively applies saved homepage content and keeps FAQ structured data
   assert.match(html, /content\.cmsReady\s*&&\s*content\.schemaVersion===2/);
   assert.match(html, /faqSchema\.mainEntity\s*=/);
   assert.match(html, /JSON\.stringify\(structuredData\)/);
+  assert.match(html, /fetch\('\/api\/content',\{cache:'no-store'/);
+  assert.match(html, /window\.setInterval\(refreshPublishedContent,30000\)/);
 });
 
 test("discloses the photo purpose, selected retention, controller, contact, and refusal right", () => {
@@ -179,5 +211,5 @@ test("removes mockup-only claims and gives users the confirmed email contact", (
     assert.equal(html.includes(content), false, `stale mockup copy remains: ${content}`);
   }
   assert.match(html, /href="mailto:help@climekr\.com"/);
-  assert.doesNotMatch(html, /상담 링크 설정 필요|data-contact="/);
+  for (const channel of ["telegram", "line", "channeltalk"]) assert.match(html, new RegExp(`data-contact="${channel}"`));
 });

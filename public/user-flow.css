@@ -139,8 +139,10 @@ main { padding-bottom: 36px; }
 .faq details p { margin: 0; padding: 0 14px 14px; color: var(--flow-muted); font-size: 13px; line-height: 1.75; word-break: keep-all; }
 .contact-section { margin-top: 28px; scroll-margin-top: 132px; }
 .contact-section .section-head p { margin: 6px 0 13px; color: var(--flow-muted); font-size: 13px; }
-.channels { display: grid; grid-template-columns: minmax(0, 1fr); }
+.channels { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .channel { display: flex; min-height: 64px; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--flow-line); border-radius: 13px; background: #fff; text-decoration: none; }
+.channel[aria-disabled="true"] { opacity: .72; cursor: pointer; }
+.channel:focus-visible { outline: 3px solid var(--flow-mint); outline-offset: 3px; }
 .channel-icon { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 11px; background: var(--flow-soft); color: var(--flow-blue-dark); font-size: 19px; font-weight: 800; }
 .channel strong,.channel small { display: block; }
 .channel strong { color: var(--flow-ink); font-size: 13px; }
@@ -154,8 +156,17 @@ main { padding-bottom: 36px; }
 .site-footer .footer-mark { color: var(--flow-blue-dark); letter-spacing: -.02em; }
 .site-footer a { color: var(--flow-muted); }
 .bottom-sticky { display: none !important; }
-#toast.toast { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); z-index: 101; display: grid; width: min(500px, calc(100vw - 28px)); min-height: 60px; place-content: center; padding: 14px 20px; transform: translate(-50%, 30px); border: 1px solid #78cbc8; border-radius: 15px; background: #e8f8f5; box-shadow: 0 12px 36px #102c4040; color: #123c45; font-size: 16px; font-weight: 750; line-height: 1.5; text-align: center; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; overflow-wrap: anywhere; }
-#toast.toast.show { transform: translate(-50%, 0); opacity: 1; }
+#toast.toast { position: fixed; left: 50%; top: 50%; bottom: auto; z-index: 1001; display: grid; grid-template-columns: 52px minmax(0, 1fr); align-items: center; gap: 14px; width: min(460px, calc(100vw - 32px)); max-height: calc(100vh - 32px); min-height: 104px; place-content: center; padding: 20px 22px; transform: translate(-50%, calc(-50% + 16px)) scale(.97); border: 1px solid #607b8c; border-radius: 18px; background: #102331; box-shadow: 0 22px 70px #000b, 0 0 0 1px #ffffff12; color: #f4fbff; font-size: 15px; font-weight: 600; line-height: 1.5; text-align: left; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .2s, transform .2s, visibility .2s; overflow-wrap: anywhere; overflow-y: auto; overscroll-behavior: contain; }
+#toast.toast.show { transform: translate(-50%, -50%) scale(1); opacity: 1; visibility: visible; }
+#toast.toast .toast-icon { display: grid; width: 52px; height: 52px; place-items: center; border-radius: 50%; background: #20394b; color: #dcecf5; font-size: 27px; font-weight: 900; line-height: 1; }
+#toast.toast .toast-copy { display: grid; min-width: 0; gap: 5px; line-height: 1.55; }
+#toast.toast .toast-copy strong { color: #fff; font-size: 18px; font-weight: 850; line-height: 1.35; letter-spacing: -.03em; }
+#toast.toast .toast-copy span { color: #d0e0e8; font-size: 14px; font-weight: 600; line-height: 1.6; }
+#toast.toast.toast-success { border-color: #57e4d4; background: #0b292e; box-shadow: 0 22px 70px #000b, 0 0 35px #35d9ec28; }
+#toast.toast.toast-success .toast-icon { background: #57e4d4; color: #08202a; }
+#toast.toast.toast-error { border-color: #ff7f8d; background: #30191f; box-shadow: 0 22px 70px #000b, 0 0 35px #ff445a24; }
+#toast.toast.toast-error .toast-icon { background: #ff7382; color: #2b1016; }
+#toast.toast.toast-info .toast-icon { background: #6eb5dc; color: #092033; }
 
 @media (max-width: 760px) {
   html { scroll-padding-top: 107px; }
@@ -218,7 +229,14 @@ main { padding-bottom: 36px; }
   .site-footer { grid-template-columns: 1fr; gap: 7px; padding: 15px 5px calc(20px + env(safe-area-inset-bottom)); font-size: 13px; line-height: 1.7; }
   .site-footer__terms { max-width: 54ch; font-size: 13px; line-height: 1.75; }
   .operator-info { text-align: left; }
-  #toast.toast { bottom: max(12px, env(safe-area-inset-bottom)); min-height: 58px; padding: 14px 17px; font-size: 16px; }
+  #toast.toast { top: 50%; bottom: auto; grid-template-columns: 44px minmax(0, 1fr); gap: 12px; width: calc(100vw - 28px); min-height: 94px; padding: 17px; }
+  #toast.toast .toast-icon { width: 44px; height: 44px; font-size: 24px; }
+  #toast.toast .toast-copy strong { font-size: 17px; }
+  #toast.toast .toast-copy span { font-size: 14px; }
+}
+
+@media (max-width: 380px) {
+  .channels { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (max-width: 360px) {
@@ -425,7 +443,10 @@ a { color: #8cffe8; }
 .channel { border-color: #365369; background: linear-gradient(140deg,#101e2d,#081420); }
 .channel-icon { background: #0d9ee7; color: #fff; }
 .site-footer .footer-mark { color: #60f1d4; }
-#toast.toast { border-color: #57e4d4; background: #0b262d; box-shadow: 0 12px 36px #0009,0 0 24px #35d9ec22; color: #a8fff1; line-height: 1.65; }
+#toast.toast { border-color: #607b8c; background: #102331; box-shadow: 0 22px 70px #000b,0 0 0 1px #ffffff12; color: #f4fbff; line-height: 1.5; }
+#toast.toast.toast-success { border-color: #57e4d4; background: #0b292e; box-shadow: 0 22px 70px #000b,0 0 35px #35d9ec28; color: #f4fffd; }
+#toast.toast.toast-error { border-color: #ff7f8d; background: #30191f; box-shadow: 0 22px 70px #000b,0 0 35px #ff445a24; color: #fff2f3; }
+#toast.toast.toast-info { border-color: #607b8c; background: #102331; color: #f4fbff; }
 .hero-intro,.terms-hint,.hero-caveat,.section-intro,.step p,.application-head p,.application-reminder,.upload-help,.privacy-note,.privacy-details li,.submit-row small,.receipt-panel p,.lookup-panel p,.payout-total,.payout-warning,.participation-note span,.faq details p,.contact-section .section-head p,.site-footer__terms { white-space: pre-line; line-height: 1.85; }
 .hero-intro { margin-top: 15px; }
 .hero-caveat,.terms-hint { font-size: 13px; }

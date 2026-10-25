@@ -9,6 +9,7 @@ const DEFAULT_CONTENT = {
     { title: "2. 가능 여부 심사 신청", body: "조회하셨다면 조회하신 내역을 캡처해서 신청하세요." },
     { title: "3. 유지 조건 확인 후 지급", body: "3일, 15일, 30일 유지 조건을 확인한 뒤 지급 대상이 결정됩니다." }
   ],
+  supportLinks: { telegram: "", line: "", channeltalk: "" },
   faqs: [
     { question: "사진을 첨부하면 누가 확인하나요?", answer: "로그인한 운영자가 사진을 확인합니다.\n검토 결정 후 30일, 미검토 신청은 접수 후 30일 동안 비공개로 보관합니다." },
     { question: "사진에는 어떤 내용을 보여야 하나요?", answer: "개통 가능 여부를 조회한 결과가 보이도록 첨부해 주세요.\n주민등록번호 전체, 인증번호, 비밀번호는 가려 주세요.\n제출 범위는 개인정보 처리 안내에서 확인할 수 있습니다." },
@@ -36,6 +37,17 @@ function validateContent(value) {
   }
   for (const item of value.faqs) {
     if (!item || typeof item.question !== "string" || item.question.trim().length < 1 || item.question.length > 160 || typeof item.answer !== "string" || item.answer.trim().length < 1 || item.answer.length > 400) return "FAQ 질문과 답변 길이를 확인하세요.";
+  }
+  if (value.supportLinks !== undefined) {
+    if (!value.supportLinks || typeof value.supportLinks !== "object" || Array.isArray(value.supportLinks)) return "상담 링크를 확인하세요.";
+    for (const key of ["telegram", "line", "channeltalk"]) {
+      const link = value.supportLinks[key];
+      if (typeof link !== "string" || link.length > 500) return "상담 링크를 확인하세요.";
+      if (!link.trim()) continue;
+      let url;
+      try { url = new URL(link.trim()); } catch { return "상담 링크 주소를 확인하세요."; }
+      if (url.protocol !== "https:" || !url.hostname || url.username || url.password) return "상담 링크는 HTTPS 주소를 입력하세요.";
+    }
   }
   return null;
 }
@@ -73,7 +85,8 @@ export async function onRequest({ request, env }) {
     schemaVersion: 2,
     headline: content.headline.trim(), intro: content.intro.trim(),
     checklist: content.checklist.map(x => ({ title: x.title.trim(), body: x.body.trim() })),
-    faqs: content.faqs.map(x => ({ question: x.question.trim(), answer: x.answer.trim() }))
+    faqs: content.faqs.map(x => ({ question: x.question.trim(), answer: x.answer.trim() })),
+    supportLinks: Object.fromEntries(["telegram", "line", "channeltalk"].map(key => [key, (content.supportLinks?.[key] || "").trim()]))
   };
   const updatedAt = new Date().toISOString();
   try {
@@ -81,6 +94,9 @@ export async function onRequest({ request, env }) {
     if (previous) {
       let current = null;
       try { current = JSON.parse(previous.content); } catch {}
+      if (content.supportLinks === undefined && current?.schemaVersion === 2 && !validateContent(current) && current.supportLinks) {
+        safe.supportLinks = Object.fromEntries(["telegram", "line", "channeltalk"].map(key => [key, current.supportLinks[key]]));
+      }
       if (!current || current.schemaVersion !== 2 || validateContent(current)) {
         await env.CONTENT_DB.prepare("INSERT INTO site_content (id, content, updated_at) VALUES (?, ?, ?) ON CONFLICT(id) DO NOTHING")
           .bind("home_legacy", previous.content, previous.updated_at || updatedAt).run();
