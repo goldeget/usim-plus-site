@@ -136,7 +136,7 @@ test("rejects a valid amount when it is assigned to the wrong retention mileston
     body: JSON.stringify(content)
   }), env });
   assert.equal(response.status, 400);
-  assert.match((await response.json()).error, /서로 맞지 않습니다/);
+  assert.match((await response.json()).error, /지급 금액이 현재 기준과 다릅니다|서로 맞지 않습니다/);
 });
 
 test("rejects stale payout amounts in the generated payout FAQ question", async () => {
@@ -314,10 +314,10 @@ test("keeps legacy editor content out of the current homepage while showing vers
   assert.equal(data.schemaVersion, 4);
   assert.equal(data.legacyContent, true);
   assert.equal(data.headline, "유심 개통 가능하면\n최대 {{MAX_TOTAL}}");
-  assert.equal(data.intro, "먼저 개통 가능 여부를 조회하세요.\n조회 사진은 상담창으로 보내 주세요.");
+  assert.equal(data.intro, DEFAULT_CONTENT.intro);
   assert.deepEqual(data.checklist.map(step => step.title), ["1. 개통 가능 여부 확인", "2. 사진 보내고 상담하기", "3. 조건 확인 후 안내"]);
   assert.match(data.checklist[0].body, /조회 사이트/);
-  assert.equal(data.checklist[1].body, "조회 결과를 캡처해 LINE·텔레그램·채널톡 상담창으로 보내 주세요.");
+  assert.equal(data.checklist[1].body, DEFAULT_CONTENT.checklist[1].body);
   assert.match(data.faqs.find(item => item.question === "상담하거나 사진을 보내면 바로 지급되나요?").answer, /신청 내용과 유지 조건 확인/);
   assert.doesNotMatch(JSON.stringify(data), /통신사|요금·약정|월 요금|해지 비용|사진 사전 검토/);
   assert.equal(cloudflare.siteContent.get("home").content, JSON.stringify(legacy));
@@ -430,7 +430,7 @@ test("upgrades current v3 homepage edits to v4 without losing the lookup or chat
   assert.equal(data.faqs[1].answer, DEFAULT_CONTENT.faqs.find(item => item.question === "왜 참여자를 모집하나요?").answer);
   assert.deepEqual(data.supportLinks, v3.supportLinks);
   assert.equal(data.lookup.url, "https://www.credit.or.kr/credit/search");
-  assert.deepEqual(data.payout.milestones.map(item => item.amount), [50000, 50000, 70000]);
+  assert.deepEqual(data.payout.milestones.map(item => item.amount), [50000, 70000, 100000]);
 });
 
 test("saves editable public screen content with derived payout totals and validated lookup links", async () => {

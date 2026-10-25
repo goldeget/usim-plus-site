@@ -137,7 +137,7 @@ test("uses safe defaults when CMS content is unavailable", async () => {
   globalThis.HTMLRewriter = TestHTMLRewriter;
   try {
     const response = await onRequest({ request: new Request("https://climekr.com/"), env: {}, next: async () => new Response(page) });
-    assert.match(await response.text(), /<title>클라임유심 \| 유심 개통 가능하면 최대 51만원<\/title>/);
+    assert.match(await response.text(), /<title>클라임유심 \| 유심 개통 가능하면 최대 66만원<\/title>/);
   } finally {
     if (previous === undefined) delete globalThis.HTMLRewriter;
     else globalThis.HTMLRewriter = previous;
