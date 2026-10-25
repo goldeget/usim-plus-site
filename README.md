@@ -27,6 +27,15 @@ The public page declares `https://climekr.com/` as its canonical URL and provide
 
 These settings help crawlers understand the service, but search ranking and AI answers are determined by external providers and cannot be guaranteed. Google Search Console and Naver Search Advisor still require site ownership verification before submitting the sitemap there.
 
+## Free search and social entry points
+
+- `/guide/`: original, indexable Korean explainer for people comparing non-loan SIM activation benefits. Prominently states that CLIME is **not a loan product**, that payment is conditional and not immediate, and that the applicant must check all telecom costs and contract responsibilities before applying. Reads the latest milestone amounts from the existing public `/api/content` endpoint, with no fixed 51/66만원 promise in the HTML.
+- `/links/`: lightweight, mobile-first `noindex` link-in-bio page with direct Telegram and ChannelTalk buttons. Uses the two verified operator-configured consultation links, with safe fallbacks.
+- The official homepage footer links to both, while the public sitemap lists only the distinct, search-eligible guide. Existing Pages preview hosts remain `noindex`.
+- No new domains, third-party accounts, Pages projects, or paid subscriptions are created by these files. They deploy through the **existing** Cloudflare Pages project after a commit lands on `main`.
+
+Deployment, optional free platform usage, and non-loan advertising cautions are documented in [docs/free-entry-points.md](docs/free-entry-points.md).
+
 ## Cloudflare resources
 
 The production Pages project requires:
