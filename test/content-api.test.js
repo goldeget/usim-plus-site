@@ -93,6 +93,10 @@ test("requires the displayed total payout in the headline and search titles to m
   content.headline = "유심 개통 가능하면 최대 51만원";
   content.seo.title = "클라임유심 최대 51만원";
   content.seo.socialTitle = "클라임유심 최대 51만원";
+  content.seo.description = "검색 안내: 총 최대 51만원";
+  content.seo.socialDescription = "공유 안내: 총 최대 51만원";
+  content.intro = "현재 총 최대 51만원을 안내합니다.";
+  content.faqs[0].answer = "3일 유지 후 5만원을 받습니다.";
   content.payout.milestones[0].amount = 60000;
   const response = await onRequest({ request: new Request("https://admin.climekr.com/api/content", {
     method: "PUT",
@@ -101,6 +105,97 @@ test("requires the displayed total payout in the headline and search titles to m
   }), env });
   assert.equal(response.status, 400);
   assert.match((await response.json()).error, /총액/);
+});
+
+test("rejects outdated payout days in any editable public copy", async () => {
+  const { onRequest } = await import("../functions/api/content.js");
+  const env = createAdminEnvironment({ cloudflare: createMemoryCloudflare() });
+  const headers = await createAdminSessionHeaders(env);
+  const content = freshContent();
+  content.payout.milestones[0].days = 5;
+  content.copy.contactIntro = "3일 유지 후 상담해 주세요.";
+  const response = await onRequest({ request: new Request("https://admin.climekr.com/api/content", {
+    method: "PUT",
+    headers: { ...headers, origin: "https://admin.climekr.com", "Content-Type": "application/json" },
+    body: JSON.stringify(content)
+  }), env });
+  assert.equal(response.status, 400);
+  assert.match((await response.json()).error, /유지 일수/);
+});
+
+test("rejects a valid amount when it is assigned to the wrong retention milestone", async () => {
+  const { onRequest } = await import("../functions/api/content.js");
+  const env = createAdminEnvironment({ cloudflare: createMemoryCloudflare() });
+  const headers = await createAdminSessionHeaders(env);
+  const content = freshContent();
+  content.payout.milestones[0].amount = 60000;
+  content.faqs[0].answer = "3일 유지 후 5만원을 지급합니다.";
+  const response = await onRequest({ request: new Request("https://admin.climekr.com/api/content", {
+    method: "PUT",
+    headers: { ...headers, origin: "https://admin.climekr.com", "Content-Type": "application/json" },
+    body: JSON.stringify(content)
+  }), env });
+  assert.equal(response.status, 400);
+  assert.match((await response.json()).error, /서로 맞지 않습니다/);
+});
+
+test("rejects stale payout amounts in the generated payout FAQ question", async () => {
+  const { onRequest } = await import("../functions/api/content.js");
+  const env = createAdminEnvironment({ cloudflare: createMemoryCloudflare() });
+  const headers = await createAdminSessionHeaders(env);
+  const content = freshContent();
+  content.payout.milestones = [
+    { days: 3, amount: 60000 },
+    { days: 15, amount: 40000 },
+    { days: 30, amount: 50000 }
+  ];
+  content.faqs.find(item => item.key === "payoutSchedule").question = "최대 51만원 받을 수 있나요?";
+  const response = await onRequest({ request: new Request("https://admin.climekr.com/api/content", {
+    method: "PUT",
+    headers: { ...headers, origin: "https://admin.climekr.com", "Content-Type": "application/json" },
+    body: JSON.stringify(content)
+  }), env });
+  assert.equal(response.status, 400);
+  assert.match((await response.json()).error, /현재 기준과 다릅니다/);
+});
+
+test("rejects payout amount lists that do not match their retention-day order", async () => {
+  const { onRequest } = await import("../functions/api/content.js");
+  const env = createAdminEnvironment({ cloudflare: createMemoryCloudflare() });
+  const headers = await createAdminSessionHeaders(env);
+  const content = freshContent();
+  content.faqs[0].answer = "유지 기간은 3일, 15일, 30일입니다. 지급 기준과 신청 절차를 확인하고 상담을 진행합니다. 단계별 지급 금액은 7만원, 5만원, 5만원입니다.";
+  const response = await onRequest({ request: new Request("https://admin.climekr.com/api/content", {
+    method: "PUT",
+    headers: { ...headers, origin: "https://admin.climekr.com", "Content-Type": "application/json" },
+    body: JSON.stringify(content)
+  }), env });
+  assert.equal(response.status, 400);
+  assert.match((await response.json()).error, /서로 맞지 않습니다/);
+});
+
+test("clears the public homepage edge cache after publishing content", async () => {
+  const { onRequest } = await import("../functions/api/content.js");
+  const env = createAdminEnvironment({ cloudflare: createMemoryCloudflare() });
+  const headers = await createAdminSessionHeaders(env);
+  const previous = Object.getOwnPropertyDescriptor(globalThis, "caches");
+  let deletedUrl = "";
+  Object.defineProperty(globalThis, "caches", {
+    configurable: true,
+    value: { default: { delete: async request => { deletedUrl = request.url; return true; } } }
+  });
+  try {
+    const response = await onRequest({ request: new Request("https://admin.climekr.com/api/content", {
+      method: "PUT",
+      headers: { ...headers, origin: "https://admin.climekr.com", "Content-Type": "application/json" },
+      body: JSON.stringify(freshContent())
+    }), env });
+    assert.equal(response.status, 200);
+    assert.equal(deletedUrl, "https://climekr.com/");
+  } finally {
+    if (previous) Object.defineProperty(globalThis, "caches", previous);
+    else delete globalThis.caches;
+  }
 });
 
 test("saves consultation links in the admin CMS and returns them to the public page", async () => {

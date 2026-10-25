@@ -1,4 +1,4 @@
-import { DEFAULT_CONTENT, fixedPrivacyCopy, validateContent } from "./api/content.js";
+import { DEFAULT_CONTENT, fixedPrivacyCopy, upgradedV3, validateContent, validateV3 } from "./api/content.js";
 
 const jsonLdEscape = value => JSON.stringify(value)
   .replaceAll("<", "\\u003c")
@@ -120,29 +120,49 @@ async function currentContent(env) {
     const row = await env.CONTENT_DB.prepare("SELECT content FROM site_content WHERE id = ?").bind("home").first();
     if (!row) return DEFAULT_CONTENT;
     const stored = JSON.parse(row.content);
-    return stored.schemaVersion === 4 && !validateContent(stored)
-      ? { ...DEFAULT_CONTENT, ...stored, copy: { ...stored.copy, ...fixedPrivacyCopy() } }
-      : DEFAULT_CONTENT;
+    if (stored.schemaVersion === 4 && !validateContent(stored)) {
+      return { ...DEFAULT_CONTENT, ...stored, copy: { ...stored.copy, ...fixedPrivacyCopy() } };
+    }
+    if (stored.schemaVersion === 3 && !validateV3(stored)) return upgradedV3(stored);
+    return DEFAULT_CONTENT;
   } catch {
     return DEFAULT_CONTENT;
   }
 }
 
-function noStore(response) {
+function cacheable(response) {
   const headers = new Headers(response.headers);
-  headers.set("Cache-Control", "private, no-store, max-age=0");
+  headers.set("Cache-Control", "public, max-age=0, s-maxage=15");
   headers.delete("Content-Length");
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
+function rootCacheKey(request) {
+  const url = new URL(request.url);
+  url.pathname = "/";
+  url.search = "";
+  url.hash = "";
+  return new Request(url, { method: "GET" });
+}
+
 export async function onRequest(context) {
+  const isGet = context.request.method === "GET";
+  const cache = isGet ? globalThis.caches?.default : null;
+  const key = rootCacheKey(context.request);
+  if (cache) {
+    try {
+      const hit = await cache.match(key);
+      if (hit) return hit;
+    } catch {}
+  }
   const response = await context.next();
+  if (!isGet) return response;
   if (!response.ok || !response.headers.get("content-type")?.includes("text/html")) return response;
   const content = await currentContent(context.env);
   const metadata = buildPublicMetadata(content);
   const Rewriter = globalThis.HTMLRewriter;
-  if (typeof Rewriter !== "function") return noStore(response);
-  return noStore(await new Rewriter()
+  if (typeof Rewriter !== "function") return response;
+  const result = cacheable(await new Rewriter()
     .on("title", { element(element) { element.setInnerContent(metadata.title); } })
     .on('meta[name="description"]', { element(element) { element.setAttribute("content", metadata.description); } })
     .on('meta[property="og:title"]', { element(element) { element.setAttribute("content", metadata.socialTitle); } })
@@ -151,4 +171,10 @@ export async function onRequest(context) {
     .on('meta[name="twitter:description"]', { element(element) { element.setAttribute("content", metadata.socialDescription); } })
     .on('script[type="application/ld+json"]', { element(element) { element.setInnerContent(jsonLdEscape(metadata.structuredData), { html: true }); } })
     .transform(response));
+  if (cache) {
+    const put = cache.put(key, result.clone()).catch(() => {});
+    if (typeof context.waitUntil === "function") context.waitUntil(put);
+    else await put;
+  }
+  return result;
 }

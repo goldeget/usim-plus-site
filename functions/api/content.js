@@ -164,7 +164,7 @@ function isSafeHttpsUrl(value) {
   } catch { return false; }
 }
 
-function validateV3(value) {
+export function validateV3(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return "잘못된 요청입니다.";
   if (typeof value.headline !== "string" || value.headline.trim().length < 1 || value.headline.length > 100) return "제목은 1~100자로 입력하세요.";
   if (typeof value.intro !== "string" || value.intro.trim().length < 1 || value.intro.length > 500) return "안내 문구는 1~500자로 입력하세요.";
@@ -203,15 +203,6 @@ export function validateContent(value) {
   }
   const totalPayout = total * value.payout.maxCases;
   if (totalPayout > 10000000) return "최대 지급 금액은 1,000만원 이하여야 합니다.";
-  const expectedTotal = Number.isInteger(totalPayout) && totalPayout >= 10000 && totalPayout % 10000 === 0
-    ? `${totalPayout / 10000}만원`
-    : `${new Intl.NumberFormat("ko-KR").format(totalPayout)}원`;
-  const hasLiteralAmount = title => /\d[\d,]*(?:만원|원)/.test(title);
-  for (const title of [value.headline, value.seo?.title, value.seo?.socialTitle]) {
-    if (typeof title === "string" && hasLiteralAmount(title) && !title.includes("{{MAX_TOTAL}}") && !title.includes(expectedTotal)) {
-      return "첫 화면·검색·공유 제목의 최대 금액은 현재 지급 기준 총액과 같아야 합니다.";
-    }
-  }
   if (!value.copy || typeof value.copy !== "object" || Array.isArray(value.copy)) return "화면 안내 문구를 확인하세요.";
   for (const [key, max] of Object.entries(COPY_LIMITS)) {
     const text = value.copy[key];
@@ -225,6 +216,64 @@ export function validateContent(value) {
   for (const key of ["description", "socialDescription"]) if (typeof value.seo[key] !== "string" || !value.seo[key].trim() || value.seo[key].length > 500) return "검색·공유 설명은 1~500자로 입력하세요.";
   if (value.faqs.filter(item => item.key === "payoutSchedule").length > 1) return "자동 계산 FAQ는 하나만 사용할 수 있습니다.";
   for (const item of value.faqs) if (item.key !== undefined && item.key !== "payoutSchedule") return "지원하지 않는 FAQ 설정입니다.";
+  const copyIssue = payoutCopyIssue(value);
+  if (copyIssue) return copyIssue;
+  return null;
+}
+
+function payoutCopyIssue(content) {
+  const entries = [
+    ["첫 화면 제목", content.headline], ["첫 화면 안내", content.intro],
+    ...content.checklist.flatMap((item, index) => [[`참여 단계 ${index + 1} 제목`, item.title], [`참여 단계 ${index + 1} 설명`, item.body]]),
+    ...content.faqs.flatMap((item, index) => item.key === "payoutSchedule"
+      ? [[`지급 안내 FAQ ${index + 1} 질문`, item.question]]
+      : [[`FAQ ${index + 1} 질문`, item.question], [`FAQ ${index + 1} 답변`, item.answer]]),
+    ...Object.entries(content.copy).filter(([key]) => !FIXED_PRIVACY_COPY_KEYS.includes(key)).map(([key, text]) => [`화면 문구 ${key}`, text]),
+    ...Object.entries(content.seo).map(([key, text]) => [`검색·공유 문구 ${key}`, text])
+  ];
+  for (const [label, text] of entries) {
+    const issue = payoutTextIssue(text, content.payout);
+    if (issue === "days") return `화면 문구(${label})의 유지 일수가 지급 기준과 다릅니다. 유지 일수를 확인하세요.`;
+    if (issue === "pair") return `화면 문구(${label})의 유지 일수와 지급 금액이 서로 맞지 않습니다. 지급 기준을 확인하세요.`;
+    if (issue === "amount") return `화면 문구(${label})의 지급 금액이 현재 기준과 다릅니다. 최대 총액과 단계별 금액을 확인하세요.`;
+  }
+  return null;
+}
+
+function payoutTextIssue(text, payout) {
+  const milestones = payout.milestones;
+  const allowedDays = new Set(milestones.map(item => item.days));
+  const perCase = milestones.reduce((sum, item) => sum + item.amount, 0);
+  const total = perCase * payout.maxCases;
+  const allowedAmounts = new Set([...milestones.map(item => item.amount), perCase, total]);
+  const days = [...text.matchAll(/(\d+)\s*일/g)].map(match => ({ day: Number(match[1]), index: match.index }));
+  const payoutContext = /지급|유지|수령|받|금액|단계|조건/.test(text) || days.length > 1;
+  if (payoutContext && days.some(({ day }) => !allowedDays.has(day))) return "days";
+  const amounts = [...text.matchAll(/(\d[\d,]*(?:\.\d+)?)\s*(만원|만\s*원|원)/g)].map(match => {
+    const number = Number(match[1].replaceAll(",", ""));
+    return {
+      amount: Math.round(number * (match[2].replaceAll(/\s/g, "").startsWith("만") ? 10000 : 1)),
+      index: match.index
+    };
+  });
+  const stageAmounts = amounts.filter(({ amount }) => milestones.some(item => item.amount === amount) && amount !== perCase && amount !== total);
+  if (days.length >= 2 && stageAmounts.length === days.length) {
+    for (let index = 0; index < days.length; index++) {
+      const milestone = milestones.find(item => item.days === days[index].day);
+      if (milestone && milestone.amount !== stageAmounts[index].amount) return "pair";
+    }
+  }
+  for (const { amount, index } of amounts) {
+    if (!Number.isSafeInteger(amount) || !allowedAmounts.has(amount)) return "amount";
+    if (amount === perCase || amount === total) continue;
+    const nearestDay = days
+      .filter(item => Math.abs(item.index - index) <= 48)
+      .sort((left, right) => Math.abs(left.index - match.index) - Math.abs(right.index - match.index))[0];
+    if (nearestDay) {
+      const milestone = milestones.find(item => item.days === nearestDay.day);
+      if (milestone && milestone.amount !== amount) return "pair";
+    }
+  }
   return null;
 }
 
@@ -238,7 +287,7 @@ function safeSupportLinks(links) {
   }));
 }
 
-function upgradedV3(stored) {
+export function upgradedV3(stored) {
   const upgraded = JSON.parse(JSON.stringify(DEFAULT_CONTENT));
   const storedHeadline = stored.headline.trim();
   upgraded.headline = storedHeadline === "유심 개통 가능하면\n최대 51만원" ? DEFAULT_CONTENT.headline : storedHeadline;
@@ -254,8 +303,20 @@ function upgradedV3(stored) {
     };
   });
   upgraded.supportLinks = safeSupportLinks(stored.supportLinks);
+  if (payoutCopyIssue(upgraded)) {
+    if (payoutCopyIssueForText(upgraded.headline, upgraded.payout)) upgraded.headline = DEFAULT_CONTENT.headline;
+    if (payoutCopyIssueForText(upgraded.intro, upgraded.payout)) upgraded.intro = DEFAULT_CONTENT.intro;
+    upgraded.checklist = upgraded.checklist.map((item, index) => {
+      const fallback = DEFAULT_CONTENT.checklist[index];
+      return payoutCopyIssueForText(item.title, upgraded.payout) || payoutCopyIssueForText(item.body, upgraded.payout) ? fallback : item;
+    });
+    upgraded.faqs = upgraded.faqs.filter(item => !payoutCopyIssueForText(item.question, upgraded.payout) && !payoutCopyIssueForText(item.answer, upgraded.payout));
+    if (!upgraded.faqs.length) upgraded.faqs = JSON.parse(JSON.stringify(DEFAULT_CONTENT.faqs));
+  }
   return upgraded;
 }
+
+function payoutCopyIssueForText(text, payout) { return payoutTextIssue(text, payout); }
 
 export async function onRequest({ request, env }) {
   if (request.method === "GET") {
@@ -330,9 +391,16 @@ export async function onRequest({ request, env }) {
   } catch {
     return json({ error: "홈페이지 안내를 저장하지 못했습니다. 잠시 후 다시 확인해 주세요." }, 503);
   }
+  await invalidatePublicHomeCache();
   return json({ content: safe, retentionDays: RETENTION_DAYS, updatedAt });
 }
 
 export function fixedPrivacyCopy() {
   return Object.fromEntries(FIXED_PRIVACY_COPY_KEYS.map(key => [key, DEFAULT_CONTENT.copy[key]]));
+}
+
+async function invalidatePublicHomeCache() {
+  try {
+    if (globalThis.caches?.default) await globalThis.caches.default.delete(new Request("https://climekr.com/"));
+  } catch {}
 }
