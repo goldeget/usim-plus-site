@@ -9,7 +9,7 @@ const home = read('../public/index.html');
 const sitemap = read('../public/sitemap.xml');
 
 test('benefits guide has unique self-canonical and describes actual service', () => {
-  assert.match(guide, /<title>자금이 급할 때 알아둘 유심 개통 혜택과 지급 조건/);
+  assert.match(guide, /<title>CLIME 유심 개통 혜택 \| 참여 조건과 지급 기준/);
   assert.match(guide, /rel="canonical" href="https:\/\/climekr\.com\/guide\/"/);
   assert.match(guide, /대출·대부·당일대출 서비스가 아니며/);
   assert.match(guide, /혜택은 상담이나 개통 직후 지급되는 것이 아니며/);

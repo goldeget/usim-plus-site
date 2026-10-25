@@ -76,7 +76,7 @@ test("admin-managed public copy covers payouts, lookup, privacy, footer, status,
   for (const id of ["termsHint", "statusDisclosure", "privacyCollection", "privacyPurpose", "privacyStorage", "footerTerms", "seoDescription", "ogTitle", "twitterDescription"]) assert.ok(html.includes(`id="${id}"`), id);
   assert.match(html, /content\.schemaVersion===4/);
   assert.match(html, /content\.payout\.milestones\.reduce/);
-  assert.match(html, /item\.key==='payoutSchedule'\?payoutFaq\(content\)/);
+  assert.doesNotMatch(html, /faqList|faqSchema|payoutFaq\(content\)/);
   assert.match(html, /lookupButton\.href=content\.lookup\.url/);
   assert.match(html, /textContent=/);
   assert.doesNotMatch(html, /\.innerHTML\s*=/);
@@ -101,4 +101,14 @@ test("renders a clean two-line homepage announcement and footer without visible 
   assert.match(html, /function normalizeDisplayedLineBreaks\(value\)/);
   assert.match(userFlowCss, /\.hero-intro,[^{]*\.site-footer__terms \{ white-space: pre-line; line-height: 1\.85; \}/);
   assert.doesNotMatch(expectedIntro, /\\n/);
+});
+
+test("removes public FAQ and the invisible FAQ schema without removing consultation or archived CMS data", () => {
+  assert.doesNotMatch(html, /<section class="faq"|id="faq-title"|class="faq-list"/);
+  assert.doesNotMatch(html, /FAQPage|faqSchema|faqList/);
+  assert.doesNotMatch(userFlowCss, /\.faq(?:\s|\.|\{|-)/);
+  assert.match(html, /class="guide-disclosure"/);
+  assert.match(html, /id="contact"/);
+  assert.match(html, /id="payoutConditions"/);
+  assert.match(contentApi, /faqs: content\.faqs\.map/);
 });

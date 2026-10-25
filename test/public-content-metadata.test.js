@@ -59,7 +59,7 @@ function createEnv(content) {
   };
 }
 
-test("serves the edited title, search and social descriptions, and matching FAQ schema in raw HTML", async () => {
+test("serves edited title, social metadata and matching Organization/Service graph without FAQ schema", async () => {
   const { onRequest } = await import("../functions/index.js");
   const content = structuredClone(DEFAULT_CONTENT);
   content.payout.milestones = [{ days: 3, amount: 40000 }, { days: 15, amount: 20000 }, { days: 30, amount: 30000 }];
@@ -86,10 +86,11 @@ test("serves the edited title, search and social descriptions, and matching FAQ 
     assert.match(html, /name="twitter:description"[^>]*content="공유 설명 9만원"/);
     const json = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)?.[1];
     const graph = JSON.parse(json)["@graph"];
-    const faq = graph.find(item => item["@type"] === "FAQPage");
-    assert.equal(faq.mainEntity[0].name, "새 질문");
-    assert.equal(faq.mainEntity[0].acceptedAnswer.text, "새 답변");
-    assert.match(faq.mainEntity.find(item => item.name.includes("지급 금액")).acceptedAnswer.text, /18만원/);
+    assert.equal(graph.some(item => item["@type"] === "FAQPage"), false);
+    assert.equal(graph.find(item => item["@type"] === "WebPage").name, "18만원 지급 안내 | climekr");
+    assert.equal(graph.find(item => item["@type"] === "WebPage").description, "검색 설명 18만원");
+    assert.equal(graph.find(item => item["@type"] === "Service").description, "검색 설명 18만원");
+    assert.equal(graph.find(item => item["@type"] === "Organization").email, "help@climekr.com");
   } finally {
     if (previous === undefined) delete globalThis.HTMLRewriter;
     else globalThis.HTMLRewriter = previous;
@@ -122,9 +123,10 @@ test("renders preserved v3 copy into raw metadata and matches the public content
     const migrated = await apiResponse.json();
     const html = await pageResponse.text();
     const json = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)?.[1];
-    const faq = JSON.parse(json)["@graph"].find(item => item["@type"] === "FAQPage");
-    assert.equal(faq.mainEntity[0].name, migrated.faqs[0].question);
-    assert.equal(faq.mainEntity[0].acceptedAnswer.text, migrated.faqs[0].answer);
+    const graph = JSON.parse(json)["@graph"];
+    assert.equal(graph.some(item => item["@type"] === "FAQPage"), false);
+    assert.equal(graph.find(item => item["@type"] === "Organization").email, migrated.operator.email);
+    assert.equal(graph.find(item => item["@type"] === "Service").serviceType, "유심 개통 혜택 안내 및 상담 채널 연결");
   } finally {
     if (previous === undefined) delete globalThis.HTMLRewriter;
     else globalThis.HTMLRewriter = previous;

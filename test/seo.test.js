@@ -16,21 +16,20 @@ test("publishes a canonical Korean title, description, and social preview metada
   assert.match(page, /name="robots" content="index,follow/);
 });
 
-test("includes accurate search structured data that matches visible FAQs", () => {
+test("describes the real public service without inventing hidden FAQ or review schema", () => {
   const json = page.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)?.[1];
   assert.ok(json, "JSON-LD is present");
   const graph = JSON.parse(json)["@graph"];
-  assert.ok(graph.some(item => item["@type"] === "Organization" && item.email === "help@climekr.com"));
-  const faq = graph.find(item => item["@type"] === "FAQPage");
-  assert.equal(faq.mainEntity.length, 8);
-  for (const item of faq.mainEntity) {
-    assert.ok(page.includes(`<summary>${item.name}</summary>`), `FAQ question is visible: ${item.name}`);
-    assert.ok(page.includes(`<p>${item.acceptedAnswer.text}</p>`), `FAQ answer is visible: ${item.name}`);
+  const types = graph.map(item => item["@type"]);
+  for (const type of ["Organization", "WebSite", "WebPage", "Service"]) {
+    assert.ok(types.includes(type), type);
   }
-  const recruitmentFaq = faq.mainEntity.find(item => item.name === "왜 참여자를 모집하나요?");
-  assert.match(recruitmentFaq.acceptedAnswer.text, /참여 조건과 지급 기준을 안내/);
-  assert.match(recruitmentFaq.acceptedAnswer.text, /지급 대상과 금액은 조회 결과와 유지 조건을 확인한 뒤 결정/);
-  assert.doesNotMatch(recruitmentFaq.acceptedAnswer.text, /실적 향상/);
+  assert.ok(graph.some(item => item["@type"] === "Organization" && item.email === "help@climekr.com"));
+  assert.match(graph.find(item => item["@type"] === "WebPage").description, /대출이 아닌 유심 개통 혜택/);
+  assert.match(graph.find(item => item["@type"] === "Service").description, /3일·15일·30일/);
+  assert.ok(!types.includes("FAQPage"), "Do not describe removed FAQ as visible");
+  assert.doesNotMatch(page, /<section class="faq"|id="faq-title"|class="faq-list"/);
+  assert.doesNotMatch(json, /AggregateRating|"@type"\s*:\s*"Review"/);
 });
 
 test("covers the requested climekr spellings and gives review searches useful, accurate guidance", () => {
@@ -39,12 +38,10 @@ test("covers the requested climekr spellings and gives review searches useful, a
   const graph = JSON.parse(json)["@graph"];
   const organization = graph.find(item => item["@type"] === "Organization");
   assert.ok(organization.alternateName.includes("climekr 유심"));
-  assert.match(page, /<summary>클라임유심 후기나 climekr 유심 후기를 살펴볼 때 무엇을 확인해야 하나요\?<\/summary>/);
-  assert.match(page, /후기를 볼 때 작성 시점과 실제 이용 경험인지 확인해 주세요/);
   assert.match(llms, /클라임유심 후기[\s\S]*climekr 유심 후기/);
   assert.match(llms, /클라임유심[\s\S]*climekr[\s\S]*참여 방법/);
   assert.match(llms, /개통 가능 여부 확인 버튼[\s\S]*상담창으로 사진을 보냅니다[\s\S]*유지 조건을 확인한 뒤 지급 대상이 결정됩니다/);
-  assert.match(llms, /상담창에서 조회 결과 사진을 보내는 방법과 유지 기간별 지급 금액/);
+  assert.match(llms, /대출 상품이 아닌 유심 개통 혜택과 지급 조건/);
   assert.match(llms, /회사가 전액 부담/);
   assert.match(llms, /대출·대부·당일대출 상품이 아닙니다/);
   assert.doesNotMatch(llms, /사진 사전 검토|개통 현황 사진으로 사전 검토|유심 개통 사전 검토 안내/);
