@@ -367,7 +367,7 @@ test("migrates photo-form copy while preserving safe consultation links", async 
   assert.equal(data.supportLinks.telegram,stored.supportLinks.telegram);
   assert.equal(data.supportLinks.line,"");
   assert.equal(data.supportLinks.channeltalk,"");
-  assert.match(data.intro,/상담/);
+  assert.equal(data.intro, DEFAULT_CONTENT.intro);
   assert.equal(cloudflare.siteContent.get("home").content,JSON.stringify(stored));
 });
 
