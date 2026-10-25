@@ -430,7 +430,7 @@ test("upgrades current v3 homepage edits to v4 without losing the lookup or chat
   assert.equal(data.faqs[1].answer, DEFAULT_CONTENT.faqs.find(item => item.question === "왜 참여자를 모집하나요?").answer);
   assert.deepEqual(data.supportLinks, v3.supportLinks);
   assert.equal(data.lookup.url, "https://www.credit.or.kr/credit/search");
-  assert.deepEqual(data.payout.milestones.map(item => item.amount), [50000, 50000, 70000]);
+  assert.deepEqual(data.payout.milestones.map(item => item.amount), [50000, 70000, 100000]);
 });
 
 test("saves editable public screen content with derived payout totals and validated lookup links", async () => {
