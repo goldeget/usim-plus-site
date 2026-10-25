@@ -38,7 +38,7 @@
         <div class="admin-topbar__title"><span>USIM PLUS</span><strong></strong></div>
         <div class="admin-topbar__actions"><a href="https://climekr.com" target="_blank" rel="noopener noreferrer">사이트 보기 <span aria-hidden="true">↗</span></a><button class="admin-logout" type="button" data-admin-logout>로그아웃</button></div>
       </header>
-      <div class="admin-page-content"></div>
+      <div class="admin-page-content"><p class="admin-channel-notice" style="padding:16px;border:1px solid #b9d8dc;border-radius:12px;line-height:1.8;background:#eaf5f5;color:#174453">신규 상담과 사진은 LINE·텔레그램·채널톡 대화창에서 확인하세요. 이곳의 신청 목록은 기존 홈페이지 접수입니다. <a href="/admin/content.html">상담 주소 등록·변경하기</a></p></div>
     </div>`;
 
   const nav = layout.querySelector(".admin-nav");

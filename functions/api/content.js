@@ -1,23 +1,57 @@
 import { isAdminRequest, readBoundedRequestBody } from "../_lib/applications.js";
 
-const DEFAULT_CONTENT = {
-  schemaVersion: 2,
-  headline: "유심 개통 가능하면\n최대 51만원",
-  intro: "먼저 개통 가능 여부를 확인하세요.\n조회 후 사진 한 장으로 신청하세요.",
-  checklist: [
-    { title: "1. 개통 가능 여부 확인", body: "본인 명의 개통 가능 여부를 조회하세요." },
-    { title: "2. 가능 여부 심사 신청", body: "조회하셨다면 조회하신 내역을 캡처해서 신청하세요." },
-    { title: "3. 유지 조건 확인 후 지급", body: "3일, 15일, 30일 유지 조건을 확인한 뒤 지급 대상이 결정됩니다." }
+export const DEFAULT_CONTENT = {
+  "schemaVersion": 3,
+  "headline": "유심 개통 가능하면\n최대 51만원",
+  "intro": "지급 대상인지 상담으로 확인하세요.\n조회 사진은 상담창으로 보내 주세요.",
+  "checklist": [
+    {
+      "title": "1. 상담 시작",
+      "body": "LINE·텔레그램·채널톡 중 편한 상담 채널을 선택하세요."
+    },
+    {
+      "title": "2. 조회 사진 보내기",
+      "body": "운영자 안내에 따라 가능 여부를 조회하고, 결과 화면을 상담창으로 보내 주세요."
+    },
+    {
+      "title": "3. 조건 확인 후 안내",
+      "body": "운영자가 같은 대화에서 다음 절차를 안내합니다. 유지 조건 확인 후 지급 대상이 결정됩니다."
+    }
   ],
-  supportLinks: { telegram: "", line: "", channeltalk: "" },
-  faqs: [
-    { question: "사진을 첨부하면 누가 확인하나요?", answer: "로그인한 운영자가 사진을 확인합니다.\n검토 결정 후 30일, 미검토 신청은 접수 후 30일 동안 비공개로 보관합니다." },
-    { question: "사진에는 어떤 내용을 보여야 하나요?", answer: "개통 가능 여부를 조회한 결과가 보이도록 첨부해 주세요.\n주민등록번호 전체, 인증번호, 비밀번호는 가려 주세요.\n제출 범위는 개인정보 처리 안내에서 확인할 수 있습니다." },
-    { question: "지급 금액과 신청 가능 건수는 어떻게 되나요?", answer: "조건과 유지 기간이 확인되면 개통 1건당 3일 5만원, 15일 추가 5만원, 30일 추가 7만원이 지급 대상입니다.\n한 사람 최대 3건이며, 모든 조건 충족 시 최대 51만원입니다.\n3일 유지가 확인되지 않으면 해당 건의 첫 5만원은 지급 대상에서 제외됩니다.\n신청 전 실제 지급 기준과 시점을 문의해 확인해 주세요." },
-    { question: "개통 가능 여부는 어떻게 확인하나요?", answer: "공식 조회처에서 본인 명의 개통 가능 여부를 확인해 주세요.\n조회하신 내역을 캡처해서 심사를 신청할 수 있습니다." },
-    { question: "왜 참여자를 모집하나요?", answer: "유심 개통 실적 향상을 위한 참여 안내입니다." },
-    { question: "사진 확인 후 바로 지급되나요?", answer: "아닙니다.\n제출한 신청 내용과 유지 조건을 확인한 뒤 지급 대상이 결정됩니다." },
-    { question: "클라임유심 후기나 climekr 유심 후기를 살펴볼 때 무엇을 확인해야 하나요?", answer: "후기를 볼 때 작성 시점과 실제 이용 경험인지 확인해 주세요.\n신청 전 현재 지급 금액과 유지 조건을 확인하세요.\n사진 확인만으로 지급이 확정되지는 않습니다." }
+  "supportLinks": {
+    "telegram": "",
+    "line": "",
+    "channeltalk": ""
+  },
+  "faqs": [
+    {
+      "question": "어떻게 신청하나요?",
+      "answer": "LINE·텔레그램·채널톡 중 연결된 상담 채널을 선택하세요.\n상담창에서 운영자에게 문의하고, 안내에 따라 조회 사진을 보내 주세요."
+    },
+    {
+      "question": "어떤 사진을 보내면 되나요?",
+      "answer": "개통 가능 여부를 조회한 결과 화면을 보내 주세요.\n주민등록번호·인증번호·비밀번호는 가려 주세요.\n사진을 보내기 전 상담창에서 개인정보 이용·보관 안내를 확인해 주세요."
+    },
+    {
+      "question": "지급 금액과 신청 가능 건수는 어떻게 되나요?",
+      "answer": "조건과 유지 기간이 확인되면 개통 1건당 3일 5만원, 15일 추가 5만원, 30일 추가 7만원이 지급 대상입니다.\n한 사람 최대 3건이며, 모든 조건 충족 시 최대 51만원입니다.\n3일 유지가 확인되지 않으면 해당 건의 첫 5만원은 지급 대상에서 제외됩니다.\n지급 기준과 시점은 상담창에서 확인해 주세요."
+    },
+    {
+      "question": "개통 가능 여부는 어떻게 확인하나요?",
+      "answer": "상담창에서 운영자의 안내를 받아 주세요.\n이미 조회했다면 결과 화면을 캡처해 같은 상담창으로 보내 주세요."
+    },
+    {
+      "question": "왜 참여자를 모집하나요?",
+      "answer": "유심 개통 실적 향상을 위한 참여 안내입니다."
+    },
+    {
+      "question": "상담하거나 사진을 보내면 바로 지급되나요?",
+      "answer": "아닙니다.\n신청 내용과 유지 조건 확인 후 지급 대상이 결정됩니다.\n진행 상황과 결과는 사진을 보낸 상담창에서 안내받으세요."
+    },
+    {
+      "question": "클라임유심 후기나 climekr 유심 후기를 살펴볼 때 무엇을 확인해야 하나요?",
+      "answer": "후기를 볼 때 작성 시점과 실제 이용 경험인지 확인해 주세요.\n신청 전 현재 지급 금액과 유지 조건을 확인하세요.\n사진 확인만으로 지급이 확정되지는 않습니다."
+    }
   ]
 };
 
@@ -52,6 +86,16 @@ function validateContent(value) {
   return null;
 }
 
+function safeSupportLinks(links) {
+  return Object.fromEntries(["telegram", "line", "channeltalk"].map(key => {
+    const link = links?.[key];
+    if (typeof link === "string" && link.length <= 500) {
+      try { const url = new URL(link.trim()); if (url.protocol === "https:" && url.hostname && !url.username && !url.password) return [key, link.trim()]; } catch {}
+    }
+    return [key, ""];
+  }));
+}
+
 export async function onRequest({ request, env }) {
   if (request.method === "GET") {
     if (!env.CONTENT_DB) return json({ ...DEFAULT_CONTENT, cmsReady: false });
@@ -61,7 +105,10 @@ export async function onRequest({ request, env }) {
     if (!row) return json({ ...DEFAULT_CONTENT, cmsReady: true });
     try {
       const stored = JSON.parse(row.content);
-      if (stored.schemaVersion !== 2 || validateContent(stored)) return json({ ...DEFAULT_CONTENT, updatedAt: row.updated_at, cmsReady: true, legacyContent: true });
+      if (stored.schemaVersion !== 3 || validateContent(stored)) {
+        const supportLinks = safeSupportLinks(stored.supportLinks);
+        return json({ ...DEFAULT_CONTENT, supportLinks, updatedAt: row.updated_at, cmsReady: true, legacyContent: true });
+      }
       return json({ ...DEFAULT_CONTENT, ...stored, updatedAt: row.updated_at, cmsReady: true });
     } catch { return json({ ...DEFAULT_CONTENT, updatedAt: row.updated_at, cmsReady: true, legacyContent: true }); }
   }
@@ -79,10 +126,12 @@ export async function onRequest({ request, env }) {
     content = JSON.parse(raw);
   } catch { return json({ error: "JSON 형식의 요청이 필요합니다." }, 400); }
 
+  if (!content || typeof content !== "object" || Array.isArray(content)) return json({ error: "잘못된 요청입니다." }, 400);
+  if (content.schemaVersion !== 3) return json({ error: "상담 접수 방식으로 변경되었습니다. 화면을 새로고침한 뒤 다시 저장해 주세요." }, 409);
   const issue = validateContent(content);
   if (issue) return json({ error: issue }, 400);
   const safe = {
-    schemaVersion: 2,
+    schemaVersion: 3,
     headline: content.headline.trim(), intro: content.intro.trim(),
     checklist: content.checklist.map(x => ({ title: x.title.trim(), body: x.body.trim() })),
     faqs: content.faqs.map(x => ({ question: x.question.trim(), answer: x.answer.trim() })),
@@ -94,10 +143,10 @@ export async function onRequest({ request, env }) {
     if (previous) {
       let current = null;
       try { current = JSON.parse(previous.content); } catch {}
-      if (content.supportLinks === undefined && current?.schemaVersion === 2 && !validateContent(current) && current.supportLinks) {
-        safe.supportLinks = Object.fromEntries(["telegram", "line", "channeltalk"].map(key => [key, current.supportLinks[key]]));
+      if (content.supportLinks === undefined && current?.supportLinks) {
+        safe.supportLinks = safeSupportLinks(current.supportLinks);
       }
-      if (!current || current.schemaVersion !== 2 || validateContent(current)) {
+      if (!current || current.schemaVersion !== 3 || validateContent(current)) {
         await env.CONTENT_DB.prepare("INSERT INTO site_content (id, content, updated_at) VALUES (?, ?, ?) ON CONFLICT(id) DO NOTHING")
           .bind("home_legacy", previous.content, previous.updated_at || updatedAt).run();
       }

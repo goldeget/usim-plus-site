@@ -2,7 +2,9 @@
 
 Responsive Korean site for the user supplied USIM+ design, with an operator reviewed application photo flow.
 
-The public form accepts one JPG or PNG screenshot (up to 10 MiB) after consent and Turnstile verification. Do not submit names, phone numbers, identity documents, resident registration numbers, passwords, or authentication codes. Photos are stored in a private R2 bucket. D1 stores an opaque receipt ID, a hash of the receipt token, image metadata and SHA-256 fingerprint, a keyed HMAC of the source IP when Cloudflare supplies it, status, and timestamps. The raw source IP is not stored. Applicants can check status with their receipt ID and token. The admin site uses a single email/password account with D1-backed sessions on `admin.climekr.com`; Pages Functions protect every admin page and API.
+New applications and photo conversations now take place in the LINE, Telegram or ChannelTalk links configured by the operator at `/admin/content.html`. The homepage no longer uploads photos or loads Turnstile; `POST /api/applications` returns 410 for cached forms without reading or storing their bodies. Messenger photos and messages are not synchronized into the admin photo queue. Until at least one real conversation link is registered, the page clearly shows unavailable channels and an email fallback.
+
+The following storage and review details apply only to existing homepage submissions: Do not submit names, phone numbers, identity documents, resident registration numbers, passwords, or authentication codes. Photos are stored in a private R2 bucket. D1 stores an opaque receipt ID, a hash of the receipt token, image metadata and SHA-256 fingerprint, a keyed HMAC of the source IP when Cloudflare supplies it, status, and timestamps. The raw source IP is not stored. Applicants can check status with their receipt ID and token. The admin site uses a single email/password account with D1-backed sessions on `admin.climekr.com`; Pages Functions protect every admin page and API.
 
 Pending photos expire 30 days after submission. When an operator approves or rejects an application, the image is copied to a fresh R2 key and expires 30 days after that decision. R2 lifecycle processing can add some deletion delay. D1 receipt/status metadata is purged daily after 60 days from submission or decision, so status lookup ends after that retention period. The site does not automatically decide telecom eligibility or issue payments.
 
@@ -17,7 +19,7 @@ Pending photos expire 30 days after submission. When an operator approves or rej
 - Public domains: [climekr.com](https://climekr.com) and [www.climekr.com](https://www.climekr.com)
 - Admin domain: [admin.climekr.com](https://admin.climekr.com), protected by the Pages session middleware. The Cloudflare Access app is bypassed only after the session guards are deployed and verified.
 
-The public form and status lookup use `/api/applications`, `/api/applications/status`, and `/api/applications/config`. The operator console opens at `https://admin.climekr.com/`, with dashboard, review queue, application history, duplicate signals, and the content editor at `/admin/content.html`.
+Existing receipt holders can still use `/api/applications/status`. The protected legacy photo review, retention cleanup and D1/R2 data remain intact. The operator console opens at `https://admin.climekr.com/`, with dashboard, review queue, application history, duplicate signals, and the content editor at `/admin/content.html`.
 
 ## Search and AI discovery
 
@@ -78,7 +80,7 @@ public/admin/applications.html             session-protected application history
 public/admin/duplicates.html                session-protected duplicate-signal review
 public/admin/content.html                   session-protected content editor
 functions/_middleware.js                   admin host routing and session checks
-functions/api/applications.js              consent, Turnstile, image validation, upload
+functions/api/applications.js              retires new homepage uploads with HTTP 410
 functions/api/applications/status.js       applicant receipt status lookup
 functions/api/admin/applications/           session-protected queue, image, and review APIs
 functions/api/content.js                   public content read and admin content write API
