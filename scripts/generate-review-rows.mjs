@@ -4,12 +4,6 @@
  */
 import { REVIEW_BODY_MIN, REVIEW_BODY_MAX } from "../functions/_lib/reviews.js";
 
-const REGIONS = [
-  "서울", "경기", "인천", "부산", "대구", "광주", "대전", "울산", "세종", "강원",
-  "충북", "충남", "전북", "전남", "경북", "경남", "제주", "수원", "고양", "용인",
-  "창원", "청주", "전주", "천안", "포항", "김해", "안산", "안양", "남양주", "평택"
-];
-
 const CHANNEL_LABEL = {
   channeltalk: "채널톡",
   telegram: "텔레그램",
@@ -130,16 +124,13 @@ function timelineForIndex(i) {
   const monthIdx = Math.floor(idx / 28) % MONTHS.length;
   const reasonIdx = Math.floor(idx / (28 * MONTHS.length)) % REASONS.length;
   const timeIdx = Math.floor(idx / (28 * MONTHS.length * REASONS.length)) % TIMES.length;
-  const placeIdx =
-    Math.floor(idx / (28 * MONTHS.length * REASONS.length * TIMES.length)) % REGIONS.length;
   const variant =
-    Math.floor(idx / (28 * MONTHS.length * REASONS.length * TIMES.length * REGIONS.length)) % 4;
+    Math.floor(idx / (28 * MONTHS.length * REASONS.length * TIMES.length)) % 4;
   return {
     month: MONTHS[monthIdx],
     day,
     reason: REASONS[reasonIdx],
     time: TIMES[timeIdx],
-    place: REGIONS[placeIdx],
     variant
   };
 }
@@ -148,10 +139,10 @@ function leadSentence(i, channelKey) {
   const channel = CHANNEL_LABEL[channelKey] || channelKey;
   const t = timelineForIndex(i);
   const variants = [
-    `${t.place}에서 ${t.month} ${t.day}일 ${t.time} ${t.reason} 관련으로 ${channel}에 문의했습니다.`,
-    `${t.month} ${t.day}일 ${t.time}, ${t.place} 기준 ${t.reason} 조건을 ${channel} 상담으로 확인했습니다.`,
-    `${t.time} ${channel} 상담에서 ${t.place} ${t.reason} 가능 여부를 ${t.month} ${t.day}일에 먼저 짚었습니다.`,
-    `${t.reason} 검토하다 ${t.place} 후기 보고 ${t.month} ${t.day}일 ${t.time} ${channel}으로 연락했습니다.`
+    `${t.month} ${t.day}일 ${t.time} ${t.reason} 관련으로 ${channel}에 문의했습니다.`,
+    `${t.month} ${t.day}일 ${t.time}, ${t.reason} 조건을 ${channel} 상담으로 확인했습니다.`,
+    `${t.time} ${channel} 상담에서 ${t.reason} 가능 여부를 ${t.month} ${t.day}일에 먼저 짚었습니다.`,
+    `${t.reason} 검토하다 후기 보고 ${t.month} ${t.day}일 ${t.time} ${channel}으로 연락했습니다.`
   ];
   return variants[t.variant];
 }
@@ -192,16 +183,16 @@ function composeBody(i, rating, channelKey) {
 
 export function generateReviewRows(count = 10_000) {
   const rows = [];
-  const start = Date.UTC(2024, 2, 1);
-  const span = Date.UTC(2026, 9, 1) - start;
+  const end = new Date();
+  const start = new Date(end);
+  start.setFullYear(start.getFullYear() - 3);
+  const spanMs = end.getTime() - start.getTime();
   for (let i = 1; i <= count; i += 1) {
-    const timeline = timelineForIndex(i);
-    const region = timeline.place;
     const channel = CHANNELS[(i * 7) % CHANNELS.length];
     const rating = ratingForIndex(i);
     const rng = mulberry32(i * 999_983);
     const body = composeBody(i, rating, channel);
-    const published = new Date(start + (span * i) / count);
+    const published = new Date(start.getTime() + (spanMs * i) / count);
     rows.push({
       rowId: `corpus-${String(i).padStart(5, "0")}`,
       publishedAt: published.toISOString(),
@@ -209,7 +200,6 @@ export function generateReviewRows(count = 10_000) {
       displayName: displayNameFor(i, rng),
       body,
       tags: {
-        region,
         channel,
         stage: STAGES[(i * 11) % STAGES.length]
       },
