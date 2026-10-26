@@ -4,7 +4,7 @@
   const listEl = document.getElementById("reviewsList");
   const loadMoreBtn = document.getElementById("loadMore");
   const statusFilter = document.getElementById("statusFilter");
-  let cursor = null;
+  let listPage = null;
 
   function setStatus(message, isError = false) {
     statusEl.textContent = message;
@@ -42,6 +42,14 @@
     }
   }
 
+  function formatPublishedAt(iso) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    return Number.isNaN(d.valueOf())
+      ? iso
+      : d.toLocaleString("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "short", day: "numeric" });
+  }
+
   function renderRow(item) {
     const row = document.createElement("article");
     row.className = "reviews-admin-row";
@@ -50,7 +58,7 @@
     const title = document.createElement("strong");
     title.textContent = `★${item.rating} · ${item.displayName || "참여자"}`;
     const meta = document.createElement("small");
-    meta.textContent = ` ${item.publishedAt || ""} · ${item.id}`;
+    meta.textContent = formatPublishedAt(item.publishedAt);
     const snippet = document.createElement("p");
     snippet.textContent = item.snippet;
     main.append(title, meta, snippet);
@@ -62,7 +70,7 @@
     for (const value of ["published", "hidden", "draft"]) {
       const opt = document.createElement("option");
       opt.value = value;
-      opt.textContent = value === "published" ? "게시" : value === "hidden" ? "숨김" : "초안";
+      opt.textContent = value === "published" ? "게시" : value === "hidden" ? "숨김" : "작성 중";
       if (item.status === value) opt.selected = true;
       statusSelect.append(opt);
     }
@@ -71,14 +79,14 @@
     const featured = document.createElement("input");
     featured.type = "checkbox";
     featured.checked = Boolean(item.featured);
-    featuredLabel.append(featured, " 홈 추천");
+    featuredLabel.append(featured, " 홈에 추천");
     const boostLabel = document.createElement("label");
     boostLabel.style.fontSize = "12px";
     const boost = document.createElement("input");
     boost.type = "number";
     boost.value = String(item.sortBoost || 0);
     boost.style.width = "72px";
-    boostLabel.append(" boost ", boost);
+    boostLabel.append(" 추천 순서 ", boost);
     const save = document.createElement("button");
     save.type = "button";
     save.className = "btn secondary";
@@ -108,32 +116,34 @@
 
   async function loadList(reset = false) {
     if (reset) {
-      cursor = null;
+      listPage = null;
       listEl.replaceChildren();
     }
     const params = new URLSearchParams({ limit: "30", status: statusFilter.value });
-    if (cursor) params.set("cursor", cursor);
+    if (listPage) params.set("cursor", listPage);
     const data = await api(`/api/admin/reviews?${params}`);
     for (const item of data.items) listEl.append(renderRow(item));
-    cursor = data.nextCursor;
-    loadMoreBtn.hidden = !cursor;
+    listPage = data.nextCursor;
+    loadMoreBtn.hidden = !listPage;
   }
 
   document.getElementById("importBtn").addEventListener("click", async () => {
     const raw = document.getElementById("importJson").value.trim();
-    if (!raw) return setStatus("JSON을 입력하세요.", true);
+    if (!raw) return setStatus("붙여 넣은 내용이 비어 있습니다.", true);
     let payload;
     try {
       const parsed = JSON.parse(raw);
       payload = Array.isArray(parsed) ? { reviews: parsed } : parsed;
     } catch {
-      return setStatus("JSON 형식이 올바르지 않습니다.", true);
+      return setStatus("형식을 확인해 주세요. 운영 가이드 예시와 같은 구조인지 봐 주세요.", true);
     }
     const btn = document.getElementById("importBtn");
     btn.disabled = true;
     try {
       const result = await api("/api/admin/reviews", { method: "POST", body: JSON.stringify(payload) });
-      setStatus(`등록 완료: 성공 ${result.ok || 0}건, 중복 ${result.duplicate || 0}건, 형식 오류 ${result.invalid || 0}건`);
+      setStatus(
+        `등록했습니다. 반영 ${result.ok || 0}건, 이미 있던 내용 ${result.duplicate || 0}건, 확인 필요 ${result.invalid || 0}건`
+      );
       await loadStats();
       await loadList(true);
     } catch (error) {
@@ -148,7 +158,7 @@
     btn.disabled = true;
     try {
       await api("/api/admin/reviews/rebuild-stats", { method: "POST" });
-      setStatus("집계를 다시 계산했습니다.");
+      setStatus("집계를 다시 맞췄습니다.");
       await loadStats();
     } catch (error) {
       setStatus(error.message, true);

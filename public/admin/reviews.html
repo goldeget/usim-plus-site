@@ -11,7 +11,8 @@
     .reviews-admin-list{display:grid;gap:10px;margin:16px 0}.reviews-admin-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:14px;border:1px solid var(--line);border-radius:12px;background:#fff}
     .reviews-admin-row p{margin:6px 0 0;font-size:14px;line-height:1.65;color:#385b70}.reviews-admin-row small{color:#718395}
     .reviews-admin-row select,.reviews-admin-row input[type=number]{font:inherit;border:1px solid #cad8e2;border-radius:8px;padding:6px 8px}
-    .import-panel textarea{min-height:120px;font-family:ui-monospace,monospace;font-size:12px}
+    .import-panel textarea{min-height:140px;font:inherit;font-size:13px;line-height:1.55}
+    .import-panel .note ul{margin:8px 0 0;padding-left:1.2em}
   </style>
 </head>
 <body>
@@ -19,35 +20,41 @@
     <section class="intro">
       <p class="eyebrow">사이트 운영</p>
       <h1>이용 후기</h1>
-      <p>공개 후기 목록·홈 노출·집계를 관리합니다. JSON 일괄 등록은 한 번에 최대 50건입니다.</p>
+      <p>공개 후기 목록, 홈 화면 추천, 게시·숨김 상태를 관리합니다. 한 번에 올릴 수 있는 후기는 최대 50건입니다.</p>
     </section>
     <p id="status" class="status" role="status" aria-live="polite">후기 정보를 불러오는 중…</p>
     <div class="reviews-admin-stats" id="statsBar" hidden></div>
     <section class="panel import-panel">
-      <h2>일괄 등록</h2>
-      <p class="note">배열 또는 <code>{"reviews":[…]}</code> 형식. 각 항목: body, rating(1–5), displayName, publishedAt(선택), featured, sortBoost.</p>
+      <h2>한 번에 올릴 후기</h2>
+      <p class="note">운영팀에서 받은 후기 묶음을 아래 칸에 붙여 넣고 등록합니다. 한 번에 1~50건까지 처리됩니다.</p>
+      <ul class="note">
+        <li>후기 내용: 40자 이상</li>
+        <li>별점: 1~5</li>
+        <li>이름 표시: 예) 김*희</li>
+        <li>선택: 올린 날짜, 홈에 추천 여부, 추천 순서(숫자)</li>
+      </ul>
       <div class="field">
-        <label for="importJson">후기 JSON</label>
-        <textarea id="importJson" placeholder='{"reviews":[{"body":"…40자 이상…","rating":5,"displayName":"김*희"}]}'></textarea>
+        <label for="importJson">후기 묶음</label>
+        <textarea id="importJson" placeholder="운영 가이드에 있는 예시 형식 그대로 붙여 넣으세요."></textarea>
       </div>
       <div class="actions">
-        <button id="importBtn" class="btn primary" type="button">등록 실행</button>
-        <button id="rebuildStatsBtn" class="btn secondary" type="button">집계 다시 계산</button>
+        <button id="importBtn" class="btn primary" type="button">후기 등록</button>
+        <button id="rebuildStatsBtn" class="btn secondary" type="button">집계 다시 맞추기</button>
       </div>
     </section>
     <section class="panel">
       <div class="panel-head" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
-        <h2>게시된 후기</h2>
-        <label>상태
+        <h2>후기 목록</h2>
+        <label>보기
           <select id="statusFilter">
-            <option value="published">게시</option>
+            <option value="published">게시 중</option>
             <option value="hidden">숨김</option>
-            <option value="draft">초안</option>
+            <option value="draft">작성 중</option>
           </select>
         </label>
       </div>
       <div id="reviewsList" class="reviews-admin-list" aria-live="polite"></div>
-      <button id="loadMore" class="btn secondary" type="button" hidden>더 불러오기</button>
+      <button id="loadMore" class="btn secondary" type="button" hidden>더 보기</button>
     </section>
   </main>
   <script src="/admin/admin-shell.js" defer></script>
