@@ -14,7 +14,14 @@
 
   function formatDate(iso) {
     const d = new Date(iso);
-    return Number.isNaN(d.valueOf()) ? "" : d.toLocaleDateString("ko-KR", { year: "numeric", month: "short", day: "numeric" });
+    return Number.isNaN(d.valueOf())
+      ? ""
+      : d.toLocaleDateString("ko-KR", {
+          timeZone: "Asia/Seoul",
+          year: "numeric",
+          month: "short",
+          day: "numeric"
+        });
   }
 
   function renderHistogram(histogram, total) {

@@ -140,6 +140,62 @@ test("generated corpus voice: USIM PLUS 급전 platform theme and age buckets", 
   }
 });
 
+function kstCalendar(iso) {
+  const bag = {};
+  for (const part of new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hourCycle: "h23"
+  }).formatToParts(new Date(iso))) {
+    if (part.type !== "literal") bag[part.type] = Number(String(part.value).replace(/[^\d]/g, ""));
+  }
+  return bag;
+}
+
+test("review body calendar dates match publishedAt in Asia/Seoul", () => {
+  const rows = generateReviewRows(10_000);
+  const sampleIds = new Set(["00001", "00017", "00500", "02500", "05000", "07500", "09999", "10000"]);
+  const monthDayRe = /(\d{1,2})월\s*(\d{1,2})일/g;
+  const monthRe = /(\d{1,2})월/g;
+  const yearRe = /(\d{4})년/g;
+  const durationRe = /(?:3|15|30)일\s*유지/g;
+  for (const row of rows) {
+    assert.doesNotMatch(row.body, /\d+\s*분경/, `${row.rowId} has a minute stamp`);
+    assert.doesNotMatch(row.body, /\d+\s*분/, `${row.rowId} has a clock minute`);
+    assert.doesNotMatch(row.body, /corpus-/i, `${row.rowId} leaks corpus id`);
+    const cal = kstCalendar(row.publishedAt);
+    yearRe.lastIndex = 0;
+    monthRe.lastIndex = 0;
+    monthDayRe.lastIndex = 0;
+    durationRe.lastIndex = 0;
+    for (const match of row.body.matchAll(yearRe)) {
+      assert.equal(Number(match[1]), cal.year, `${row.rowId} year`);
+    }
+    yearRe.lastIndex = 0;
+    for (const match of row.body.matchAll(monthRe)) {
+      assert.equal(Number(match[1]), cal.month, `${row.rowId} month`);
+    }
+    monthRe.lastIndex = 0;
+    monthDayRe.lastIndex = 0;
+    for (const match of row.body.matchAll(monthDayRe)) {
+      assert.equal(Number(match[1]), cal.month, `${row.rowId} month-day month`);
+      assert.equal(Number(match[2]), cal.day, `${row.rowId} month-day day`);
+    }
+    monthDayRe.lastIndex = 0;
+    durationRe.lastIndex = 0;
+    const stray = row.body.replace(durationRe, "").replace(monthDayRe, "").match(/(\d{1,2})일/);
+    assert.equal(stray, null, `${row.rowId} mentions a different day ${stray && stray[0]}`);
+    if (sampleIds.has(row.rowId)) {
+      assert.match(row.body, new RegExp(`${cal.month}월\\s*${cal.day}일`), `${row.rowId} should mention its Seoul date`);
+    }
+  }
+  const lengths = rows.map(row => row.body.length);
+  assert.ok(Math.min(...lengths) < 220, "some reviews stay short");
+  assert.ok(Math.max(...lengths) > 420, "some reviews run long");
+});
+
 test("generated corpus snippet prefixes are diverse", async () => {
   const rows = generateReviewRows(10_000);
   const prefix60 = new Set();
