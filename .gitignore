@@ -2,3 +2,16 @@
 .dev.vars
 .dev.vars.*
 .admin-seed.local
+scripts/.reviews-corpus.cache.json
+seed-progress.log
+.seed-*.json
+.seed-worker.b64
+.mcp-exec-chunk.js
+.mcp-chunks/
+.mcp-*.js
+inline-*.js
+execute-deploy-seed.txt
+seed10k.json
+batch100.json
+.mcp-payload.json
+scripts/.one-shot-seed-worker.mjs
