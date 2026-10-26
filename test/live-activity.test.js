@@ -117,6 +117,79 @@ test("화면 표시 이름은 마지막 글자만 마스킹하고 내부 식별�
   }
 });
 
+test("탭이 숨겨지면 카운터 타이머가 멈추고, 다시 보이면 남은 시간 뒤 1~7만 증가한다", () => {
+  const storage = new Map();
+  const counter = { textContent: "" };
+  const docListeners = [];
+  const pending = new Map();
+  let seq = 1;
+  let visibilityState = "visible";
+  const sandbox = {};
+  sandbox.window = sandbox;
+  sandbox.Intl = Intl;
+  sandbox.performance = { now: () => Date.now() };
+  sandbox.matchMedia = query => ({ matches: String(query).includes("prefers-reduced-motion") });
+  sandbox.setTimeout = (fn, ms) => {
+    const id = seq++;
+    pending.set(id, { fn, ms });
+    return id;
+  };
+  sandbox.clearTimeout = id => pending.delete(id);
+  sandbox.document = {
+    readyState: "complete",
+    get visibilityState() { return visibilityState; },
+    body: {
+      classList: { add() {} },
+      getAttribute() { return null; },
+      append() {}
+    },
+    addEventListener(type, fn) { docListeners.push({ type, fn }); },
+    querySelector() { return null; },
+    querySelectorAll(sel) { return sel === "[data-live-counter]" ? [counter] : []; }
+  };
+  sandbox.window.addEventListener = () => {};
+  sandbox.localStorage = {
+    getItem: key => (storage.has(key) ? storage.get(key) : null),
+    setItem: (key, value) => storage.set(key, String(value))
+  };
+  sandbox.sessionStorage = { getItem: () => null, setItem: () => {}, removeItem: () => {} };
+  vm.createContext(sandbox);
+  const src = readFileSync(new URL("../public/live-activity.js", import.meta.url), "utf8");
+  vm.runInContext(src, sandbox, { filename: "live-activity.js" });
+
+  const emit = type => {
+    for (const item of docListeners) if (item.type === type) item.fn();
+  };
+  const numeric = text => Number(String(text).replace(/[^\d]/g, ""));
+  assert.equal(pending.size, 1, "보이는 동안에는 카운터 타이머가 하나다");
+  const originalDelay = [...pending.values()][0].ms;
+  const shown = numeric(counter.textContent);
+  assert.ok(shown >= 500_000);
+
+  visibilityState = "hidden";
+  emit("visibilitychange");
+  assert.equal(pending.size, 0, "숨긴 동안에는 타이머가 돌지 않는다");
+  assert.equal(numeric(counter.textContent), shown);
+
+  visibilityState = "visible";
+  emit("visibilitychange");
+  assert.equal(pending.size, 1);
+  const resumed = [...pending.values()][0];
+  assert.ok(resumed.ms <= originalDelay && resumed.ms > originalDelay - 1000, `남은 지연 ${resumed.ms}`);
+  resumed.fn();
+  const delta = numeric(counter.textContent) - shown;
+  assert.ok(delta >= 1 && delta <= 7, `복귀 후 증가폭 ${delta}`);
+});
+
+test("보이는 동안의 카운터·토스트 주기는 그대로다", () => {
+  const src = readFileSync(new URL("../public/live-activity.js", import.meta.url), "utf8");
+  assert.match(src, /later\(tick, 3_500 \+ Math\.random\(\) \* 4_500\)/);
+  assert.match(src, /animateNumber\(el, value, next, 700\)/);
+  assert.match(src, /later\(tick, 12_000 \+ Math\.random\(\) \* 8_000\)/);
+  assert.match(src, /dismiss\(toast\), 5_200\)/);
+  assert.match(src, /first \? 4_000 \+ Math\.random\(\) \* 3_000 : 8_000 \+ Math\.random\(\) \* 12_000/);
+});
+
 test("토스트 렌더링은 풀네임이 아니라 maskName 결과를 표시한다", () => {
   const src = readFileSync(new URL("../public/live-activity.js", import.meta.url), "utf8");
   assert.match(src, /maskName\(name\)/, "렌더링 경로가 maskName을 거쳐야 함");

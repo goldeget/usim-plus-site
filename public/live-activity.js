@@ -4,6 +4,7 @@
  * - 실시간 신청 토스트: 풀네임 기준 중복 없는 이름 엔진, 표시는 마지막 글자 마스킹(김민*)
  * - 온라인 인원 지표: 20~90 사이 평균 회귀 랜덤 워크
  * 백엔드 호출 없음. prefers-reduced-motion 시 자동 토스트/애니메이션 비활성.
+ * 탭이 숨겨지면 카운터·온라인·토스트 예약은 멈추고, 다시 보이면 남은 시간부터 이어진다.
  */
 (() => {
   "use strict";
@@ -186,10 +187,26 @@
   }
 
   const SURNAMES_UNIQUE = [...new Set(SURNAMES)];
-  const GIVEN = buildGivenPool();
-  const S = SURNAMES_UNIQUE.length;
-  const G = GIVEN.length;
-  const TOTAL = S * G; // 이론적 유니크 수
+  // 조합 풀은 첫 파싱에서 만들지 않는다. 생성 비용이 메인 스레드를 한 번 막지 않게
+  // 토스트가 필요해지기 전에 유휴 시간에 채운다.
+  let GIVEN = null;
+  let S = 0;
+  let G = 0;
+  let TOTAL = 0;
+  function ensurePool() {
+    if (GIVEN) return;
+    GIVEN = buildGivenPool();
+    S = SURNAMES_UNIQUE.length;
+    G = GIVEN.length;
+    TOTAL = S * G;
+    if (nameState && nameState.n >= TOTAL) nameState = freshNameState();
+  }
+  function schedulePoolBuild() {
+    if (GIVEN) return;
+    const kick = () => ensurePool();
+    if (typeof requestIdleCallback === "function") requestIdleCallback(kick, { timeout: 1500 });
+    else setTimeout(kick, 1);
+  }
 
   /* ---------- 결정론적 PRNG (mulberry32) ---------- */
   function mulberry32(seed) {
@@ -232,6 +249,7 @@
   }
 
   function derivePermutation(seed) {
+    ensurePool();
     const rnd = mulberry32(seed);
     const start = Math.floor(rnd() * TOTAL);
     // 골든 레이시오 홉: 연속 선택이 풀 전체에 고르게 퍼지도록
@@ -241,12 +259,13 @@
   }
 
   let nameState = readStore(STORE.names) || freshNameState();
-  if (!Number.isInteger(nameState.n) || nameState.n < 0 || nameState.n >= TOTAL || !Number.isInteger(nameState.seed)) {
+  if (!Number.isInteger(nameState.n) || nameState.n < 0 || !Number.isInteger(nameState.seed)) {
     nameState = freshNameState();
   }
   let lastName = "";
 
   function pickName() {
+    ensurePool();
     for (let attempt = 0; attempt < 3; attempt += 1) {
       // 탭 여러 개가 열려 있어도 같은 커서를 두 번 소비하지 않도록
       // 매번 저장소의 최신 값을 읽고-증가-기록한다.
@@ -320,20 +339,65 @@
   /* ---------- DOM 구동부 (브라우저 전용) ---------- */
   const KO = new Intl.NumberFormat("ko-KR");
   const timers = new Set();
+  const scheduled = new Set();
+  let timersPaused = typeof document !== "undefined" && document.visibilityState === "hidden";
+  let counterAnim = 0;
+
+  function pageVisible() {
+    return typeof document === "undefined" || document.visibilityState !== "hidden";
+  }
+  function arm(task) {
+    task.delay = task.remaining;
+    task.started = Date.now();
+    task.id = setTimeout(() => {
+      timers.delete(task.id);
+      task.id = 0;
+      if (timersPaused || !pageVisible()) {
+        task.remaining = 0;
+        return;
+      }
+      scheduled.delete(task);
+      task.fn();
+    }, task.delay);
+    timers.add(task.id);
+  }
   function later(fn, ms) {
-    const id = setTimeout(() => { timers.delete(id); fn(); }, ms);
-    timers.add(id);
-    return id;
+    const task = { fn, remaining: ms, delay: ms, started: 0, id: 0 };
+    scheduled.add(task);
+    if (!timersPaused && pageVisible()) arm(task);
+    return task.id;
+  }
+  function pauseTimers() {
+    const now = Date.now();
+    timersPaused = true;
+    for (const task of scheduled) {
+      if (!task.id) continue;
+      clearTimeout(task.id);
+      timers.delete(task.id);
+      task.remaining = Math.max(0, task.delay - (now - task.started));
+      task.id = 0;
+    }
+  }
+  function resumeTimers() {
+    if (!pageVisible()) return;
+    timersPaused = false;
+    for (const task of [...scheduled]) {
+      if (!task.id) arm(task);
+    }
   }
   function clearAllTimers() {
+    timersPaused = true;
     for (const id of timers) clearTimeout(id);
     timers.clear();
+    scheduled.clear();
   }
 
   function animateNumber(el, from, to, duration) {
+    const gen = counterAnim;
     if (from === to) { el.textContent = KO.format(to); return; }
     const t0 = performance.now();
     const step = now => {
+      if (gen !== counterAnim) return;
       const p = Math.min(1, (now - t0) / duration);
       const eased = 1 - Math.pow(1 - p, 3);
       el.textContent = KO.format(Math.round(from + (to - from) * eased));
@@ -346,18 +410,34 @@
     const mounts = document.querySelectorAll("[data-live-counter]");
     if (!mounts.length) return;
     let value = currentCount();
-    for (const el of mounts) el.textContent = KO.format(value);
+    const paint = next => {
+      for (const el of mounts) el.textContent = KO.format(next);
+    };
+    paint(value);
+    // 숨기는 동안 진행 중이던 숫자 애니메이션이 복귀 직후 예전 값으로 덮어쓰지 않게 끊는다.
+    // 다시 보일 때는 날짜 기준값까지만 즉시 맞추고, 눈에 보이는 증가는 그대로 1~7이다.
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") {
+        counterAnim += 1;
+        paint(value);
+        return;
+      }
+      counterAnim += 1;
+      value = currentCount();
+      paint(value);
+    });
     if (reducedMotion) {
       // 움직임 없이 아주 가끔만 갱신
       later(function tick() {
         value = bumpCount();
-        for (const el of mounts) el.textContent = KO.format(value);
+        paint(value);
         later(tick, 12_000 + Math.random() * 8_000);
       }, 12_000);
       return;
     }
     later(function tick() {
       const next = bumpCount();
+      counterAnim += 1;
       for (const el of mounts) animateNumber(el, value, next, 700);
       value = next;
       later(tick, 3_500 + Math.random() * 4_500);
@@ -461,6 +541,8 @@
       // 스티키 CTA가 있으면 토스트가 그 위에 뜨도록 오프셋 클래스 부여
       if (document.querySelector(".sticky-cta")) document.body.classList.add("has-sticky-cta");
     }
+    const toastsOff = document.body && document.body.getAttribute("data-live-toasts") === "off";
+    if (!reducedMotion && !toastsOff) schedulePoolBuild();
     bootCounter(reducedMotion);
     bootOnline(reducedMotion);
     bootToasts(reducedMotion);
@@ -473,6 +555,10 @@
       boot();
     }
     window.addEventListener("pagehide", clearAllTimers);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") pauseTimers();
+      else resumeTimers();
+    });
   }
 
   /* ---------- 테스트·재사용용 공개 API ---------- */
@@ -484,9 +570,12 @@
     bumpCount,
     ACTIONS,
     TIMES,
-    pool: { surnames: S, given: G, total: TOTAL },
+    get pool() {
+      ensurePool();
+      return { surnames: S, given: G, total: TOTAL };
+    },
     _derivePermutation: derivePermutation,
     _resetForTest(state) { nameState = state; lastName = ""; },
-    version: "2026-10-27.3"
+    version: "2026-10-27.4"
   };
 })();
