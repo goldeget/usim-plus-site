@@ -22,6 +22,7 @@ test("generated review corpus has unique dedup hashes and realistic bounds", asy
     normSha.add(hashes.body_norm_sha256);
     snippetSha.add(hashes.snippet_sha256);
   }
+  assert.ok(rows.every(r => r.rating === 5), "corpus uses 5-star ratings only");
   const featured = rows.filter(r => r.featured);
   assert.equal(featured.length, 24);
   assert.ok(featured.every(r => r.sortBoost > 0));

@@ -111,13 +111,8 @@ function pick(rng, arr) {
   return arr[Math.floor(rng() * arr.length)];
 }
 
-function ratingForIndex(i) {
-  const r = i % 100;
-  if (r < 52) return 5;
-  if (r < 78) return 4;
-  if (r < 90) return 3;
-  if (r < 97) return 2;
-  return 1;
+function ratingForIndex(_i) {
+  return 5;
 }
 
 function displayNameFor(i, rng) {

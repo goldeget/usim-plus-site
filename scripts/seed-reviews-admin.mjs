@@ -5,15 +5,32 @@
  *   ADMIN_EMAIL=... ADMIN_PASSWORD=... node scripts/seed-reviews-admin.mjs --count=10000
  * Optional: ADMIN_ORIGIN=https://admin.climekr.com (default)
  */
+import { readFileSync } from "node:fs";
 import { generateReviewRows } from "./generate-review-rows.mjs";
 import { REVIEW_CAP } from "../functions/_lib/reviews.js";
+
+const FETCH_TIMEOUT_MS = 180_000;
+
+async function fetchWithTimeout(url, options = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 const args = process.argv.slice(2);
 const countArg = args.find(a => a.startsWith("--count="));
 const count = Math.min(Number(countArg?.split("=")[1] || 10_000), REVIEW_CAP);
 const origin = process.env.ADMIN_ORIGIN || "https://admin.climekr.com";
 const email = process.env.ADMIN_EMAIL;
-const password = process.env.ADMIN_PASSWORD;
+const password =
+  process.env.ADMIN_PASSWORD ||
+  (process.env.ADMIN_PASSWORD_FILE
+    ? readFileSync(process.env.ADMIN_PASSWORD_FILE, "utf8").trim()
+    : "");
 const batchSize = 50;
 
 if (!email || !password) {
@@ -22,7 +39,7 @@ if (!email || !password) {
 }
 
 async function login() {
-  const response = await fetch(`${origin}/api/admin/auth/login`, {
+  const response = await fetchWithTimeout(`${origin}/api/admin/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Origin: origin },
     body: JSON.stringify({ email, password })
@@ -37,7 +54,7 @@ async function login() {
 }
 
 async function importBatch(cookie, reviews) {
-  const response = await fetch(`${origin}/api/admin/reviews`, {
+  const response = await fetchWithTimeout(`${origin}/api/admin/reviews`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -53,7 +70,7 @@ async function importBatch(cookie, reviews) {
 }
 
 async function rebuildStats(cookie) {
-  await fetch(`${origin}/api/admin/reviews/rebuild-stats`, {
+  await fetchWithTimeout(`${origin}/api/admin/reviews/rebuild-stats`, {
     method: "POST",
     headers: { Origin: origin, Cookie: cookie }
   });
