@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { generateReviewRows, ratingDistributionForCorpus } from "../scripts/generate-review-rows.mjs";
+import {
+  ageBucketForIndex,
+  generateReviewRows,
+  isFormalAgeBucket,
+  ratingDistributionForCorpus
+} from "../scripts/generate-review-rows.mjs";
 import {
   REVIEW_BODY_MAX,
   REVIEW_BODY_MIN,
@@ -76,4 +81,64 @@ test("generated review corpus has unique dedup hashes and realistic bounds", asy
   );
   assert.ok(Math.abs(Date.now() - new Date(newest.publishedAt).getTime()) < 60_000, "newest row publishedAt is today");
   assert.ok(new Date(newest.publishedAt) > new Date(oldest.publishedAt), "row 10000 is newer than row 1");
+});
+
+test("generated corpus voice: hardship/prepaid theme and age buckets", () => {
+  const rows = generateReviewRows(10_000);
+  const themeRe =
+    /대출|급전|선불\s*유심|생활비|자금|카드\s*한도|통장|병원|학자금|신용|막힌|부족|빠듯|지출|보태|줄어|공백|전세|몰랐|처음\s*알/;
+  const telecomOnlyLead = /^[^.]{0,80}(번호\s*이동|신규\s*개통)\s*관련으로만/;
+  let themed = 0;
+  let formalRows = 0;
+  let casualWithEmoticon = 0;
+  let formalWithEmoticon = 0;
+  const bucketCounts = { "20s": 0, "30s": 0, "40s": 0, "50s": 0, "60s": 0, "70s": 0 };
+  for (let i = 1; i <= 10_000; i += 1) {
+    const bucket = ageBucketForIndex(i);
+    bucketCounts[bucket] += 1;
+  }
+  for (const row of rows) {
+    const idx = Number(row.rowId);
+    const bucket = ageBucketForIndex(idx);
+    assert.equal(bucketCounts[bucket] > 0, true);
+    if (themeRe.test(row.body)) themed += 1;
+    assert.ok(!telecomOnlyLead.test(row.body), `row ${row.rowId} reads as telecom-only lead`);
+    const formal = isFormalAgeBucket(bucket);
+    if (formal) {
+      formalRows += 1;
+      assert.match(
+        row.body,
+        /(습니다|였습니다|하였습니다|입니다|였어요)[.!?]?(?:\s[🙂😅👍])?$/u,
+        `formal bucket row ${row.rowId}`
+      );
+      if (/[🙂😅👍]|ㅠㅠ/.test(row.body)) formalWithEmoticon += 1;
+    } else {
+      assert.match(
+        row.body,
+        /(어요|았어요|했어요|였어요|ㅠㅠ|🙂|😅)[.!?]?(?:\s[🙂😅👍])?$/u,
+        `casual bucket row ${row.rowId}`
+      );
+      if (/[🙂😅👍]|ㅠㅠ/.test(row.body)) casualWithEmoticon += 1;
+    }
+  }
+  assert.ok(themed >= 9_500, `expected most rows to mention hardship/prepaid theme, got ${themed}`);
+  assert.ok(
+    Math.abs(formalRows - 10_000 / 2) <= 1,
+    `~half of rows use 50s–70s formal voice (got ${formalRows})`
+  );
+  assert.equal(formalWithEmoticon, 0, "formal age buckets should not use emoticons");
+  assert.ok(casualWithEmoticon > 100 && casualWithEmoticon < 5_000, "some casual rows include emoticons");
+  for (const n of Object.values(bucketCounts)) {
+    assert.ok(Math.abs(n - 10_000 / 6) <= 2, "age buckets evenly split");
+  }
+});
+
+test("generated corpus snippet prefixes are diverse", async () => {
+  const rows = generateReviewRows(10_000);
+  const prefix60 = new Set();
+  for (const row of rows) {
+    const { snippet } = await reviewHashes(row.body);
+    prefix60.add(snippet.slice(0, 60));
+  }
+  assert.ok(prefix60.size >= 9800, `expected diverse snippet prefixes, got ${prefix60.size}`);
 });
