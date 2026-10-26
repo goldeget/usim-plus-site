@@ -62,6 +62,18 @@ test("generated review corpus has unique dedup hashes and realistic bounds", asy
   assert.ok(featured.every(r => r.sortBoost > 0));
   const newest = rows.at(-1);
   const oldest = rows[0];
+  assert.equal(newest.rowId, "10000", "last generated row is corpus row 10000");
+  assert.equal(oldest.rowId, "00001", "first generated row is corpus row 1");
+  assert.equal(
+    new Date(newest.publishedAt).getTime(),
+    Math.max(...publishedMs),
+    "row 10000 has maximum publishedAt (newest = highest index)"
+  );
+  assert.equal(
+    new Date(oldest.publishedAt).getTime(),
+    Math.min(...publishedMs),
+    "row 1 has minimum publishedAt (~3 years before row 10000)"
+  );
   assert.ok(Math.abs(Date.now() - new Date(newest.publishedAt).getTime()) < 60_000, "newest row publishedAt is today");
   assert.ok(new Date(newest.publishedAt) > new Date(oldest.publishedAt), "row 10000 is newer than row 1");
 });
