@@ -80,3 +80,21 @@ test("hosts the IndexNow verification key at the declared public URL", async () 
   const keyFile = await readFile(new URL(`../public/${indexNowKey}.txt`, import.meta.url), "utf8");
   assert.equal(keyFile.trim(), indexNowKey);
 });
+
+const naverToken = "navercb78a18ae519c02b17c8618a7b72822c";
+const naverMeta = "4787a0e0a2225a79b88b77825a36d5cf27429080";
+
+test("publishes the Naver site verification meta tag on the homepage", () => {
+  assert.match(page, new RegExp(`<meta name="naver-site-verification" content="${naverMeta}" />`));
+});
+
+test("returns the Naver HTML verification token with status 200", async () => {
+  const file = await readFile(new URL(`../public/${naverToken}.html`, import.meta.url), "utf8");
+  assert.equal(file.trim(), naverToken);
+  const { onRequest } = await import(`../functions/${naverToken}.html.js`);
+  const response = await onRequest();
+  assert.equal(response.status, 200);
+  assert.equal(await response.text(), naverToken);
+  assert.equal(response.headers.get("content-type"), "text/html; charset=utf-8");
+  assert.equal(response.headers.get("cache-control"), "no-store");
+});
