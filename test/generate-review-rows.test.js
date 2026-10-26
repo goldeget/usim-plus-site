@@ -83,12 +83,14 @@ test("generated review corpus has unique dedup hashes and realistic bounds", asy
   assert.ok(new Date(newest.publishedAt) > new Date(oldest.publishedAt), "row 10000 is newer than row 1");
 });
 
-test("generated corpus voice: hardship/prepaid theme and age buckets", () => {
+test("generated corpus voice: USIM PLUS 급전 platform theme and age buckets", () => {
   const rows = generateReviewRows(10_000);
   const themeRe =
-    /대출|급전|선불\s*유심|생활비|자금|카드\s*한도|통장|병원|학자금|신용|막힌|부족|빠듯|지출|보태|줄어|공백|전세|몰랐|처음\s*알/;
+    /급전|융통|유심\s*플랫폼|USIM|0원|담당자|지급|사진\s*캡처|회사|자금|대출|생활비|막힌|부담|통신사\s*실적|불법\s*대출|자격/;
+  const platformRe = /유심\s*플랫폼|USIM\s*PLUS|0원|담당자|사진\s*캡처/;
   const telecomOnlyLead = /^[^.]{0,80}(번호\s*이동|신규\s*개통)\s*관련으로만/;
   let themed = 0;
+  let platformThemed = 0;
   let formalRows = 0;
   let casualWithEmoticon = 0;
   let formalWithEmoticon = 0;
@@ -102,6 +104,7 @@ test("generated corpus voice: hardship/prepaid theme and age buckets", () => {
     const bucket = ageBucketForIndex(idx);
     assert.equal(bucketCounts[bucket] > 0, true);
     if (themeRe.test(row.body)) themed += 1;
+    if (platformRe.test(row.body)) platformThemed += 1;
     assert.ok(!telecomOnlyLead.test(row.body), `row ${row.rowId} reads as telecom-only lead`);
     const formal = isFormalAgeBucket(bucket);
     if (formal) {
@@ -121,7 +124,11 @@ test("generated corpus voice: hardship/prepaid theme and age buckets", () => {
       if (/[🙂😅👍]|ㅠㅠ/.test(row.body)) casualWithEmoticon += 1;
     }
   }
-  assert.ok(themed >= 9_500, `expected most rows to mention hardship/prepaid theme, got ${themed}`);
+  assert.ok(themed >= 9_500, `expected most rows to mention 급전/platform theme, got ${themed}`);
+  assert.ok(
+    platformThemed >= 9_000,
+    `expected most rows to mention USIM PLUS platform pillars, got ${platformThemed}`
+  );
   assert.ok(
     Math.abs(formalRows - 10_000 / 2) <= 1,
     `~half of rows use 50s–70s formal voice (got ${formalRows})`
