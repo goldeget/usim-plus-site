@@ -32,6 +32,18 @@ if (!token) {
   process.exit(1);
 }
 
+const verifyRes = await fetch("https://api.cloudflare.com/client/v4/user/tokens/verify", {
+  headers: { Authorization: `Bearer ${token}` }
+});
+const verify = await verifyRes.json();
+if (!verify.success) {
+  console.error(
+    "CLOUDFLARE_API_TOKEN invalid or expired:",
+    verify.errors?.[0]?.message || "verify failed"
+  );
+  process.exit(1);
+}
+
 async function cf(path, { method = "GET", body, contentType } = {}) {
   const res = await fetch(`https://api.cloudflare.com/client/v4${path}`, {
     method,
