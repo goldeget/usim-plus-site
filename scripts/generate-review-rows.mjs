@@ -41,7 +41,7 @@ function dedupHashesForBody(body) {
 }
 
 /** Bump when corpus voice/templates change so seed cache files regenerate. */
-export const REVIEW_CORPUS_VERSION = "usim-zero-cost-performance-2026-10-26";
+export const REVIEW_CORPUS_VERSION = "usimplus-geupjeon-platform-2026-10-26";
 
 const CHANNEL_LABEL = {
   channeltalk: "채널톡",
