@@ -8,9 +8,30 @@ import {
   mapReviewRow,
   rebuildReviewStats
 } from "../../../_lib/reviews.js";
+import { loadReviewMeta, queryPublishedReviews } from "../../../_lib/review-static.js";
 import { readBoundedRequestBody } from "../../../_lib/http.js";
 
 const BATCH_MAX = 50;
+
+/**
+ * D1 무료 티어 일일 쓰기 한도로 reviews 테이블이 비어 있는 동안(재시드 전 임시)
+ * 어드민 목록을 정적 코퍼스(public/reviews/data/**)에서 읽어 동일 형태로 반환한다.
+ */
+async function staticCorpusListResponse(env, request, { limit, status, rating, cursor }) {
+  if (status !== "published") {
+    return jsonResponse({ items: [], nextCursor: null, totalPublished: 0 });
+  }
+  const ratingFilter = rating && /^[1-5]$/.test(rating) ? Number(rating) : null;
+  const [page, meta] = await Promise.all([
+    queryPublishedReviews(env, request, { limit, cursor, rating: ratingFilter, today: new Date() }),
+    loadReviewMeta(env, request)
+  ]);
+  return jsonResponse({
+    items: page.items.map(item => ({ ...item, status: "published", source: "corpus_v1" })),
+    nextCursor: page.nextCursor,
+    totalPublished: Number(meta.count || 0)
+  });
+}
 
 export async function onRequest({ request, env }) {
   if (!(await isAdminRequest(request, env, { requireOrigin: request.method !== "GET" }))) {
@@ -46,17 +67,25 @@ export async function onRequest({ request, env }) {
          FROM reviews WHERE ${filters.join(" AND ")}
          ORDER BY published_at DESC, id DESC LIMIT ?`
       ).bind(...binds, limit + 1).all();
-      const hasMore = results.length > limit;
-      const page = hasMore ? results.slice(0, limit) : results;
-      const last = page.at(-1);
-      const stats = await env.CONTENT_DB.prepare(
-        "SELECT total_published FROM review_stats WHERE id = 'global'"
-      ).first();
-      return jsonResponse({
-        items: page.map(r => ({ ...mapReviewRow(r), status: r.status, source: r.source })),
-        nextCursor: hasMore && last ? encodeCursor(last.published_at, last.id) : null,
-        totalPublished: Number(stats?.total_published || 0)
-      });
+      if (results.length) {
+        const hasMore = results.length > limit;
+        const page = hasMore ? results.slice(0, limit) : results;
+        const last = page.at(-1);
+        const stats = await env.CONTENT_DB.prepare(
+          "SELECT total_published FROM review_stats WHERE id = 'global'"
+        ).first();
+        return jsonResponse({
+          items: page.map(r => ({ ...mapReviewRow(r), status: r.status, source: r.source })),
+          nextCursor: hasMore && last ? encodeCursor(last.published_at, last.id) : null,
+          totalPublished: Number(stats?.total_published || 0)
+        });
+      }
+    } catch {
+      // D1 읽기 실패 시에도 아래 정적 코퍼스 폴백으로 응답한다.
+    }
+    // D1이 비어 있거나(0건) 읽기에 실패한 경우에만 여기로 온다.
+    try {
+      return await staticCorpusListResponse(env, request, { limit, status, rating, cursor });
     } catch {
       return jsonResponse({ error: "후기 목록을 불러오지 못했습니다." }, 503);
     }

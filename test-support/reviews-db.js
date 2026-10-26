@@ -34,7 +34,9 @@ export function extendReviewsDb(db, bucket) {
       },
       async all() {
         if (/FROM reviews/i.test(sql)) {
-          let rows = [...reviews.values()].filter(r => r && r.id);
+          // review_stats rows live in the same map under "__stats__" (id "global");
+          // a real D1 keeps them in a separate table, so never list them here.
+          let rows = [...reviews.values()].filter(r => r && r.id && r.id !== "global");
           if (/status = 'published'/i.test(sql)) rows = rows.filter(r => r.status === "published");
           if (/featured = 1/i.test(sql)) rows = rows.filter(r => r.featured === 1);
           rows.sort((a, b) => {
