@@ -146,6 +146,70 @@ export function mapReviewRow(row, includeBody = false) {
   return item;
 }
 
+export async function upsertCorpusReviewRecord({ db, bucket, record }) {
+  const source = record.source || "import";
+  const sourceRowId = record.sourceRowId ? String(record.sourceRowId) : null;
+  if (!sourceRowId) return insertReviewRecord({ db, bucket, record });
+
+  const rowKey = sourceRowId.replace(/^corpus-/, "");
+  const sourceRowCandidates = [...new Set([sourceRowId, rowKey, `corpus-${rowKey}`])];
+  let existing = null;
+  for (const candidate of sourceRowCandidates) {
+    existing = await db
+      .prepare("SELECT id, body_r2_key FROM reviews WHERE source = ? AND source_row_id = ?")
+      .bind(source, candidate)
+      .first();
+    if (existing) break;
+  }
+  if (!existing) return insertReviewRecord({ db, bucket, record });
+
+  const importIssue = validateReviewImportRecord(record);
+  if (importIssue) return { ok: false, reason: importIssue };
+
+  const body = normalizeReviewBody(record.body);
+  if (body.length < REVIEW_BODY_MIN || body.length > REVIEW_BODY_MAX) {
+    return { ok: false, reason: "invalid_length" };
+  }
+  const rating = validateRating(record.rating);
+  if (!rating) return { ok: false, reason: "invalid_rating" };
+
+  const hashes = await reviewHashes(body);
+  const now = new Date().toISOString();
+  const publishedAt = record.publishedAt || now;
+  const r2Key = existing.body_r2_key;
+  const payload = JSON.stringify({ id: existing.id, body, rating, publishedAt, importedAt: now });
+
+  await bucket.put(r2Key, payload, {
+    httpMetadata: { contentType: "application/json; charset=utf-8" }
+  });
+  await db
+    .prepare(
+      `UPDATE reviews SET
+        published_at = ?, rating = ?, snippet = ?, snippet_sha256 = ?, body_sha256 = ?,
+        body_norm_sha256 = ?, body_byte_length = ?, display_name = ?, tags_json = ?,
+        status = ?, featured = ?, sort_boost = ?, updated_at = ?
+       WHERE id = ?`
+    )
+    .bind(
+      publishedAt,
+      rating,
+      hashes.snippet,
+      hashes.snippet_sha256,
+      hashes.body_sha256,
+      hashes.body_norm_sha256,
+      hashes.body_byte_length,
+      String(record.displayName || "참여자").slice(0, 40),
+      JSON.stringify(record.tags || {}),
+      record.status || "published",
+      record.featured ? 1 : 0,
+      Number(record.sortBoost) || 0,
+      now,
+      existing.id
+    )
+    .run();
+  return { ok: true, id: existing.id, updated: true };
+}
+
 export async function insertReviewRecord({ db, bucket, record }) {
   const importIssue = validateReviewImportRecord(record);
   if (importIssue) return { ok: false, reason: importIssue };

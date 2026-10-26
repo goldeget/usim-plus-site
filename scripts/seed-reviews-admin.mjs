@@ -158,13 +158,15 @@ if (existsSync(corpusCache)) {
   writeFileSync(corpusCache, JSON.stringify(rows));
 }
 
-let cookie = await login();
 let ok = 0;
 let duplicate = 0;
 let invalid = 0;
 const startOffset = (startBatch - 1) * batchSize;
 const lastBatch = endBatch || Math.ceil(rows.length / batchSize);
 const endOffsetExclusive = Math.min(lastBatch * batchSize, rows.length);
+console.log(`Seeding ${count} rows (batches ${startBatch}-${lastBatch}, cache ${rows.length})`);
+let cookie = await login();
+console.log("Admin session ready");
 
 for (let offset = startOffset; offset < endOffsetExclusive; offset += batchSize) {
   const batchNum = Math.floor(offset / batchSize) + 1;
@@ -178,23 +180,30 @@ for (let offset = startOffset; offset < endOffsetExclusive; offset += batchSize)
     featured: Boolean(r.featured),
     sortBoost: r.sortBoost
   }));
-  let result;
+  let result = { ok: 0, duplicate: 0, invalid: 0 };
+  let batchDone = false;
   for (let attempt = 1; attempt <= 8; attempt += 1) {
     try {
       result = await importBatch(cookie, batch);
+      batchDone = true;
       break;
     } catch (error) {
-      if (attempt >= 8) throw error;
+      if (attempt >= 8) {
+        console.error(`Batch ${batchNum} failed after retries: ${error?.message || error}`);
+        break;
+      }
       const delay = Math.min(4000 * attempt, 45_000);
       console.warn(`Batch ${batchNum} retry ${attempt}/8 in ${delay}ms: ${error?.message || error}`);
       await new Promise(r => setTimeout(r, delay));
       if (attempt % 2 === 0) cookie = await login();
     }
   }
-  ok += result.ok || 0;
-  duplicate += result.duplicate || 0;
-  invalid += result.invalid || 0;
-  console.log(`Batch ${batchNum}/${Math.ceil(rows.length / batchSize)} ok=${result.ok} dup=${result.duplicate}`);
+  if (batchDone) {
+    ok += result.ok || 0;
+    duplicate += result.duplicate || 0;
+    invalid += result.invalid || 0;
+    console.log(`Batch ${batchNum}/${Math.ceil(rows.length / batchSize)} ok=${result.ok} dup=${result.duplicate}`);
+  }
   await new Promise(r => setTimeout(r, 600));
 }
 

@@ -4,6 +4,7 @@ import {
   decodeCursor,
   encodeCursor,
   insertReviewRecord,
+  upsertCorpusReviewRecord,
   mapReviewRow,
   rebuildReviewStats
 } from "../../../_lib/reviews.js";
@@ -79,38 +80,48 @@ export async function onRequest({ request, env }) {
       "SELECT COUNT(*) AS c FROM reviews WHERE status = 'published'"
     ).first();
     let published = Number(current?.c || 0);
-    const result = { ok: 0, duplicate: 0, invalid: 0, capped: 0, ids: [] };
+    const result = { ok: 0, duplicate: 0, invalid: 0, capped: 0, updated: 0, ids: [] };
+    const importSource = payload.source || "admin_import";
+    const useCorpusUpsert = importSource === "corpus_v1";
 
     for (const row of rows) {
       if (published >= REVIEW_CAP) {
         result.capped += 1;
         continue;
       }
-      const insert = await insertReviewRecord({
-        db: env.CONTENT_DB,
-        bucket: env.APPLICATIONS_BUCKET,
-        record: {
-          body: row.body,
-          rating: row.rating,
-          displayName: row.displayName,
-          publishedAt: row.publishedAt,
-          tags: row.tags,
-          source: row.source || payload.source || "admin_import",
-          sourceRowId: row.rowId || row.sourceRowId,
-          featured: row.featured,
-          sortBoost: row.sortBoost,
-          status: row.status || "published"
-        }
-      });
+      const record = {
+        body: row.body,
+        rating: row.rating,
+        displayName: row.displayName,
+        publishedAt: row.publishedAt,
+        tags: row.tags,
+        source: row.source || importSource,
+        sourceRowId: row.rowId || row.sourceRowId,
+        featured: row.featured,
+        sortBoost: row.sortBoost,
+        status: row.status || "published"
+      };
+      const insert = useCorpusUpsert
+        ? await upsertCorpusReviewRecord({
+            db: env.CONTENT_DB,
+            bucket: env.APPLICATIONS_BUCKET,
+            record
+          })
+        : await insertReviewRecord({
+            db: env.CONTENT_DB,
+            bucket: env.APPLICATIONS_BUCKET,
+            record
+          });
       if (insert.ok) {
-        result.ok += 1;
+        if (insert.updated) result.updated += 1;
+        else result.ok += 1;
         result.ids.push(insert.id);
-        if ((row.status || "published") === "published") published += 1;
+        if ((row.status || "published") === "published" && !insert.updated) published += 1;
       } else if (insert.reason === "duplicate") result.duplicate += 1;
       else result.invalid += 1;
     }
 
-    if (result.ok) await rebuildReviewStats(env.CONTENT_DB);
+    if (result.ok || result.updated) await rebuildReviewStats(env.CONTENT_DB);
     return jsonResponse(result, result.ok ? 201 : 200);
   }
 
