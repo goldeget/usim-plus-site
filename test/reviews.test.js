@@ -72,6 +72,12 @@ test("public reviews list and detail return distinct snippets and clean bodies",
   assert.equal(listRes.status, 200);
   const list = await listRes.json();
   assert.equal(list.items.length, 3);
+  for (let i = 1; i < list.items.length; i += 1) {
+    assert.ok(
+      list.items[i - 1].publishedAt >= list.items[i].publishedAt,
+      "public list is published_at DESC (newest first)"
+    );
+  }
   const snippets = list.items.map(i => i.snippet);
   assert.equal(new Set(snippets).size, 3, "each list item must have a distinct snippet");
   for (const item of list.items) {

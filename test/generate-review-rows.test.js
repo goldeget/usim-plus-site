@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { generateReviewRows, ratingDistributionForCorpus } from "../scripts/generate-review-rows.mjs";
-import { REVIEW_BODY_MAX, REVIEW_BODY_MIN, reviewHashes } from "../functions/_lib/reviews.js";
+import {
+  REVIEW_BODY_MAX,
+  REVIEW_BODY_MIN,
+  REVIEW_INTERNAL_ID_PATTERN,
+  reviewHashes
+} from "../functions/_lib/reviews.js";
 
 test("generated review corpus has unique dedup hashes and realistic bounds", async () => {
   const rows = generateReviewRows(10_000);
@@ -13,6 +18,9 @@ test("generated review corpus has unique dedup hashes and realistic bounds", asy
     assert.ok(row.body.length >= REVIEW_BODY_MIN, `row ${row.rowId} too short`);
     assert.ok(row.body.length <= REVIEW_BODY_MAX, `row ${row.rowId} too long`);
     assert.doesNotMatch(row.body, /\(후기-\d+\)/);
+    assert.doesNotMatch(row.body, REVIEW_INTERNAL_ID_PATTERN);
+    assert.doesNotMatch(row.displayName, REVIEW_INTERNAL_ID_PATTERN);
+    assert.doesNotMatch(row.rowId, /corpus-/i);
     assert.doesNotMatch(row.body, /corpus-\d{5}/i);
     assert.doesNotMatch(row.displayName, /corpus-\d{5}/i);
     assert.match(row.displayName, /^[가-힣]/);
@@ -52,4 +60,8 @@ test("generated review corpus has unique dedup hashes and realistic bounds", asy
   const featured = rows.filter(r => r.featured);
   assert.equal(featured.length, 24);
   assert.ok(featured.every(r => r.sortBoost > 0));
+  const newest = rows.at(-1);
+  const oldest = rows[0];
+  assert.ok(Math.abs(Date.now() - new Date(newest.publishedAt).getTime()) < 60_000, "newest row publishedAt is today");
+  assert.ok(new Date(newest.publishedAt) > new Date(oldest.publishedAt), "row 10000 is newer than row 1");
 });

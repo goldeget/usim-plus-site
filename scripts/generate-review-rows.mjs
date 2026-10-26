@@ -215,7 +215,8 @@ export function generateReviewRows(count = 10_000) {
     const body = composeBody(i, rating, channel);
     const published = new Date(start.getTime() + (spanMs * i) / count);
     rows.push({
-      rowId: `corpus-${String(i).padStart(5, "0")}`,
+      /** Admin import dedup key only — never embedded in public review text. */
+      rowId: String(i).padStart(5, "0"),
       publishedAt: published.toISOString(),
       rating,
       displayName: displayNameFor(i, rng),
