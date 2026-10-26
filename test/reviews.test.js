@@ -7,7 +7,8 @@ import {
   normalizeForDedup,
   normalizeReviewBody,
   rebuildReviewStats,
-  reviewHashes
+  reviewHashes,
+  REVIEW_INTERNAL_ID_PATTERN
 } from "../functions/_lib/reviews.js";
 import { extendReviewsDb } from "../test-support/reviews-db.js";
 
@@ -19,6 +20,80 @@ test("normalizes review bodies and treats near-duplicates as identical for dedup
   const h2 = await reviewHashes(normalizeReviewBody("가".repeat(40)));
   assert.equal(h1.body_sha256, h2.body_sha256);
   assert.notEqual(h1.body_sha256, (await reviewHashes("가".repeat(41))).body_sha256);
+});
+
+test("rejects review bodies that embed internal corpus row ids", async () => {
+  const store = createMemoryCloudflare();
+  extendReviewsDb(store.CONTENT_DB, store.APPLICATIONS_BUCKET);
+  const body =
+    "유심플러스 참여 후기 corpus-00001. 채널톡·텔레그램·LINE 상담 후 조건 확인하고 진행했습니다. " +
+    "가".repeat(20);
+  const result = await insertReviewRecord({
+    db: store.CONTENT_DB,
+    bucket: store.APPLICATIONS_BUCKET,
+    record: { body, rating: 5, displayName: "참여1", source: "test", sourceRowId: "corpus-00001" }
+  });
+  assert.equal(result.ok, false);
+  assert.equal(result.reason, "internal_id_in_body");
+});
+
+test("public reviews list and detail return distinct snippets and clean bodies", async () => {
+  const store = createMemoryCloudflare();
+  extendReviewsDb(store.CONTENT_DB, store.APPLICATIONS_BUCKET);
+  const bodies = [
+    "1월 3일 채널톡으로 번호 이동 조건을 확인했습니다. " + "가".repeat(12),
+    "2월 8일 LINE 상담에서 유지 기간별 지급 안내를 들었습니다. " + "나".repeat(12),
+    "3월 12일 텔레그램으로 조회 캡처 보낸 뒤 진행했습니다. " + "다".repeat(12)
+  ];
+  const ids = [];
+  for (const [i, body] of bodies.entries()) {
+    const inserted = await insertReviewRecord({
+      db: store.CONTENT_DB,
+      bucket: store.APPLICATIONS_BUCKET,
+      record: {
+        body,
+        rating: 5,
+        displayName: `김*${String.fromCharCode(65 + i)}`,
+        source: "test",
+        sourceRowId: `test-row-${i}`,
+        publishedAt: new Date(Date.UTC(2025, i, 1)).toISOString()
+      }
+    });
+    assert.equal(inserted.ok, true);
+    ids.push(inserted.id);
+  }
+  await rebuildReviewStats(store.CONTENT_DB);
+
+  const { onRequest: listHandler } = await import("../functions/api/reviews/index.js");
+  const listRes = await listHandler({
+    request: new Request("https://climekr.com/api/reviews?limit=10"),
+    env: { CONTENT_DB: store.CONTENT_DB }
+  });
+  assert.equal(listRes.status, 200);
+  const list = await listRes.json();
+  assert.equal(list.items.length, 3);
+  const snippets = list.items.map(i => i.snippet);
+  assert.equal(new Set(snippets).size, 3, "each list item must have a distinct snippet");
+  for (const item of list.items) {
+    assert.doesNotMatch(item.snippet, REVIEW_INTERNAL_ID_PATTERN);
+    assert.doesNotMatch(item.displayName, REVIEW_INTERNAL_ID_PATTERN);
+  }
+
+  const { onRequest: detailHandler } = await import("../functions/api/reviews/[id].js");
+  const detailBodies = [];
+  for (const id of ids) {
+    const detailRes = await detailHandler({
+      request: new Request(`https://climekr.com/api/reviews/${id}`),
+      env: { CONTENT_DB: store.CONTENT_DB, APPLICATIONS_BUCKET: store.APPLICATIONS_BUCKET },
+      params: { id }
+    });
+    assert.equal(detailRes.status, 200);
+    const detail = await detailRes.json();
+    detailBodies.push(detail.body);
+    assert.doesNotMatch(detail.body, REVIEW_INTERNAL_ID_PATTERN);
+    assert.ok(bodies.some(b => detail.body === b), "detail body must match stored R2 payload for that id");
+  }
+  assert.equal(new Set(detailBodies).size, 3);
 });
 
 test("rejects duplicate reviews at insert time", async () => {

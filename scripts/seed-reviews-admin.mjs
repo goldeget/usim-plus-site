@@ -4,20 +4,82 @@
  * Usage:
  *   ADMIN_EMAIL=... ADMIN_PASSWORD=... node scripts/seed-reviews-admin.mjs --count=10000
  * Optional: ADMIN_ORIGIN=https://admin.climekr.com (default)
+ *
+ * Production re-seed (fixes legacy rows whose bodies/snippets contained corpus-XXXXX):
+ * 1. Deploy this repo so admin import rejects internal ids in public text.
+ * 2. Wipe bad rows (one-shot worker with ?wipe=1, or DELETE reviews + R2 bodies/*).
+ * 3. Re-run this script with --count=10000 (or export/import payloads).
+ *    Existing corpus_v1 source_row_id values dedupe re-import; a full wipe is required
+ *    when replacing in-place rows that already consumed those ids.
  */
 import { readFileSync } from "node:fs";
+import https from "node:https";
 import { generateReviewRows } from "./generate-review-rows.mjs";
 import { REVIEW_CAP } from "../functions/_lib/reviews.js";
 
-const FETCH_TIMEOUT_MS = 180_000;
+const REQUEST_TIMEOUT_MS = 180_000;
 
-async function fetchWithTimeout(url, options = {}) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+function httpsRequest(url, options = {}) {
+  const target = new URL(url);
+  const body = options.body ? Buffer.from(options.body) : null;
+  return new Promise((resolve, reject) => {
+    const req = https.request(
+      {
+        protocol: target.protocol,
+        hostname: target.hostname,
+        port: target.port || 443,
+        path: `${target.pathname}${target.search}`,
+        method: options.method || "GET",
+        headers: {
+          ...(body ? { "Content-Length": body.length } : {}),
+          ...options.headers
+        },
+        timeout: REQUEST_TIMEOUT_MS
+      },
+      res => {
+        const chunks = [];
+        res.on("data", chunk => chunks.push(chunk));
+        res.on("end", () => {
+          const text = Buffer.concat(chunks).toString("utf8");
+          const setCookie = res.headers["set-cookie"];
+          resolve({
+            ok: res.statusCode >= 200 && res.statusCode < 300,
+            status: res.statusCode,
+            headers: {
+              get(name) {
+                const key = String(name).toLowerCase();
+                if (key === "set-cookie") {
+                  return Array.isArray(setCookie) ? setCookie.join("; ") : setCookie || null;
+                }
+                return res.headers[key] ?? null;
+              },
+              getSetCookie() {
+                return Array.isArray(setCookie) ? setCookie : setCookie ? [setCookie] : [];
+              }
+            },
+            json: async () => (text ? JSON.parse(text) : {}),
+            text: async () => text
+          });
+        });
+      }
+    );
+    req.on("timeout", () => req.destroy(new Error("Request timed out")));
+    req.on("error", reject);
+    if (body) req.write(body);
+    req.end();
+  });
+}
+
+async function fetchWithTimeout(url, options = {}, attempt = 1) {
+  const maxAttempts = 5;
   try {
-    return await fetch(url, { ...options, signal: controller.signal });
-  } finally {
-    clearTimeout(timer);
+    return await httpsRequest(url, options);
+  } catch (error) {
+    if (attempt >= maxAttempts) throw error;
+    const delay = Math.min(2000 * attempt, 15_000);
+    console.warn(`Fetch retry ${attempt}/${maxAttempts} in ${delay}ms: ${error?.message || error}`);
+    await new Promise(r => setTimeout(r, delay));
+    return fetchWithTimeout(url, options, attempt + 1);
   }
 }
 

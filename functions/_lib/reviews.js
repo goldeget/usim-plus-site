@@ -4,6 +4,25 @@ export const REVIEW_CAP = 10_000;
 export const REVIEW_BODY_MIN = 40;
 export const REVIEW_BODY_MAX = 2000;
 
+/** Internal import row ids must never appear in public review text. */
+export const REVIEW_INTERNAL_ID_PATTERN = /corpus-\d{5}/i;
+
+export function reviewTextContainsInternalId(text) {
+  return REVIEW_INTERNAL_ID_PATTERN.test(String(text ?? ""));
+}
+
+export function validateReviewImportRecord(record) {
+  const body = normalizeReviewBody(record?.body);
+  if (reviewTextContainsInternalId(body)) return "internal_id_in_body";
+  const displayName = String(record?.displayName ?? "");
+  if (reviewTextContainsInternalId(displayName)) return "internal_id_in_display_name";
+  const channel = record?.tags?.channel;
+  if (channel === "corpus" || reviewTextContainsInternalId(String(channel ?? ""))) {
+    return "invalid_tags";
+  }
+  return null;
+}
+
 const textEncoder = new TextEncoder();
 
 export function sha256Hex(value) {
@@ -128,6 +147,9 @@ export function mapReviewRow(row, includeBody = false) {
 }
 
 export async function insertReviewRecord({ db, bucket, record }) {
+  const importIssue = validateReviewImportRecord(record);
+  if (importIssue) return { ok: false, reason: importIssue };
+
   const body = normalizeReviewBody(record.body);
   if (body.length < REVIEW_BODY_MIN || body.length > REVIEW_BODY_MAX) {
     return { ok: false, reason: "invalid_length" };

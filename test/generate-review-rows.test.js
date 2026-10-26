@@ -13,6 +13,8 @@ test("generated review corpus has unique dedup hashes and realistic bounds", asy
     assert.ok(row.body.length >= REVIEW_BODY_MIN, `row ${row.rowId} too short`);
     assert.ok(row.body.length <= REVIEW_BODY_MAX, `row ${row.rowId} too long`);
     assert.doesNotMatch(row.body, /\(후기-\d+\)/);
+    assert.doesNotMatch(row.body, /corpus-\d{5}/i);
+    assert.doesNotMatch(row.displayName, /corpus-\d{5}/i);
     assert.match(row.displayName, /^[가-힣]/);
     const hashes = await reviewHashes(row.body);
     assert.ok(!bodySha.has(hashes.body_sha256), `duplicate body ${row.rowId}`);
