@@ -11,6 +11,7 @@ import {
   REVIEW_INTERNAL_ID_PATTERN
 } from "../functions/_lib/reviews.js";
 import { extendReviewsDb } from "../test-support/reviews-db.js";
+import { reviewAssetsEnv } from "../test-support/review-assets.js";
 
 test("normalizes review bodies and treats near-duplicates as identical for dedup hash", async () => {
   const a = normalizeForDedup("  안녕하세요!!\n\n상담이  친절했습니다.  ");
@@ -37,69 +38,42 @@ test("rejects review bodies that embed internal corpus row ids", async () => {
   assert.equal(result.reason, "internal_id_in_body");
 });
 
-test("public reviews list and detail return distinct snippets and clean bodies", async () => {
-  const store = createMemoryCloudflare();
-  extendReviewsDb(store.CONTENT_DB, store.APPLICATIONS_BUCKET);
-  const bodies = [
-    "1월 3일 채널톡으로 번호 이동 조건을 확인했습니다. " + "가".repeat(12),
-    "2월 8일 LINE 상담에서 유지 기간별 지급 안내를 들었습니다. " + "나".repeat(12),
-    "3월 12일 텔레그램으로 조회 캡처 보낸 뒤 진행했습니다. " + "다".repeat(12)
-  ];
-  const ids = [];
-  for (const [i, body] of bodies.entries()) {
-    const inserted = await insertReviewRecord({
-      db: store.CONTENT_DB,
-      bucket: store.APPLICATIONS_BUCKET,
-      record: {
-        body,
-        rating: 5,
-        displayName: `김*${String.fromCharCode(65 + i)}`,
-        source: "test",
-        sourceRowId: `test-row-${i}`,
-        publishedAt: new Date(Date.UTC(2025, i, 1)).toISOString()
-      }
-    });
-    assert.equal(inserted.ok, true);
-    ids.push(inserted.id);
-  }
-  await rebuildReviewStats(store.CONTENT_DB);
-
+test("public reviews list and detail read the static corpus, not D1", async () => {
+  const env = reviewAssetsEnv();
   const { onRequest: listHandler } = await import("../functions/api/reviews/index.js");
   const listRes = await listHandler({
     request: new Request("https://climekr.com/api/reviews?limit=10"),
-    env: { CONTENT_DB: store.CONTENT_DB }
+    env
   });
   assert.equal(listRes.status, 200);
   const list = await listRes.json();
-  assert.equal(list.items.length, 3);
+  assert.equal(list.items.length, 10);
   for (let i = 1; i < list.items.length; i += 1) {
     assert.ok(
       list.items[i - 1].publishedAt >= list.items[i].publishedAt,
       "public list is published_at DESC (newest first)"
     );
   }
-  const snippets = list.items.map(i => i.snippet);
-  assert.equal(new Set(snippets).size, 3, "each list item must have a distinct snippet");
+  const snippets = list.items.map(item => item.snippet);
+  assert.equal(new Set(snippets).size, snippets.length, "each list item must have a distinct snippet");
   for (const item of list.items) {
     assert.doesNotMatch(item.snippet, REVIEW_INTERNAL_ID_PATTERN);
     assert.doesNotMatch(item.displayName, REVIEW_INTERNAL_ID_PATTERN);
+    assert.doesNotMatch(item.snippet, /\d+\s*분경/);
   }
 
   const { onRequest: detailHandler } = await import("../functions/api/reviews/[id].js");
-  const detailBodies = [];
-  for (const id of ids) {
-    const detailRes = await detailHandler({
-      request: new Request(`https://climekr.com/api/reviews/${id}`),
-      env: { CONTENT_DB: store.CONTENT_DB, APPLICATIONS_BUCKET: store.APPLICATIONS_BUCKET },
-      params: { id }
-    });
-    assert.equal(detailRes.status, 200);
-    const detail = await detailRes.json();
-    detailBodies.push(detail.body);
-    assert.doesNotMatch(detail.body, REVIEW_INTERNAL_ID_PATTERN);
-    assert.ok(bodies.some(b => detail.body === b), "detail body must match stored R2 payload for that id");
-  }
-  assert.equal(new Set(detailBodies).size, 3);
+  const detailRes = await detailHandler({
+    request: new Request(`https://climekr.com/api/reviews/${list.items[0].id}`),
+    env,
+    params: { id: list.items[0].id }
+  });
+  assert.equal(detailRes.status, 200);
+  const detail = await detailRes.json();
+  assert.equal(detail.id, list.items[0].id);
+  assert.doesNotMatch(detail.body, REVIEW_INTERNAL_ID_PATTERN);
+  assert.doesNotMatch(detail.body, /\d+\s*분경/);
+  assert.ok(detail.body.length > list.items[0].snippet.replace(/…$/, "").length);
 });
 
 test("rejects duplicate reviews at insert time", async () => {
@@ -123,29 +97,19 @@ test("rejects duplicate reviews at insert time", async () => {
   assert.equal(stats.total, 1);
 });
 
-test("public reviews stats endpoint returns aggregated totals", async () => {
-  const store = createMemoryCloudflare();
-  extendReviewsDb(store.CONTENT_DB, store.APPLICATIONS_BUCKET);
-  await insertReviewRecord({
-    db: store.CONTENT_DB,
-    bucket: store.APPLICATIONS_BUCKET,
-    record: {
-      body: "조회 후 상담까지 한 번에 연결되어 번거롭지 않았습니다. " + "나".repeat(12),
-      rating: 5,
-      displayName: "김*희",
-      source: "test"
-    }
-  });
-  await rebuildReviewStats(store.CONTENT_DB);
+test("public reviews stats endpoint returns the static 10000-review aggregate", async () => {
   const { onRequest } = await import("../functions/api/reviews/stats.js");
   const response = await onRequest({
     request: new Request("https://climekr.com/api/reviews/stats"),
-    env: { CONTENT_DB: store.CONTENT_DB }
+    env: reviewAssetsEnv()
   });
   assert.equal(response.status, 200);
   const data = await response.json();
-  assert.equal(data.total, 1);
-  assert.equal(data.avgRating, 5);
+  assert.equal(data.total, 10_000);
+  assert.equal(data.avgRating, 4.8);
+  assert.equal(data.histogram["5"], 8100);
+  assert.equal(data.histogram["4"], 1800);
+  assert.equal(data.histogram["3"], 100);
   assert.match(response.headers.get("Cache-Control"), /s-maxage=300/);
 });
 

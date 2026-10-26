@@ -1,4 +1,9 @@
 import {
+  kstCalendarParts,
+  kstDateKey,
+  rewriteReviewDatePhrase
+} from "./review-dates.js";
+import {
   REVIEW_BODY_MAX,
   REVIEW_BODY_MIN,
   normalizeReviewBody,
@@ -6,66 +11,13 @@ import {
   reviewTextContainsInternalId
 } from "./reviews.js";
 
+export { kstCalendarParts, kstDateKey, rewriteReviewDatePhrase };
+
 /** Published reviews moved to "today" on each Asia/Seoul calendar day. */
 export const DAILY_REVIEW_REFRESH_LIMIT = 50;
 
 const PAGE_SIZE = 80;
 const MAX_SCAN = 400;
-
-const WEEKDAY_KO = { Sun: "일", Mon: "월", Tue: "화", Wed: "수", Thu: "목", Fri: "금", Sat: "토" };
-const MINUTE_STAMP_RE = /\s*\d{1,2}\s*분경\s*/g;
-const YEAR_MONTH_DAY_RE = /\d{4}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일/g;
-const MONTH_DAY_RE = /\d{1,2}\s*월\s*\d{1,2}\s*일/g;
-const WEEKDAY_RE = /(?:일|월|화|수|목|금|토)요일/g;
-
-/** @param {Date} date */
-export function kstCalendarParts(date) {
-  const bag = {};
-  for (const part of new Intl.DateTimeFormat("en-US", {
-    timeZone: "Asia/Seoul",
-    year: "numeric",
-    month: "numeric",
-    day: "numeric",
-    weekday: "short",
-    hourCycle: "h23"
-  }).formatToParts(date)) {
-    if (part.type !== "literal") bag[part.type] = part.value;
-  }
-  const digits = value => Number(String(value ?? "").replace(/[^\d]/g, ""));
-  return {
-    year: digits(bag.year),
-    month: digits(bag.month),
-    day: digits(bag.day),
-    weekday: WEEKDAY_KO[bag.weekday] || bag.weekday
-  };
-}
-
-/** @param {Date} date */
-export function kstDateKey(date) {
-  const parts = kstCalendarParts(date);
-  return `${parts.year}-${String(parts.month).padStart(2, "0")}-${String(parts.day).padStart(2, "0")}`;
-}
-
-/**
- * Point calendar phrases at `when` in Asia/Seoul and drop minute stamps.
- * Time-of-day words ("오전에", "퇴근 후") and the rest of the story stay.
- * @param {string} body
- * @param {Date|string|number} when
- */
-export function rewriteReviewDatePhrase(body, when) {
-  const instant = when instanceof Date ? when : new Date(when);
-  const kst = kstCalendarParts(instant);
-  const md = `${kst.month}월 ${kst.day}일`;
-  const ymd = `${kst.year}년 ${md}`;
-  const weekday = `${kst.weekday}요일`;
-  let text = String(body ?? "");
-  text = text.replace(MINUTE_STAMP_RE, " ");
-  text = text.replace(YEAR_MONTH_DAY_RE, ymd);
-  text = text.replace(MONTH_DAY_RE, md);
-  text = text.replace(WEEKDAY_RE, weekday);
-  text = text.replace(/[ \t]{2,}/g, " ").replace(/\s+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
-  return text;
-}
 
 function changes(result) {
   return Number(result?.meta?.changes ?? 0);

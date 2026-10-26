@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "test": "node --test",
+    "build:reviews": "node scripts/build-review-static.mjs",
     "seed:reviews": "node scripts/seed-reviews.mjs --count=10000",
     "seed:reviews:remote": "node scripts/seed-reviews-admin.mjs --count=10000"
   }
