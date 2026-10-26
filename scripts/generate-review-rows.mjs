@@ -1,7 +1,12 @@
 /**
  * Deterministic Korean review corpus for import (unique bodies, dedup-safe).
- * Voice: 급전·융통 필요 → 유심 플랫폼(USIM PLUS) 경로로 자격 확인 후 지원·지급;
- * 회사가 절차·통신 비용 부담, 이용자는 사진 캡처 위주 (번호이동·개통-only 후기 아님).
+ * Voice: 급전이 필요하고 대출은 안 됨 → 이 유심 플랫폼이 자금을 마련해 문제가 해결됨.
+ * 페르소나(주부·직장인·대학생·사업자·육아맘·경단녀)가 글마다 분명함.
+ * 대학생은 용돈이 필요했던 경우, 사업자는 사업자금이 부족했던 경우.
+ * 대학생은 20–30대 구어. 나머지 페르소나는 20–70대에 걸쳐 나이 말투를 탄다.
+ * 회사가 절차를 진행, 고객은 사진 캡처, 고객 부담 0원, 회사·통신사 실적 목적.
+ * 가족에게 전달·설명·안내 문구를 넘기는 문장은 넣지 않는다.
+ * 번호이동·개통만 다룬 후기가 아님.
  *
  * Calendar: every 년/월/일 in a body is that row's publishedAt in Asia/Seoul.
  * Time of day ("오전에", "저녁에") follows the same instant. No "N분경" stamps.
@@ -45,7 +50,7 @@ function dedupHashesForBody(body) {
 }
 
 /** Bump when corpus voice/templates change so seed cache files regenerate. */
-export const REVIEW_CORPUS_VERSION = "usim-unique-skeleton-2026-10-27";
+export const REVIEW_CORPUS_VERSION = "usim-persona-funds-2026-10-27";
 
 const CHANNELS = ["channeltalk", "telegram", "line"];
 const STAGES = ["3", "15", "30", "consult"];
@@ -59,42 +64,62 @@ const CHANNEL_PHRASE = {
 const SURNAMES = ["김", "이", "박", "최", "정", "강", "조", "윤", "장", "임", "한", "오", "서", "신", "권", "황", "안", "송", "류", "홍"];
 const GIVEN_TAIL = ["민", "준", "서", "현", "우", "진", "영", "희", "수", "연", "호", "윤", "아", "성", "경", "혜", "택", "빈", "람", "솔"];
 
-/** Reason clauses. Casual ends so it can lead a sentence; formal is the 하여-체 parallel. */
-const SITUATIONS = [
-  { topic: "카드 한도", because: "카드 한도가 막혀서", formal: "카드 한도가 부족하여" },
-  { topic: "은행 대출", because: "은행 대출이 거절돼서", formal: "은행 대출이 거절되어" },
-  { topic: "월말 생활비", because: "월말 통장이 빠듯해서", formal: "월말 자금이 빠듯하여" },
-  { topic: "생활비", because: "생활비가 모자라서", formal: "생활비가 부족하여" },
-  { topic: "알바비", because: "알바 수입이 줄어서", formal: "아르바이트 수입이 줄어 급전이 필요하여" },
-  { topic: "매출", because: "매출이 비어서", formal: "매출 공백으로 자금이 막힌 탓에" },
-  { topic: "병원비", because: "병원비가 겹쳐서", formal: "병원비 부담이 커진 탓에" },
-  { topic: "학자금", because: "학자금 마감이 다가와서", formal: "학자금 마감이 다가온 탓에" },
-  { topic: "전세자금", because: "전세자금이 묶여서", formal: "전세자금이 묶인 탓에" },
-  { topic: "신용조회", because: "신용조회 뒤에 대출이 안 돼서", formal: "신용조회 이후 추가 대출이 어려워진 탓에" },
-  { topic: "2금융 거절", because: "2금융까지 거절당해서", formal: "제2금융권까지 거절되어" },
-  { topic: "기대출", because: "기대출이 많아서", formal: "기대출이 많아 한도가 막힌 탓에" },
-  { topic: "통장 잔액", because: "통장이 바닥나서", formal: "통장 잔액이 바닥난 탓에" },
-  { topic: "카드론", because: "카드론까지 써서", formal: "카드론 한도까지 사용하여" },
-  { topic: "연체 이력", because: "단기 연체로 대출이 막혀서", formal: "단기 연체로 대출이 어려워진 탓에" },
-  { topic: "프리랜서 소득", because: "프리랜서라 서류 대출이 안 돼서", formal: "프리랜서 소득이라 서류 대출이 되지 않아" },
-  { topic: "실업급여", because: "실업급여만으로는 빠듯해서", formal: "실업급여만으로 생활비가 빠듯하여" },
-  { topic: "가족 병원비", because: "가족 병원비를 한꺼번에 내야 해서", formal: "가족 병원비를 일시불로 내야 하여" },
-  { topic: "학원비", because: "학원비가 겹쳐서", formal: "학원비가 겹쳐 급전이 필요하여" },
-  { topic: "결제일", because: "결제일이 몰려서", formal: "결제일이 몰려 현금이 막힌 탓에" },
-  { topic: "비상금", because: "비상금을 이미 써서", formal: "비상금을 이미 사용하여" },
-  { topic: "보증금", because: "보증금 일부를 메워야 해서", formal: "보증금 일부를 메워야 하여" },
-  { topic: "급전 융통", because: "융통이 안 돼서", formal: "당장 융통이 되지 않아" },
-  { topic: "이번 달 생활비", because: "당월 생활비를 못 메워서", formal: "당월 생활비를 메우지 못해" },
-  { topic: "소득 증빙", because: "소득 증빙이 약해서", formal: "소득 증빙이 약해 대출이 거절되어" },
-  { topic: "월급날", because: "월급날까지 버티기가 힘들어서", formal: "월급날까지 날이 남아 급하여" }
-];
+/**
+ * Need clauses tied to one persona.
+ * Casual `because` can lead a sentence; `formal` is the 하여-체 parallel.
+ * 대학생 topics stay on 용돈. 사업자 topics stay on 사업자금.
+ */
+const PERSONA_SITUATIONS = {
+  "주부": [
+    { topic: "생활비", because: "생활비가 모자라서", formal: "생활비가 부족하여" },
+    { topic: "가계 비용", because: "가계가 비어서", formal: "가계가 비어" },
+    { topic: "공과금", because: "공과금이 겹쳐서", formal: "공과금이 겹쳐" },
+    { topic: "월세", because: "월세가 다가와서", formal: "월세 날이 다가와" },
+    { topic: "장보기", because: "장보기 비용이 빠져서", formal: "장보기 비용이 빠져" }
+  ],
+  "직장인": [
+    { topic: "월급 전 생활비", because: "월급 전 생활비가 막혀서", formal: "월급 전 생활비가 막혀" },
+    { topic: "카드값", because: "카드값이 밀려서", formal: "카드값이 밀려" },
+    { topic: "전세자금", because: "전세자금이 묶여서", formal: "전세자금이 묶인 탓에" },
+    { topic: "카드론", because: "카드론까지 막혀서", formal: "카드론까지 막혀" },
+    { topic: "결제일", because: "결제일이 몰려서", formal: "결제일이 몰려" }
+  ],
+  "대학생": [
+    { topic: "용돈", because: "용돈이 필요해서", formal: "용돈이 필요하여" },
+    { topic: "용돈", because: "용돈이 끊겨서", formal: "용돈이 끊겨" },
+    { topic: "용돈", because: "학식비 낼 용돈이 없어서", formal: "학식비 낼 용돈이 없어" },
+    { topic: "용돈", because: "자취 월세 낼 용돈이 빠져서", formal: "자취 월세 낼 용돈이 빠져" },
+    { topic: "용돈", because: "교재 살 용돈이 모자라서", formal: "교재 살 용돈이 모자라" }
+  ],
+  "사업자": [
+    { topic: "사업자금", because: "사업자금이 부족해서", formal: "사업자금이 부족하여" },
+    { topic: "사업자금", because: "재료 살 사업자금이 없어서", formal: "재료 살 사업자금이 없어" },
+    { topic: "사업자금", because: "매출이 비어 사업자금이 막혀서", formal: "매출이 비어 사업자금이 막혀" },
+    { topic: "사업자금", because: "거래처 대금 낼 사업자금이 없어서", formal: "거래처 대금 낼 사업자금이 없어" },
+    { topic: "사업자금", because: "가게 운영 사업자금이 빠져서", formal: "가게 운영 사업자금이 빠져" }
+  ],
+  "육아맘": [
+    { topic: "육아비", because: "육아비가 겹쳐서", formal: "육아비가 겹쳐" },
+    { topic: "분유값", because: "분유값이 빠져서", formal: "분유값이 빠져" },
+    { topic: "어린이집 비용", because: "어린이집 비용이 겹쳐서", formal: "어린이집 비용이 겹쳐" },
+    { topic: "아이 병원비", because: "아이 병원비가 나와서", formal: "아이 병원비가 나와" },
+    { topic: "기저귀 값", because: "기저귀 값이 빠져서", formal: "기저귀 값이 빠져" }
+  ],
+  "경단녀": [
+    { topic: "생활비", because: "경력이 끊겨 생활비가 막혀서", formal: "경력 단절 뒤 생활비가 막혀" },
+    { topic: "재취업 비용", because: "재취업 준비 비용이 없어서", formal: "재취업 준비 비용이 없어" },
+    { topic: "급전", because: "소득이 끊겨 급전이 필요해서", formal: "소득이 끊겨 급전이 필요하여" },
+    { topic: "자격 학원비", because: "자격 학원비가 겹쳐서", formal: "자격 학원비가 겹쳐" },
+    { topic: "공과금", because: "벌어 둔 돈이 없어 공과금이 막혀서", formal: "벌어 둔 돈이 없어 공과금이 막혀" }
+  ]
+};
 
 const SHOTS = ["캡처 화면", "요금 화면", "명의 화면", "회선 상태 화면", "유심 실물 사진", "캡처 한 장", "요금 문자 화면", "본인 확인 화면"];
 const DOCS = ["0원 안내", "지급 안내", "회사 절차 안내", "유지 조건 안내", "자격 안내", "비용 부담 안내", "자동 안내", "상담 안내"];
 const WORRIES = [
   "추가 비용이 붙는지",
   "신용조회가 한 번 더 도는지",
-  "가족 명의가 필요한지",
+  "본인 명의만으로 되는지",
   "당일 입금이 되는지",
   "위약이 있는지",
   "서류가 더 필요한지",
@@ -119,17 +144,17 @@ const CLOSER_CASUAL = {
       "답이 조금 늦었던 것 말고는 안내가 깔끔했어요."
     ],
     3: [
-      "안내는 알겠는데 제 회선이랑은 안 맞아서 보류해 뒀어요.",
-      "설명은 들었지만 진행이 느려 그 날은 결정을 미뤘어요.",
-      "계산이 헷갈려 아직 참여하지는 않았어요.",
-      "조건은 분명한데 지금 상황에는 맞지 않아 멈춰 뒀어요."
+      "급한 돈은 해결됐는데 회선 안내가 조금 헷갈려 아쉬웠어요.",
+      "자금은 마련됐는데 진행이 느려 그 점은 아쉬웠어요.",
+      "필요한 돈은 들어왔는데 유지 계산이 헷갈려 아쉬웠어요.",
+      "문제는 풀렸는데 조건 표가 조금 촘촘해 아쉬웠어요."
     ]
   },
   "30s": {
     5: [
       "조건이 짧아서 한 번 읽고 바로 이해할 수 있었어요.",
       "같은 질문을 나눠 물어도 기준이 안 흔들려서 신뢰가 갔어요.",
-      "가족에게 전달할 문장까지 정리돼 있어 편했어요.",
+      "필요한 자금이 마련돼 막혔던 일이 해결됐어요.",
       "급전을 찾다 들어온 창치고는 압박이 없었어요."
     ],
     4: [
@@ -139,17 +164,17 @@ const CLOSER_CASUAL = {
       "첫 답이 늦은 것만 빼고는 내용이 분명했어요."
     ],
     3: [
-      "안내는 충분한데 제 명의 조건과는 달라 보류해 뒀어요.",
-      "진행이 길어져 그날은 참여를 미뤄 뒀어요.",
-      "표 계산이 한 번에 안 들어와 아직 결정하지 못했어요.",
-      "설명과 제 상황이 어긋나 일단 멈춰 뒀어요."
+      "급한 돈은 해결됐는데 명의 안내를 두 번 읽게 됐어요.",
+      "자금은 들어왔는데 진행이 길어 기다린 점이 아쉬웠어요.",
+      "문제는 풀렸는데 표 계산이 한 번에 안 들어왔어요.",
+      "돈은 마련됐는데 설명이 조금 길어 아쉬웠어요."
     ]
   },
   "40s": {
     5: [
       "필요한 말만 있어 읽고 조건을 비교하기 수월했어요.",
       "처음 들은 기준과 나중 안내가 같아서 마음이 놓였어요.",
-      "주변에 조건부터 보라고 전할 수 있을 정도였어요.",
+      "대출 대신 이 경로로 돈이 들어와 문제가 풀렸어요.",
       "급하게 알아본 상담치고는 정돈이 잘 돼 있었어요."
     ],
     4: [
@@ -159,10 +184,10 @@ const CLOSER_CASUAL = {
       "답장이 약간 늦었지만 내용 자체는 분명했어요."
     ],
     3: [
-      "안내는 받았지만 제 회선 조건과 맞지 않아 보류해 뒀어요.",
-      "진행 속도가 예상보다 느려 참여는 미뤄 뒀어요.",
-      "유지 기간 계산이 헷갈려 아직 결정하지 않았어요.",
-      "설명은 이해했는데 지금 사정에는 맞지 않아 멈춰 뒀어요."
+      "급한 돈은 해결됐는데 회선 조건을 다시 확인한 점이 번거로웠어요.",
+      "자금은 마련됐는데 진행이 느려 기다림이 있었어요.",
+      "문제는 풀렸는데 유지 기간 계산이 한 번에 안 들어왔어요.",
+      "필요한 돈은 마련됐는데 안내가 길어 아쉬웠어요."
     ]
   }
 };
@@ -172,7 +197,7 @@ const CLOSER_FORMAL = {
     5: [
       "안내 순서가 일정하여 조건을 이해하고 진행했습니다.",
       "같은 질문을 다시 드려도 기준이 흔들리지 않았습니다.",
-      "가족에게 전할 문장까지 정리되어 전달이 수월했습니다.",
+      "필요한 자금이 마련되어 막혔던 일이 해결되었습니다.",
       "급한 자금 상황에서 본 상담치고는 정돈이 잘 되어 있었습니다."
     ],
     4: [
@@ -182,17 +207,17 @@ const CLOSER_FORMAL = {
       "첫 답변이 조금 늦었으나 내용 자체는 분명했습니다."
     ],
     3: [
-      "안내는 받았으나 제 회선 조건과는 맞지 않아 보류했습니다.",
-      "진행이 예상보다 느려 당일은 참여를 미뤘습니다.",
-      "유지 기간 계산이 한 번에 이해되지 않아 결정을 보류했습니다.",
-      "설명은 분명했으나 현재 사정에는 맞지 않아 멈춰 두었습니다."
+      "급한 자금은 해결되었으나 회선 안내를 다시 읽은 점이 번거로웠습니다.",
+      "자금은 마련되었으나 진행이 느려 기다린 점이 아쉬웠습니다.",
+      "문제는 해결되었으나 유지 기간 계산이 한 번에 이해되지 않았습니다.",
+      "필요한 자금은 마련되었으나 안내가 길어 아쉬웠습니다."
     ]
   },
   "60s": {
     5: [
       "필요한 설명이 간결하여 조건을 비교하기 수월했습니다.",
       "초기 안내와 이후 답변이 같아 신뢰할 수 있었습니다.",
-      "주변에 조건을 먼저 확인하라고 전할 수 있을 정도였습니다.",
+      "대출 대신 이 경로로 자금이 들어와 문제가 해결되었습니다.",
       "급한 마음에 문의했으나 절차 설명은 차분했습니다."
     ],
     4: [
@@ -202,17 +227,17 @@ const CLOSER_FORMAL = {
       "답변이 다소 늦었으나 안내 내용은 명확했습니다."
     ],
     3: [
-      "안내는 충분했으나 제 명의 조건과 달라 보류했습니다.",
-      "진행 속도가 느려 그날은 결정을 미뤘습니다.",
-      "계산이 헷갈려 아직 참여하지 않았습니다.",
-      "조건은 이해했으나 지금 상황에는 맞지 않아 보류했습니다."
+      "급한 자금은 해결되었으나 명의 안내를 다시 확인했습니다.",
+      "자금은 마련되었으나 진행이 느려 기다렸습니다.",
+      "문제는 해결되었으나 계산이 한 번에 이해되지 않았습니다.",
+      "필요한 자금은 마련되었으나 안내가 다소 길었습니다."
     ]
   },
   "70s": {
     5: [
       "안내가 간결하여 납득하고 진행했습니다.",
       "추가 질문에도 같은 기준으로 답하여 신뢰가 갔습니다.",
-      "조건이 분명하여 가족에게도 동일하게 전달했습니다.",
+      "조건이 분명하였고 필요한 자금이 마련되어 문제가 해결되었습니다.",
       "전반적으로 차분한 안내라 마음이 놓였습니다."
     ],
     4: [
@@ -222,10 +247,10 @@ const CLOSER_FORMAL = {
       "답변이 조금 늦었으나 이후 안내는 일관되었습니다."
     ],
     3: [
-      "안내는 받았으나 제 회선 조건과는 맞지 않아 보류했습니다.",
-      "진행이 느려 당일은 결정을 미뤘습니다.",
-      "조건은 분명했으나 현재 상황에는 맞지 않아 보류했습니다.",
-      "설명은 이해했으나 참여는 보류한 상태입니다."
+      "급한 자금은 해결되었으나 회선 안내를 다시 확인하였습니다.",
+      "자금은 마련되었으나 진행이 느려 기다렸습니다.",
+      "문제는 해결되었으나 현재 안내가 다소 길었습니다.",
+      "필요한 자금은 마련되었으나 읽는 데 시간이 걸렸습니다."
     ]
   }
 };
@@ -260,15 +285,16 @@ export function kstCalendarParts(date) {
   };
 }
 
-function todOptions(hour, weekday) {
+function todOptions(hour, weekday, persona) {
   const weekend = weekday === "토" || weekday === "일";
+  const commutes = persona === "직장인" || persona === "사업자";
   if (hour < 3) return ["밤중에", "새벽에"];
   if (hour < 6) return ["새벽에"];
-  if (hour < 11) return weekend ? ["오전에", "아침 일찍"] : ["오전에", "출근 전에"];
+  if (hour < 11) return weekend || !commutes ? ["오전에", "아침 일찍"] : ["오전에", "출근 전에"];
   if (hour < 12) return ["오전에", "오전 중에"];
   if (hour < 14) return ["점심에", "점심시간에"];
   if (hour < 18) return ["오후에", "오후 중에"];
-  if (hour < 22) return weekend ? ["저녁에", "저녁 무렵에"] : ["저녁에", "퇴근하고"];
+  if (hour < 22) return weekend || !commutes ? ["저녁에", "저녁 무렵에"] : ["저녁에", "퇴근하고"];
   return ["밤에", "늦은 밤에"];
 }
 
@@ -323,6 +349,26 @@ export function isFormalAgeBucket(bucket) {
 }
 
 /**
+ * 대학생 is only 20s–30s casual. The other five personas span the age buckets.
+ * Lane is the index within one age bucket (rows step by 6).
+ */
+const PERSONA_BY_BUCKET = {
+  "20s": ["대학생", "대학생", "대학생", "대학생", "직장인", "주부", "육아맘", "사업자"],
+  "30s": ["직장인", "주부", "육아맘", "사업자", "경단녀", "대학생", "경단녀", "주부"],
+  "40s": ["주부", "직장인", "사업자", "육아맘", "경단녀"],
+  "50s": ["직장인", "사업자", "육아맘", "경단녀", "주부"],
+  "60s": ["사업자", "육아맘", "경단녀", "주부", "직장인"],
+  "70s": ["육아맘", "경단녀", "주부", "직장인", "사업자"]
+};
+
+export function personaForIndex(i) {
+  const bucket = ageBucketForIndex(i);
+  const lane = Math.floor((i - 1) / 6);
+  const pool = PERSONA_BY_BUCKET[bucket];
+  return pool[lane % pool.length];
+}
+
+/**
  * Corpus rating mix targeting mean exactly 4.8 on a 5-point scale (integer stars).
  * For count divisible by 5: 5·n5 + 4·n4 + 3·n3 = (48/10)·count, with n5 + n4 + n3 = count.
  * Mostly 4–5 stars: n5 = (4/5)·count + n3, n4 = count/5 − 2·n3 (0 ≤ n3 ≤ count/10).
@@ -360,8 +406,8 @@ function displayNameFor(i, rng, formal) {
   return `${surname}${head}${tail.slice(0, 1)}*`;
 }
 
-function whenPhrase(kst, i, salt) {
-  const tod = pickAt(todOptions(kst.hour, kst.weekday), i, 4 + salt);
+function whenPhrase(kst, i, salt, persona) {
+  const tod = pickAt(todOptions(kst.hour, kst.weekday, persona), i, 4 + salt);
   const md = `${kst.month}월 ${kst.day}일`;
   const ymd = `${kst.year}년 ${md}`;
   const wd = `${kst.weekday}요일`;
@@ -384,7 +430,7 @@ function casualStory(ctx) {
     `${worry} 궁금해서 ${when} ${chAt} USIM PLUS 담당자에게 먼저 물어봤어요. ${doc}랑 회사 절차를 같이 보내 줘서 급전만 헤매던 때보다 순서가 보였어요.`,
     `사기인가 싶어 미루다가 ${when} ${because} 결국 ${chName}으로 유심 플랫폼 안내를 봤어요. 대출 권유 대신 자격 확인 후 지급이라는 말이 먼저 나왔고, 본인 부담은 0원이라고 했어요.`,
     `같은 처지라던 지인이 ${chName}을 알려 줘서 ${when} ${topic} 건으로 들어가 봤어요. USIM PLUS 창에 ${shot} 예시가 있고, 회사 쪽에서 절차를 맡는다고 적혀 있었어요.`,
-    `가족에게 ${topic} 이야기를 꺼내려니 링크가 필요해 ${when} ${chAt} 유심 플랫폼 상담을 남겼어요. 0원·회사 부담 문장을 ${shot}으로 남길 수 있게 정리해 줬어요.`,
+    `대출이 안 된 뒤 ${topic} 문제로 ${when} ${chAt} 유심 플랫폼 상담을 남겼어요. 회사와 통신사 실적 목적의 절차로 자금이 마련됐고, 제가 한 일은 ${shot}뿐이었어요.`,
     `당일 입금을 기대하고 ${when} ${because} ${chTo} 유심 플랫폼에 문의했어요. 유지 기간을 채운 뒤 지급이라고 먼저 말해 줬고, ${stageName}이랑 ${doc}가 한 화면에 있었어요.`,
     `${when} ${chAt} ${shot}을 올렸더니 초점이 안 맞아 한 번 다시 찍었어요. 이유는 짚어 줬고, 비용 0원이랑 회사 절차라는 말도 그 김에 다시 확인했어요.`,
     `여기저기 급전을 알아보다 ${when} ${chAt} 연 유심 플랫폼만 톤이 달랐어요. ${because} 온 건데 몰아붙이지 않고 ${worry}부터 답해 줬어요.`,
@@ -408,7 +454,7 @@ function formalStory(ctx) {
     `${worry}부터 확인하고자 ${when} ${chAt} USIM PLUS 담당자에게 문의했습니다. ${doc}와 회사 절차를 함께 안내해 주어 급히 자금을 찾던 상황에서도 순서가 보였습니다.`,
     `처음에는 신뢰하기 어려웠으나 ${when} ${formalBecause} ${chName}으로 유심 플랫폼 안내를 받아 보았습니다. 대출 중개와 달리 자격 확인 후 지원·지급이라는 점을 먼저 설명했습니다.`,
     `${topic} 때문에 어려움을 겪던 지인의 소개로 ${when} ${chTo} 접속했습니다. USIM PLUS 화면에 ${shot} 예시가 있었고, 절차는 회사 측에서 진행한다고 적혀 있었습니다.`,
-    `가족에게 ${topic} 사정을 설명하려면 자료가 필요하여 ${when} ${chAt} 유심 플랫폼 상담을 남겼습니다. 이용자 부담 0원과 회사 부담 범위를 ${shot}으로 보관할 수 있게 정리해 주었습니다.`,
+    `대출이 되지 않은 뒤 ${topic} 문제로 ${when} ${chAt} 유심 플랫폼 상담을 남겼습니다. 회사와 통신사 실적 목적의 절차로 자금이 마련되었고, 이용자가 한 일은 ${shot}뿐이었습니다.`,
     `당일 입금을 기대하고 ${when} ${formalBecause} ${chTo} 유심 플랫폼에 문의했습니다. 유지 기간 이후 지급임을 먼저 안내받았고, ${stageName}과 ${doc}가 같은 화면에 있었습니다.`,
     `${when} ${chAt} ${shot}을 전송하였으나 초점이 맞지 않아 한 차례 다시 촬영했습니다. 사유를 함께 알려 주었고, 비용 0원과 회사 절차라는 안내도 다시 확인했습니다.`,
     `급한 자금을 알아보던 중 ${when} ${chAt} 본 유심 플랫폼 안내의 톤이 달랐습니다. ${formalBecause} 문의한 것인데 ${worry}부터 답변해 주었습니다.`,
@@ -435,7 +481,7 @@ function casualExtras(ctx) {
     "불법 대출처럼 회유하는 말은 없어서 톤이 달랐어요.",
     "자동으로 다음 안내가 이어져 어디서 멈춘 건지 표시가 됐어요.",
     "지급은 유지 기간을 채운 뒤라는 점을 먼저 말해서 기대를 낮췄어요.",
-    "가족에게 보여줄 요량으로 0원 문구를 캡처해 뒀어요.",
+    "고객 부담 0원으로 진행됐고 급한 돈 문제는 여기서 해결됐어요.",
     "진행 중에 조건이 바뀌는지 물었더니 표 밖으로는 안 바뀐다고 했어요.",
     "상담 링크를 저장해 두고 같은 날 다시 열어 확인했어요.",
     "통신사 실적이랑 회사 실적 때문에 참여자를 모은다는 설명도 있었어요.",
@@ -457,7 +503,7 @@ function formalExtras(ctx) {
     "불법 대출처럼 회유하는 표현은 없어 상담 톤이 달랐습니다.",
     "자동으로 다음 안내가 이어져 진행 위치가 표시되었습니다.",
     "지급은 유지 기간을 채운 뒤라는 점을 먼저 안내받아 기대치를 조정했습니다.",
-    "가족에게 보여 주려고 이용자 부담 0원 문구를 저장해 두었습니다.",
+    "이용자 부담 0원으로 진행되었고 급한 자금 문제는 해결되었습니다.",
     "진행 중 조건 변경 여부를 문의하니 표에 적힌 범위라고 답했습니다.",
     "상담 링크를 저장해 두고 같은 날 다시 열어 확인했습니다.",
     "통신사 실적과 회사 실적을 위해 참여자를 모은다는 배경 설명도 있었습니다.",
@@ -474,10 +520,10 @@ function casualLong(ctx) {
   return [
     `${topic} 건으로 신용이 더 깎일까 봐 ${chAt} 묻기 전에는 망설였어요. 조회를 여러 번 넣는 구조는 아니라고 해서, ${worry} 걱정은 그다음에 내려놓았어요.`,
     `${altDoc}를 읽고 나니 제가 통신사 앱을 직접 만질 단계는 거의 없었어요. ${altShot}만 맞추면 나머지는 회사 절차로 넘어간다고 적혀 있었어요.`,
-    `가족에게는 말로만 0원이라고 하면 안 믿을 것 같아 ${chAt} 대화 문장을 그대로 남겨 뒀어요. 나중에 다시 봐도 부담 주체가 회사 쪽이라는 표현이 같았어요.`,
+    `${chAt} 안내를 다시 읽어도 부담 주체가 회사 쪽이라는 표현이 같았어요. 통신사 실적을 위한 절차라는 점도 같았어요.`,
     `${stageName}을 보고 고르는 구조라 표만 천천히 읽었어요. 당장을 바랐던 마음과는 달랐지만 조건을 숨기지는 않았어요.`,
     `상담이 끝난 뒤에도 ${chAt} 같은 창으로 직전 안내를 다시 열 수 있었어요. ${topic} 때문에 급했는데 재촉하는 문자는 따로 안 왔어요.`,
-    `가족 명의를 빌려 달라는 말은 없었고 본인 회선으로만 본다고 했어요. ${worry}를 적어 둔 답이랑도 어긋나지 않았어요.`,
+    `다른 사람 명의를 빌려 달라는 말은 없었고 본인 회선으로만 본다고 했어요. ${worry}를 적어 둔 답이랑도 어긋나지 않았어요.`,
     `${because} 들어온 티가 나게 첫 문장을 길게 적었더니 그 기준으로만 안내가 돌아왔어요. 다른 상품을 끼워 팔지는 않았어요.`,
     `${altShot}이 흐리면 예시와 나란히 보여 줘서 어디가 잘렸는지 알 수 있었어요. 그 한 번 말고는 추가 서류를 요구하지 않았어요.`
   ];
@@ -488,10 +534,10 @@ function formalLong(ctx) {
   return [
     `${topic} 건으로 신용에 부담이 될까 봐 ${chAt} 문의하기 전에는 망설였습니다. 조회를 반복하는 구조는 아니라고 하여 ${worry} 우려는 이어서 덜었습니다.`,
     `${altDoc}를 확인하니 이용자가 통신사 앱을 직접 조작할 단계는 거의 없었습니다. ${altShot}만 맞으면 나머지는 회사 절차로 진행된다고 적혀 있었습니다.`,
-    `가족에게 말만으로 0원이라고 전하면 믿기 어려워 ${chAt} 대화 문장을 그대로 보관했습니다. 나중에 다시 보아도 부담 주체가 회사 측이라는 표현이 같았습니다.`,
+    `${chAt} 안내를 다시 읽어도 부담 주체가 회사 측이라는 표현이 같았습니다. 통신사 실적을 위한 절차라는 점도 같았습니다.`,
     `${stageName}을 보고 선택하는 구조라 표만 천천히 읽었습니다. 당일을 기대했던 마음과는 달랐으나 조건을 숨기지는 않았습니다.`,
     `상담 후에도 ${chAt} 같은 창에서 직전 안내를 다시 열 수 있었습니다. ${topic} 문제로 급했으나 재촉 문자는 따로 오지 않았습니다.`,
-    `가족 명의를 요구하는 말은 없었고 본인 회선으로만 본다고 했습니다. ${worry}를 적어 둔 답변과도 어긋나지 않았습니다.`,
+    `다른 사람 명의를 요구하는 말은 없었고 본인 회선으로만 본다고 했습니다. ${worry}를 적어 둔 답변과도 어긋나지 않았습니다.`,
     `${formalBecause} 사정이 드러나게 첫 문장을 적었더니 그 기준으로만 안내가 돌아왔습니다. 다른 상품을 권유하지는 않았습니다.`,
     `${altShot}이 흐리면 예시와 나란히 보여 주어 어느 부분이 잘렸는지 알 수 있었습니다. 그 한 차례 외에는 추가 서류를 요구하지 않았습니다.`
   ];
@@ -791,6 +837,87 @@ function leadForAge(text, i, bucket, formal) {
   return text;
 }
 
+/** Outcome line. Pool[0] is the short form used when the rest of the review is short. */
+const CASUAL_PERSONA_BEATS = {
+  "주부": [
+    "주부인데 생활비 대출이 안 돼 회사·통신사 실적 절차로 자금을 마련해 문제가 풀렸어요.",
+    "살림하는 주부라 가계 대출이 거절된 뒤 회사·통신사 실적 절차로 급전을 받아 해결됐어요.",
+    "주부 입장에서 생활비 대출이 막혀 회사·통신사 실적 절차로 자금을 마련해 문제가 해결됐어요.",
+    "전업 주부인데 대출은 안 나왔고 회사·통신사 실적 절차가 급한 돈을 잡아 줘 문제가 풀렸어요."
+  ],
+  "직장인": [
+    "직장인인데 생활비 대출이 안 돼 회사·통신사 실적 절차로 자금을 마련해 문제가 풀렸어요.",
+    "회사 다니는 직장인인데 대출이 거절된 뒤 회사·통신사 실적 절차로 급전을 받아 해결됐어요.",
+    "직장인 월급 전에 생활비가 막히고 대출도 안 돼 회사·통신사 실적 절차로 자금이 마련돼 문제가 해결됐어요.",
+    "직장인 입장에서 대출은 막혔고 회사·통신사 실적 절차가 급한 돈을 잡아 줘 문제가 풀렸어요."
+  ],
+  "대학생": [
+    "대학생인데 용돈 대출이 안 돼 회사·통신사 실적 절차로 자금을 마련해 문제가 풀렸어요.",
+    "학교 다니는 대학생이라 용돈 대출이 거절돼 회사·통신사 실적 절차로 용돈을 받아 해결됐어요.",
+    "대학생인데 용돈이 필요했는데 대출은 안 됐어요. 회사·통신사 실적 절차로 그 용돈을 마련해 문제가 해결됐어요.",
+    "대학생 입장에서 용돈 대출이 막혀 회사·통신사 실적 절차가 용돈을 잡아 줘 문제가 풀렸어요."
+  ],
+  "사업자": [
+    "사업자인데 사업자금 대출이 안 돼 회사·통신사 실적 절차로 자금을 마련해 문제가 풀렸어요.",
+    "가게를 하는 사업자인데 사업자금 대출이 거절돼 회사·통신사 실적 절차로 사업자금을 받아 해결됐어요.",
+    "사업자인데 사업자금이 부족하고 대출도 안 돼 회사·통신사 실적 절차로 사업자금이 마련돼 문제가 해결됐어요.",
+    "사업자 입장에서 사업자금 대출이 막혀 회사·통신사 실적 절차가 그 사업자금을 잡아 줘 문제가 풀렸어요."
+  ],
+  "육아맘": [
+    "육아맘인데 육아비 대출이 안 돼 회사·통신사 실적 절차로 자금을 마련해 문제가 풀렸어요.",
+    "아이 키우는 육아맘이라 대출이 거절된 뒤 회사·통신사 실적 절차로 육아비를 받아 해결됐어요.",
+    "육아맘인데 아이 지출이 겹치고 대출도 안 돼 회사·통신사 실적 절차로 급한 돈이 마련돼 문제가 해결됐어요.",
+    "육아맘 입장에서 대출은 막혔고 회사·통신사 실적 절차가 육아 자금을 잡아 줘 문제가 풀렸어요."
+  ],
+  "경단녀": [
+    "경단녀인데 생활비 대출이 안 돼 회사·통신사 실적 절차로 자금을 마련해 문제가 풀렸어요.",
+    "경력이 끊긴 경단녀라 대출이 거절된 뒤 회사·통신사 실적 절차로 급전을 받아 해결됐어요.",
+    "경단녀인데 소득이 없고 대출도 안 돼 회사·통신사 실적 절차로 생활비가 마련돼 문제가 해결됐어요.",
+    "경단녀 입장에서 대출은 막혔고 회사·통신사 실적 절차가 급한 자금을 잡아 줘 문제가 풀렸어요."
+  ]
+};
+
+const FORMAL_PERSONA_BEATS = {
+  "주부": [
+    "주부로서 생활비 대출이 되지 않아 회사와 통신사 실적 절차로 자금을 마련하여 문제가 해결되었습니다.",
+    "살림을 맡은 주부로서 가계 대출이 거절된 뒤 회사와 통신사 실적 절차로 급전을 받아 해결되었습니다.",
+    "주부로서 생활비 대출이 막혀 회사와 통신사 실적 절차로 자금을 마련하여 문제가 해결되었습니다.",
+    "주부 입장에서 대출은 나오지 않았고 회사와 통신사 실적 절차로 급한 자금이 마련되어 문제가 해결되었습니다."
+  ],
+  "직장인": [
+    "직장인으로서 생활비 대출이 되지 않아 회사와 통신사 실적 절차로 자금을 마련하여 문제가 해결되었습니다.",
+    "직장에 다니는 직장인으로서 대출이 거절된 뒤 회사와 통신사 실적 절차로 급전을 받아 해결되었습니다.",
+    "직장인으로서 월급 전 생활비가 막히고 대출도 되지 않아 회사와 통신사 실적 절차로 자금이 마련되어 문제가 해결되었습니다.",
+    "직장인 입장에서 대출은 막혔고 회사와 통신사 실적 절차로 급한 자금이 마련되어 문제가 해결되었습니다."
+  ],
+  "사업자": [
+    "사업자로서 사업자금 대출이 되지 않아 회사와 통신사 실적 절차로 자금을 마련하여 문제가 해결되었습니다.",
+    "가게를 운영하는 사업자로서 사업자금 대출이 거절된 뒤 회사와 통신사 실적 절차로 사업자금을 받아 해결되었습니다.",
+    "사업자로서 사업자금이 부족하고 대출도 되지 않아 회사와 통신사 실적 절차로 사업자금이 마련되어 문제가 해결되었습니다.",
+    "사업자 입장에서 사업자금 대출이 막혀 회사와 통신사 실적 절차로 그 사업자금이 마련되어 문제가 해결되었습니다."
+  ],
+  "육아맘": [
+    "육아맘으로서 육아비 대출이 되지 않아 회사와 통신사 실적 절차로 자금을 마련하여 문제가 해결되었습니다.",
+    "아이를 키우는 육아맘으로서 대출이 거절된 뒤 회사와 통신사 실적 절차로 육아비를 받아 해결되었습니다.",
+    "육아맘으로서 아이 지출이 겹치고 대출도 되지 않아 회사와 통신사 실적 절차로 급한 자금이 마련되어 문제가 해결되었습니다.",
+    "육아맘 입장에서 대출은 막혔고 회사와 통신사 실적 절차로 육아 자금이 마련되어 문제가 해결되었습니다."
+  ],
+  "경단녀": [
+    "경단녀로서 생활비 대출이 되지 않아 회사와 통신사 실적 절차로 자금을 마련하여 문제가 해결되었습니다.",
+    "경력이 끊긴 경단녀로서 대출이 거절된 뒤 회사와 통신사 실적 절차로 급전을 받아 해결되었습니다.",
+    "경단녀로서 소득이 없고 대출도 되지 않아 회사와 통신사 실적 절차로 생활비가 마련되어 문제가 해결되었습니다.",
+    "경단녀 입장에서 대출은 막혔고 회사와 통신사 실적 절차로 급한 자금이 마련되어 문제가 해결되었습니다."
+  ]
+};
+
+function personaBeat(persona, formal, i, compact) {
+  if (persona === "대학생" && formal) throw new Error("대학생 reviews stay in the casual age voice");
+  const pool = (formal ? FORMAL_PERSONA_BEATS : CASUAL_PERSONA_BEATS)[persona];
+  if (!pool) throw new Error(`missing persona beat for ${persona}`);
+  if (compact) return pool[0];
+  return pickAt(pool, i, 19);
+}
+
 function themeSupplements(body, formal, i) {
   const add = [];
   if (!/급전|융통/.test(body)) add.push(formal ? "계기는 급전 문의였습니다." : "계기는 급전 문의였어요.");
@@ -804,6 +931,12 @@ function themeSupplements(body, formal, i) {
     add.push(formal ? "준비물은 사진 캡처였습니다." : "준비물은 사진 캡처였어요.");
   }
   if (!/고객\s*부담/.test(body) || !/0원/.test(body)) add.push(pickAt(formal ? ZERO_FORMAL : ZERO_CASUAL, i, 77));
+  if (!/통신사\s*실적/.test(body)) {
+    add.push(formal ? "회사와 통신사 실적을 위한 절차라고 안내받았습니다." : "회사와 통신사 실적을 위한 절차라고 안내받았어요.");
+  }
+  if (!/해결|풀렸|마련/.test(body)) {
+    add.push(formal ? "필요한 자금이 마련되어 문제가 해결되었습니다." : "필요한 자금이 마련돼 문제가 풀렸어요.");
+  }
   return add;
 }
 
@@ -824,9 +957,10 @@ const SHORT_FORMAL = [
 function composeBody(i, rating, channelKey, stage, publishedAt, uniqSalt = 0) {
   const bucket = ageBucketForIndex(i);
   const formal = isFormalAgeBucket(bucket);
+  const persona = personaForIndex(i);
   const kst = kstCalendarParts(publishedAt instanceof Date ? publishedAt : new Date(publishedAt));
-  const when = whenPhrase(kst, i, uniqSalt);
-  const sit = pickAt(SITUATIONS, i, 2 + uniqSalt);
+  const when = whenPhrase(kst, i, uniqSalt, persona);
+  const sit = pickAt(PERSONA_SITUATIONS[persona], i, 2 + uniqSalt);
   const ch = CHANNEL_PHRASE[channelKey];
   const shot = pickAt(SHOTS, i, 5 + uniqSalt);
   const doc = pickAt(DOCS, i, 6 + uniqSalt);
@@ -847,6 +981,7 @@ function composeBody(i, rating, channelKey, stage, publishedAt, uniqSalt = 0) {
   };
   const opening = openingFor(i, formal);
   const rhythm = (Math.imul(i ^ (uniqSalt * 13), 0x45d9f3b) >>> 0) % 10;
+  const beat = personaBeat(persona, formal, i + uniqSalt, rhythm === 0);
   let middle;
   if (rhythm === 0) {
     const shortPool = formal ? SHORT_FORMAL : SHORT_CASUAL;
@@ -870,14 +1005,20 @@ function composeBody(i, rating, channelKey, stage, publishedAt, uniqSalt = 0) {
     emoticon = maybeEmoticon(i, bucket, rating);
   }
 
-  const supplements = themeSupplements(`${opening} ${middle}`, formal, i);
-  let body = [opening, middle, ...supplements, closer].join(" ").replace(/\s+/g, " ").trim();
+  const supplements = themeSupplements(`${opening} ${beat} ${middle}`, formal, i);
+  let body = [opening, beat, middle, ...supplements, closer].join(" ").replace(/\s+/g, " ").trim();
   if (emoticon) body = `${body}${emoticon}`;
   if (body.length < REVIEW_BODY_MIN) {
     body = `${body} ${formal ? "안내는 이 범위에서 확인했습니다." : "안내는 이 범위에서 확인했어요."}`;
   }
   if (body.length > REVIEW_BODY_MAX) {
     throw new Error(`Review body exceeded max length on row ${i}`);
+  }
+  if (!body.includes(persona)) throw new Error(`row ${i} missing persona ${persona}`);
+  if (persona === "대학생" && !body.includes("용돈")) throw new Error(`row ${i} 대학생 missing 용돈`);
+  if (persona === "사업자" && !body.includes("사업자금")) throw new Error(`row ${i} 사업자 missing 사업자금`);
+  if (/가족에게|안내 문구를 그대로 전달|그대로 전달/.test(body)) {
+    throw new Error(`row ${i} has a family-relay phrase`);
   }
   return body;
 }

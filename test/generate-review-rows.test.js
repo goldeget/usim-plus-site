@@ -4,6 +4,7 @@ import {
   ageBucketForIndex,
   generateReviewRows,
   isFormalAgeBucket,
+  personaForIndex,
   ratingDistributionForCorpus
 } from "../scripts/generate-review-rows.mjs";
 import {
@@ -101,6 +102,9 @@ test("generated corpus voice: USIM PLUS 급전 platform theme and age buckets", 
   let casualWithEmoticon = 0;
   let formalWithEmoticon = 0;
   const bucketCounts = { "20s": 0, "30s": 0, "40s": 0, "50s": 0, "60s": 0, "70s": 0 };
+  const personaLabels = ["경단녀", "육아맘", "대학생", "직장인", "사업자", "주부"];
+  const personaCounts = Object.fromEntries(personaLabels.map(label => [label, 0]));
+  const personaVoice = Object.fromEntries(personaLabels.map(label => [label, { casual: 0, formal: 0 }]));
   for (let i = 1; i <= 10_000; i += 1) {
     const bucket = ageBucketForIndex(i);
     bucketCounts[bucket] += 1;
@@ -129,6 +133,25 @@ test("generated corpus voice: USIM PLUS 급전 platform theme and age buckets", 
       );
       if (/[🙂😅👍]|ㅠㅠ/.test(row.body)) casualWithEmoticon += 1;
     }
+    const persona = personaForIndex(idx);
+    const found = personaLabels.filter(label => (
+      label === "사업자" ? /사업자(?!금)/.test(row.body) : row.body.includes(label)
+    ));
+    assert.deepEqual(found, [persona], `row ${row.rowId} persona`);
+    personaCounts[persona] += 1;
+    personaVoice[persona][formal ? "formal" : "casual"] += 1;
+    assert.match(row.body, /대출/, `row ${row.rowId} loan rejection`);
+    assert.match(row.body, /해결|풀렸|마련/, `row ${row.rowId} funds arranged`);
+    assert.match(row.body, /통신사\s*실적/, `row ${row.rowId} carrier performance`);
+    assert.doesNotMatch(row.body, /가족에게/);
+    assert.doesNotMatch(row.body, /안내 문구를 그대로 전달/);
+    assert.doesNotMatch(row.body, /그대로 전달/);
+    if (persona === "대학생") {
+      assert.ok(bucket === "20s" || bucket === "30s", `row ${row.rowId} 대학생 age`);
+      assert.equal(formal, false, `row ${row.rowId} 대학생 voice`);
+      assert.match(row.body, /용돈/);
+    }
+    if (persona === "사업자") assert.match(row.body, /사업자금/);
   }
   assert.ok(themed >= 9_500, `expected most rows to mention 급전/platform theme, got ${themed}`);
   assert.ok(
@@ -143,6 +166,15 @@ test("generated corpus voice: USIM PLUS 급전 platform theme and age buckets", 
   assert.ok(casualWithEmoticon > 100 && casualWithEmoticon < 5_000, "some casual rows include emoticons");
   for (const n of Object.values(bucketCounts)) {
     assert.ok(Math.abs(n - 10_000 / 6) <= 2, "age buckets evenly split");
+  }
+  for (const label of personaLabels) {
+    assert.ok(personaCounts[label] >= 700, `${label} count ${personaCounts[label]}`);
+  }
+  assert.ok(personaCounts["대학생"] < 2500, "대학생 stays a younger slice, not the whole corpus");
+  assert.equal(personaVoice["대학생"].formal, 0);
+  assert.ok(personaVoice["대학생"].casual >= 700);
+  for (const label of ["주부", "직장인", "사업자", "육아맘", "경단녀"]) {
+    assert.ok(personaVoice[label].casual > 0 && personaVoice[label].formal > 0, `${label} spans ages`);
   }
 });
 
@@ -234,6 +266,10 @@ test("displayed review skeletons are unique after dates, weekdays, times, and na
       body: row.body
     }, today, { includeBody: true });
     assert.equal(reviewDateMismatch(shown.body, shown.publishedAt), null, `${row.rowId} display date`);
+    assert.doesNotMatch(shown.body, /가족에게\s*전달/);
+    assert.doesNotMatch(shown.body, /가족에게\s*설명/);
+    assert.doesNotMatch(shown.body, /안내 문구를 그대로 전달/);
+    assert.doesNotMatch(shown.body, /가족에게/);
     const skeleton = displayedSkeleton(shown.body, shown.displayName);
     const prior = skeletons.get(skeleton);
     assert.equal(prior, undefined, `skeleton collision ${prior} and ${row.rowId}`);
