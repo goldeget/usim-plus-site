@@ -681,6 +681,15 @@
       <div class="content">
         <div class="quick-flow" id="steps" aria-label="참여 순서"><span id="quickFlow"><span>가능 여부 확인</span><span aria-hidden="true">→</span><span>조회 사진 전송</span><span aria-hidden="true">→</span><span>조건 확인 후 안내</span></span></div>
 
+        <section class="home-reviews" id="homeReviews" aria-labelledby="home-reviews-title" hidden>
+          <div class="home-reviews__head">
+            <h2 id="home-reviews-title">이용 후기</h2>
+            <p class="home-reviews__stats" id="homeReviewsStats" aria-live="polite"></p>
+          </div>
+          <ul class="home-reviews__list" id="homeReviewsList"></ul>
+          <a class="home-reviews__link" href="/reviews/">후기 더 보기</a>
+        </section>
+
         <section class="consultation-panel" id="contact" aria-labelledby="contact-title" tabindex="-1">
           <span id="apply" class="anchor-alias" aria-hidden="true"></span>
           <span class="application-kicker" id="contactKicker">운영자와 직접 상담</span>
@@ -929,18 +938,69 @@
           stepGrid.append(card);
         });
       }
+      function stars(n){return '★'.repeat(n)+'☆'.repeat(5-n);}
+      async function loadHomeReviews(){
+        const section=document.getElementById('homeReviews');
+        const statsEl=document.getElementById('homeReviewsStats');
+        const listEl=document.getElementById('homeReviewsList');
+        try{
+          const [statsRes,featRes]=await Promise.all([
+            fetch('/api/reviews/stats',{headers:{Accept:'application/json'}}),
+            fetch('/api/reviews/featured?limit=4',{headers:{Accept:'application/json'}})
+          ]);
+          if(!statsRes.ok||!featRes.ok)return;
+          const stats=await statsRes.json();
+          const featured=await featRes.json();
+          if(!stats.total||!featured.items?.length)return;
+          statsEl.textContent=`평균 ${stats.avgRating}점 · ${new Intl.NumberFormat('ko-KR').format(stats.total)}건`;
+          listEl.replaceChildren();
+          for(const item of featured.items){
+            const li=document.createElement('li');
+            li.className='home-reviews__item';
+            const meta=document.createElement('div');
+            meta.className='home-reviews__meta';
+            const starSpan=document.createElement('span');
+            starSpan.className='home-reviews__stars';
+            starSpan.setAttribute('aria-label',`${item.rating}점`);
+            starSpan.textContent=stars(item.rating);
+            const nameSpan=document.createElement('span');
+            nameSpan.textContent=item.displayName||'참여자';
+            meta.append(starSpan,nameSpan);
+            const text=document.createElement('p');
+            text.style.margin='0';
+            text.textContent=item.snippet;
+            li.append(meta,text);
+            listEl.append(li);
+          }
+          section.hidden=false;
+        }catch{}
+      }
       async function loadPublishedContent(){
         try{
           const response=await fetch('/api/content',{cache:'no-store',headers:{Accept:'application/json'}});
-          if(!response.ok)return;
+          if(!response.ok){
+            updateContactLinks(
+              {telegram:'',line:'',channeltalk:''},
+              {channelNotReady:'연결 준비 중',channelStart:'새 창에서 열기',channelReady:'연결된 상담 채널을 선택하세요.',channelMissing:'상담 채널 주소가 아직 등록되지 않았습니다. 아래 이메일로 문의해 주세요.'},
+              {email:'help@climekr.com',company:'에스씨아이평가정보(주)',representative:'운영 담당'}
+            );
+            return;
+          }
           const content=await response.json();
           if(content.cmsReady&&content.schemaVersion===4){
             const revision=content.updatedAt||JSON.stringify(content);
             if(revision!==publishedContentRevision){applyPublishedContent(content);publishedContentRevision=revision;}
           }
-        }catch{}
+        }catch{
+          updateContactLinks(
+            {telegram:'',line:'',channeltalk:''},
+            {channelNotReady:'연결 준비 중',channelStart:'새 창에서 열기',channelReady:'연결된 상담 채널을 선택하세요.',channelMissing:'상담 채널 주소가 아직 등록되지 않았습니다. 아래 이메일로 문의해 주세요.'},
+            {email:'help@climekr.com',company:'에스씨아이평가정보(주)',representative:'운영 담당'}
+          );
+        }
       }
       loadPublishedContent();
+      loadHomeReviews();
       function refreshPublishedContent(){if(document.visibilityState==='visible')loadPublishedContent();}
       document.addEventListener('visibilitychange',refreshPublishedContent);
       window.addEventListener('focus',refreshPublishedContent);

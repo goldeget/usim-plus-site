@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>이용 후기 · USIM PLUS 운영 콘솔</title>
+  <link rel="stylesheet" href="/admin/admin-shell.css" />
+  <style>
+    .reviews-admin-stats{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 18px}.reviews-admin-stats span{padding:8px 12px;border-radius:999px;background:#e7f4f4;border:1px solid #c6e3e4;font-size:13px;font-weight:700;color:#215a68}
+    .reviews-admin-list{display:grid;gap:10px;margin:16px 0}.reviews-admin-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:14px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .reviews-admin-row p{margin:6px 0 0;font-size:14px;line-height:1.65;color:#385b70}.reviews-admin-row small{color:#718395}
+    .reviews-admin-row select,.reviews-admin-row input[type=number]{font:inherit;border:1px solid #cad8e2;border-radius:8px;padding:6px 8px}
+    .import-panel textarea{min-height:120px;font-family:ui-monospace,monospace;font-size:12px}
+  </style>
+</head>
+<body>
+  <main class="admin-main wrap main" data-admin-page="reviews">
+    <section class="intro">
+      <p class="eyebrow">사이트 운영</p>
+      <h1>이용 후기</h1>
+      <p>공개 후기 목록·홈 노출·집계를 관리합니다. JSON 일괄 등록은 한 번에 최대 50건입니다.</p>
+    </section>
+    <p id="status" class="status" role="status" aria-live="polite">후기 정보를 불러오는 중…</p>
+    <div class="reviews-admin-stats" id="statsBar" hidden></div>
+    <section class="panel import-panel">
+      <h2>일괄 등록</h2>
+      <p class="note">배열 또는 <code>{"reviews":[…]}</code> 형식. 각 항목: body, rating(1–5), displayName, publishedAt(선택), featured, sortBoost.</p>
+      <div class="field">
+        <label for="importJson">후기 JSON</label>
+        <textarea id="importJson" placeholder='{"reviews":[{"body":"…40자 이상…","rating":5,"displayName":"김*희"}]}'></textarea>
+      </div>
+      <div class="actions">
+        <button id="importBtn" class="btn primary" type="button">등록 실행</button>
+        <button id="rebuildStatsBtn" class="btn secondary" type="button">집계 다시 계산</button>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="panel-head" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+        <h2>게시된 후기</h2>
+        <label>상태
+          <select id="statusFilter">
+            <option value="published">게시</option>
+            <option value="hidden">숨김</option>
+            <option value="draft">초안</option>
+          </select>
+        </label>
+      </div>
+      <div id="reviewsList" class="reviews-admin-list" aria-live="polite"></div>
+      <button id="loadMore" class="btn secondary" type="button" hidden>더 불러오기</button>
+    </section>
+  </main>
+  <script src="/admin/admin-shell.js" defer></script>
+  <script src="/admin/admin-auth.js" defer></script>
+  <script src="/admin/reviews-admin.js" defer></script>
+</body>
+</html>

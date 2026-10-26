@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#040a11" />
+  <meta name="description" content="클라임유심(CLIME) 참여 후기. 유심 개통 혜택 상담·진행 경험과 별점을 확인하세요. 대출이 아닌 조건부 혜택이며 지급은 유지 조건 충족 후 결정됩니다." />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://climekr.com/reviews/" />
+  <title>이용 후기 · 클라임유심 CLIME</title>
+  <link rel="stylesheet" href="/user-flow.css" />
+</head>
+<body class="reviews-page">
+  <a class="skip" href="#main">본문 바로가기</a>
+  <main id="main" class="reviews-shell">
+    <header class="reviews-header">
+      <a href="/" class="reviews-back">← 홈으로</a>
+      <h1>이용 후기</h1>
+      <p class="reviews-disclaimer">후기는 참여·상담 경험을 공유한 내용입니다. 대출·당일 지급이 아니며, 혜택은 유지 조건과 심사 결과에 따라 달라질 수 있습니다.</p>
+      <div class="reviews-stats" id="reviewsStats" aria-live="polite">후기를 불러오는 중…</div>
+      <div class="reviews-histogram" id="reviewsHistogram" aria-hidden="true"></div>
+      <div class="reviews-filters" role="toolbar" aria-label="별점 필터">
+        <button type="button" class="reviews-filter is-active" data-rating="">전체</button>
+        <button type="button" class="reviews-filter" data-rating="5">★5</button>
+        <button type="button" class="reviews-filter" data-rating="4">★4</button>
+        <button type="button" class="reviews-filter" data-rating="3">★3</button>
+        <button type="button" class="reviews-filter" data-rating="2">★2</button>
+        <button type="button" class="reviews-filter" data-rating="1">★1</button>
+      </div>
+    </header>
+    <section aria-label="후기 목록">
+      <ul class="reviews-list" id="reviewsList"></ul>
+      <p class="reviews-status" id="reviewsStatus" role="status"></p>
+      <button type="button" class="reviews-more" id="reviewsMore" hidden>더 보기</button>
+    </section>
+    <p class="reviews-cta"><a href="/#contact">상담 채널로 문의하기</a></p>
+  </main>
+  <script src="/reviews/reviews.js" defer></script>
+</body>
+</html>

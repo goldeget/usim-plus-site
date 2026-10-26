@@ -39,5 +39,6 @@
 ## 공식 페이지
 
 - https://climekr.com/ — 유심 개통 혜택, 지급 조건, 상담 채널과 기존 접수 상태 안내
+- https://climekr.com/reviews/ — 참여·상담 경험 후기(별점·요약). 대출·당일 지급이 아니며 조건 충족 후 지급 대상이 결정됩니다.
 - https://climekr.com/guide/ — 유심 혜택과 대출의 차이, 비용·명의·지급 시점 안내
 - https://climekr.com/links/ — 텔레그램과 채널톡 상담 링크 모음 (검색 색인 제외)

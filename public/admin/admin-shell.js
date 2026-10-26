@@ -8,7 +8,8 @@
     review: "미검토 신청",
     applications: "전체 신청",
     duplicates: "중복 의심 검토",
-    content: "안내 콘텐츠"
+    content: "안내 콘텐츠",
+    reviews: "이용 후기"
   };
   const groups = [
     { title: "현황", items: [{ id: "dashboard", label: "대시보드", href: "/", icon: "⌂" }] },
@@ -17,7 +18,10 @@
       { id: "applications", label: "전체 신청", href: "/admin/applications.html", icon: "▤" },
       { id: "duplicates", label: "중복 의심", href: "/admin/duplicates.html", icon: "◎", badge: "duplicates" }
     ] },
-    { title: "사이트 운영", items: [{ id: "content", label: "안내 콘텐츠", href: "/admin/content.html", icon: "▧" }] }
+    { title: "사이트 운영", items: [
+      { id: "content", label: "안내 콘텐츠", href: "/admin/content.html", icon: "▧" },
+      { id: "reviews", label: "이용 후기", href: "/admin/reviews.html", icon: "★" }
+    ] }
   ];
   const oldHeader = document.querySelector("header.bar");
   oldHeader?.remove();

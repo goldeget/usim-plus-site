@@ -3,6 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "seed:reviews": "node scripts/seed-reviews.mjs --count=10000",
+    "seed:reviews:remote": "node scripts/seed-reviews-admin.mjs --count=10000"
   }
 }
