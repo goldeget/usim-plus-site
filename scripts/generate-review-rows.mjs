@@ -16,6 +16,9 @@
  */
 import { REVIEW_BODY_MIN, REVIEW_BODY_MAX } from "../functions/_lib/reviews.js";
 
+/** Bump when corpus voice/templates change so seed cache files regenerate. */
+export const REVIEW_CORPUS_VERSION = "hardship-prepaid-2026-10-26";
+
 const CHANNEL_LABEL = {
   channeltalk: "채널톡",
   telegram: "텔레그램",

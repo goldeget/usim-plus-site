@@ -16,7 +16,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import https from "node:https";
-import { generateReviewRows } from "./generate-review-rows.mjs";
+import { generateReviewRows, REVIEW_CORPUS_VERSION } from "./generate-review-rows.mjs";
 import { REVIEW_CAP } from "../functions/_lib/reviews.js";
 
 const REQUEST_TIMEOUT_MS = 300_000;
@@ -146,17 +146,32 @@ async function rebuildStats(cookie) {
   });
 }
 
-let rows;
-if (existsSync(corpusCache)) {
-  rows = JSON.parse(readFileSync(corpusCache, "utf8"));
-  if (rows.length !== count) {
-    rows = generateReviewRows(count);
-    writeFileSync(corpusCache, JSON.stringify(rows));
+function loadCorpusRows(targetCount) {
+  if (existsSync(corpusCache)) {
+    try {
+      const parsed = JSON.parse(readFileSync(corpusCache, "utf8"));
+      const cachedRows = Array.isArray(parsed) ? parsed : parsed?.rows;
+      const version = Array.isArray(parsed) ? null : parsed?.version;
+      if (
+        version === REVIEW_CORPUS_VERSION &&
+        Array.isArray(cachedRows) &&
+        cachedRows.length === targetCount
+      ) {
+        return cachedRows;
+      }
+    } catch {
+      /* regenerate below */
+    }
   }
-} else {
-  rows = generateReviewRows(count);
-  writeFileSync(corpusCache, JSON.stringify(rows));
+  const generated = generateReviewRows(targetCount);
+  writeFileSync(
+    corpusCache,
+    JSON.stringify({ version: REVIEW_CORPUS_VERSION, rows: generated })
+  );
+  return generated;
 }
+
+const rows = loadCorpusRows(count);
 
 let ok = 0;
 let duplicate = 0;
