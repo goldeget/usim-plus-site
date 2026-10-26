@@ -5,6 +5,8 @@
  *
  * Calendar: every 년/월/일 in a body is that row's publishedAt in Asia/Seoul.
  * Time of day ("오전에", "저녁에") follows the same instant. No "N분경" stamps.
+ * Sentence skeleton: after Seoul dates, weekdays, times of day, and the row's
+ * masked display name are removed, all 10,000 remaining texts differ.
  *
  * Speech-pattern research (paraphrased into pools; not copied verbatim):
  * - https://m.blog.naver.com/true-water/222644750313 — 연속 대출 거절·시도 회차·감탄(ㅠㅠ) 후기 흐름
@@ -43,7 +45,7 @@ function dedupHashesForBody(body) {
 }
 
 /** Bump when corpus voice/templates change so seed cache files regenerate. */
-export const REVIEW_CORPUS_VERSION = "usim-kst-natural-2026-10-26";
+export const REVIEW_CORPUS_VERSION = "usim-unique-skeleton-2026-10-27";
 
 const CHANNELS = ["channeltalk", "telegram", "line"];
 const STAGES = ["3", "15", "30", "consult"];
@@ -508,6 +510,317 @@ function polishCloser(closer, bucket) {
   return closer.replace(/했습니다(?=\.?$)/, "하였습니다");
 }
 
+/**
+ * Opening clauses. Mixed radix 25×20×20 = 10,000, one triple per row.
+ * Each phrase is a connective clause so every combination stays grammatical.
+ * None of these may contain a calendar word, a time-of-day word, or a masked name.
+ */
+const CASUAL_OPEN_A = [
+  "급전 한도가 막혀서",
+  "급전 창구가 막혀서",
+  "급전 문의가 겹쳐서",
+  "급전 상담이 끊겨서",
+  "급전이 더 급해져서",
+  "급전 길이 막혀서",
+  "급전 신청이 거절돼서",
+  "급전 문의를 돌다가",
+  "급전 조건을 찾다가",
+  "급전 안내를 헤매다가",
+  "급전 때문에 찾아보다가",
+  "생활 급전이 막혀서",
+  "급전 융통이 안 돼서",
+  "급전 대출이 거절돼서",
+  "카드 급전이 막혀서",
+  "급전 잔액이 비어서",
+  "급전 이자를 못 내서",
+  "급전 기한이 닥쳐서",
+  "급전 연락이 닿아서",
+  "급전 서류를 넘기다가",
+  "급전 한도를 보다가",
+  "급전 문자를 읽고서",
+  "급전 거절을 본 뒤에",
+  "급전 조회가 막혀서",
+  "급전 답이 없어서"
+];
+
+const CASUAL_OPEN_B = [
+  "자격부터 읽어 봤고",
+  "부담 범위를 물었고",
+  "절차 순서를 봤고",
+  "유지 조건을 봤고",
+  "안내 문장만 받았고",
+  "담당 문구를 봤고",
+  "비용 칸을 확인했고",
+  "자격 칸만 골랐고",
+  "문의만 짧게 남겼고",
+  "조건 표를 내려 봤고",
+  "지급 설명을 들었고",
+  "회선 조건을 물었고",
+  "본인 확인만 마쳤고",
+  "신청 칸을 읽어 봤고",
+  "유지 칸을 비교했고",
+  "안내 문장만 저장했고",
+  "자격 설명만 들었고",
+  "비용 안내를 받았고",
+  "절차 안내를 받았고",
+  "조건 문장만 골랐고"
+];
+
+const CASUAL_OPEN_C = [
+  "사진 캡처만 보냈어요.",
+  "회사 절차로 넘겼어요.",
+  "고객 부담 0원을 봤어요.",
+  "캡처 예시만 맞췄어요.",
+  "회사 절차만 적었어요.",
+  "사진 캡처를 다시 했어요.",
+  "부담 0원을 적어 뒀어요.",
+  "회사 안내만 남겼어요.",
+  "캡처 한 장만 올렸어요.",
+  "0원 문구만 저장했어요.",
+  "회사 절차를 받아 뒀어요.",
+  "사진 캡처만 다시 찍었어요.",
+  "부담 0원 칸을 봤어요.",
+  "회사 쪽 안내로 끝냈어요.",
+  "캡처 조건만 맞췄어요.",
+  "0원인지 다시 봤어요.",
+  "회사 절차대로 했어요.",
+  "사진 한 장만 남겼어요.",
+  "부담 주체를 확인했어요.",
+  "지급 전 안내를 봤어요."
+];
+
+const FORMAL_OPEN_A = [
+  "급전 한도가 막혀",
+  "급전 창구가 막혀",
+  "급전 문의가 겹쳐",
+  "급전 상담이 끊겨",
+  "급전이 더 급해져",
+  "급전 길이 막혀",
+  "급전 신청이 거절되어",
+  "급전 문의를 살피다가",
+  "급전 조건을 찾다가",
+  "급전 안내를 찾다가",
+  "급전 때문에 알아보다가",
+  "생활 급전이 막혀",
+  "급전 융통이 되지 않아",
+  "급전 대출이 거절되어",
+  "카드 급전이 막혀",
+  "급전 잔액이 비어",
+  "급전 이자를 감당 못해",
+  "급전 기한이 닥쳐",
+  "급전 연락이 닿아",
+  "급전 서류를 살피다가",
+  "급전 한도를 보다가",
+  "급전 문자를 읽고",
+  "급전 거절을 본 뒤",
+  "급전 조회가 막혀",
+  "급전 답이 없어"
+];
+
+const FORMAL_OPEN_B = [
+  "자격부터 확인하였고",
+  "부담 범위를 문의하였고",
+  "절차 순서를 확인하였고",
+  "유지 조건을 확인하였고",
+  "안내 문장만 받았고",
+  "담당 문구를 확인하였고",
+  "비용 칸을 확인하였고",
+  "자격 칸만 선택하였고",
+  "문의만 간단히 남겼고",
+  "조건 표를 확인하였고",
+  "지급 설명을 받았고",
+  "회선 조건을 문의하였고",
+  "본인 확인만 마쳤고",
+  "신청 칸을 확인하였고",
+  "유지 칸을 비교하였고",
+  "안내 문장을 저장하였고",
+  "자격 설명만 받았고",
+  "비용 안내를 받았고",
+  "절차 안내를 받았고",
+  "조건 문장만 선택하였고"
+];
+
+const FORMAL_OPEN_C = [
+  "사진 캡처만 제출했습니다.",
+  "회사 절차로 넘겼습니다.",
+  "고객 부담 0원을 확인했습니다.",
+  "캡처 예시만 맞췄습니다.",
+  "회사 절차만 기록했습니다.",
+  "사진 캡처를 다시 했습니다.",
+  "부담 0원을 적어 두었습니다.",
+  "회사 안내만 보관했습니다.",
+  "캡처 한 장만 올렸습니다.",
+  "0원 문구만 저장했습니다.",
+  "회사 절차를 받아 두었습니다.",
+  "사진 캡처만 다시 찍었습니다.",
+  "부담 0원 칸을 확인했습니다.",
+  "회사 측 안내로 마쳤습니다.",
+  "캡처 조건만 맞췄습니다.",
+  "0원인지 다시 확인했습니다.",
+  "회사 절차대로 진행했습니다.",
+  "사진 한 장만 남겼습니다.",
+  "부담 주체를 확인했습니다.",
+  "지급 전 안내를 확인했습니다."
+];
+
+const ZERO_CASUAL = [
+  "고객 부담은 0원이었어요.",
+  "고객 부담 0원이라고 적혀 있었어요.",
+  "고객 부담은 0원으로 안내받았어요.",
+  "고객 부담 0원 칸을 따로 봤어요."
+];
+
+const ZERO_FORMAL = [
+  "고객 부담은 0원이었습니다.",
+  "고객 부담 0원이라고 적혀 있었습니다.",
+  "고객 부담은 0원으로 안내받았습니다.",
+  "고객 부담 0원 칸을 따로 확인했습니다."
+];
+
+const TIME_OF_DAY_WORDS = [
+  "늦은 밤에",
+  "저녁 무렵에",
+  "아침 일찍",
+  "출근 전에",
+  "오전 중에",
+  "오후 중에",
+  "점심시간에",
+  "밤중에",
+  "새벽에",
+  "오전에",
+  "점심에",
+  "오후에",
+  "퇴근하고",
+  "저녁에",
+  "밤에"
+];
+
+const REGION_WORDS = [
+  "서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종", "경기", "강원",
+  "충북", "충남", "전북", "전남", "경북", "경남", "제주", "충청", "전라", "경상",
+  "수원", "성남", "고양", "용인", "창원", "청주", "천안", "전주", "포항", "강남",
+  "홍대", "잠실", "판교", "송파", "마포"
+];
+
+function maskedNameSet() {
+  const names = new Set();
+  for (const surname of SURNAMES) {
+    for (const head of GIVEN_TAIL) {
+      names.add(surname + head);
+      for (const tail of GIVEN_TAIL) names.add(surname + head + tail);
+    }
+  }
+  return names;
+}
+
+function findMaskedName(text, names) {
+  for (let index = 0; index < text.length; index += 1) {
+    const two = text.slice(index, index + 2);
+    const three = text.slice(index, index + 3);
+    if (names.has(three)) return three;
+    if (names.has(two)) return two;
+  }
+  return "";
+}
+
+/** Audit skeleton: drop dates, weekdays, time-of-day words, and masked names. */
+export function reviewSentenceSkeleton(text, displayName) {
+  let value = String(text ?? "").normalize("NFC");
+  const name = String(displayName ?? "");
+  if (name) value = value.split(name).join(" ");
+  const bare = name.replace(/\*/g, "");
+  if (bare.length >= 2) value = value.split(bare).join(" ");
+  value = value
+    .replace(/\d{4}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일/g, " ")
+    .replace(/\d{1,2}\s*월\s*\d{1,2}\s*일/g, " ")
+    .replace(/(?:일|월|화|수|목|금|토)요일/g, " ")
+    .replace(/늦은 밤에|저녁 무렵에|아침 일찍|출근 전에|오전 중에|오후 중에|점심시간에|밤중에|새벽에|오전에|점심에|오후에|퇴근하고|저녁에|밤에/g, " ");
+  return value.replace(/\s+/g, " ").trim();
+}
+
+function openingFor(i, formal) {
+  // 727 is coprime with 10,000, so this is a bijection: every row gets a different triple,
+  // and neighboring rows differ in more than one clause.
+  const n = (Math.imul(i - 1, 727) + 13) % 10_000;
+  const a = n % CASUAL_OPEN_A.length;
+  const b = Math.floor(n / CASUAL_OPEN_A.length) % CASUAL_OPEN_B.length;
+  const c = Math.floor(n / (CASUAL_OPEN_A.length * CASUAL_OPEN_B.length)) % CASUAL_OPEN_C.length;
+  if (formal) return `${FORMAL_OPEN_A[a]} 유심 플랫폼에서 ${FORMAL_OPEN_B[b]} ${FORMAL_OPEN_C[c]}`;
+  return `${CASUAL_OPEN_A[a]} 유심 플랫폼에서 ${CASUAL_OPEN_B[b]} ${CASUAL_OPEN_C[c]}`;
+}
+
+let openingsReady = false;
+
+function ensureOpeningInventory() {
+  if (openingsReady) return;
+  const lists = [CASUAL_OPEN_A, CASUAL_OPEN_B, CASUAL_OPEN_C, FORMAL_OPEN_A, FORMAL_OPEN_B, FORMAL_OPEN_C];
+  if (CASUAL_OPEN_A.length !== 25 || FORMAL_OPEN_A.length !== 25) {
+    throw new Error("opening A inventory must be 25");
+  }
+  if (CASUAL_OPEN_B.length !== 20 || FORMAL_OPEN_B.length !== 20 || CASUAL_OPEN_C.length !== 20 || FORMAL_OPEN_C.length !== 20) {
+    throw new Error("opening B/C inventory must be 20");
+  }
+  for (const list of lists) {
+    if (new Set(list).size !== list.length) throw new Error("duplicate opening phrase");
+  }
+  const names = maskedNameSet();
+  const seen = new Set();
+  for (let i = 1; i <= 10_000; i += 1) {
+    const formal = isFormalAgeBucket(ageBucketForIndex(i));
+    const text = openingFor(i, formal);
+    if (text.length > 60) throw new Error(`opening longer than 60 at row ${i}: ${text}`);
+    if (seen.has(text)) throw new Error(`duplicate opening at row ${i}`);
+    seen.add(text);
+    const hit = findMaskedName(text, names);
+    if (hit) throw new Error(`opening contains masked name ${hit}: ${text}`);
+    if (TIME_OF_DAY_WORDS.some(word => text.includes(word))) throw new Error(`opening has time of day: ${text}`);
+    if (text.includes("요일") || text.includes("분경") || /corpus-/i.test(text)) {
+      throw new Error(`opening has a forbidden token: ${text}`);
+    }
+    if (REGION_WORDS.some(word => text.includes(word))) throw new Error(`opening names a region: ${text}`);
+    if (/\d/.test(text.replace(/0원/g, ""))) throw new Error(`opening has a stray digit: ${text}`);
+  }
+  openingsReady = true;
+}
+
+function leadForAge(text, i, bucket, formal) {
+  if (!formal && bucket === "20s" && i % 4 === 0 && !text.startsWith("진짜")) return `진짜 ${text}`;
+  if (!formal && bucket === "30s" && i % 5 === 0 && !text.startsWith("솔직히")) return `솔직히 ${text}`;
+  if (!formal && bucket === "40s" && i % 6 === 0 && !text.startsWith("우선")) return `우선 ${text}`;
+  if (formal && bucket === "60s" && i % 5 === 0 && !text.startsWith("돌이켜")) return `돌이켜 보면 ${text}`;
+  return text;
+}
+
+function themeSupplements(body, formal, i) {
+  const add = [];
+  if (!/급전|융통/.test(body)) add.push(formal ? "계기는 급전 문의였습니다." : "계기는 급전 문의였어요.");
+  if (!/유심\s*플랫폼|USIM\s*PLUS/.test(body)) {
+    add.push(formal ? "상담 창은 유심 플랫폼이었습니다." : "상담 창은 유심 플랫폼이었어요.");
+  }
+  if (!/회사/.test(body) || !/절차/.test(body)) {
+    add.push(formal ? "이후 절차는 회사에서 맡았습니다." : "이후 절차는 회사에서 맡았어요.");
+  }
+  if (!/사진/.test(body) || !/캡처/.test(body)) {
+    add.push(formal ? "준비물은 사진 캡처였습니다." : "준비물은 사진 캡처였어요.");
+  }
+  if (!/고객\s*부담/.test(body) || !/0원/.test(body)) add.push(pickAt(formal ? ZERO_FORMAL : ZERO_CASUAL, i, 77));
+  return add;
+}
+
+const SHORT_CASUAL = [
+  (c) => `${c.when} ${c.because} 사진 캡처만 보내고 회사 절차를 기다렸어요.`,
+  (c) => `${c.when} ${c.chAt} 사진 캡처를 올린 뒤 회사 절차만 확인했어요.`,
+  (c) => `${c.because} ${c.when} 회사 절차 안내와 사진 캡처 예시를 같이 봤어요.`,
+  (c) => `${c.when} 급전 상담 끝에 사진 캡처와 회사 절차만 남았어요.`
+];
+
+const SHORT_FORMAL = [
+  (c) => `${c.when} ${c.formalBecause} 사진 캡처만 보내고 회사 절차를 기다렸습니다.`,
+  (c) => `${c.when} ${c.chAt} 사진 캡처를 제출한 뒤 회사 절차만 확인했습니다.`,
+  (c) => `${c.formalBecause} ${c.when} 회사 절차 안내와 사진 캡처 예시를 함께 보았습니다.`,
+  (c) => `${c.when} 급전 문의 끝에 사진 캡처와 회사 절차만 남았습니다.`
+];
+
 function composeBody(i, rating, channelKey, stage, publishedAt, uniqSalt = 0) {
   const bucket = ageBucketForIndex(i);
   const formal = isFormalAgeBucket(bucket);
@@ -532,23 +845,21 @@ function composeBody(i, rating, channelKey, stage, publishedAt, uniqSalt = 0) {
     worry: pickAt(WORRIES, i, 7 + uniqSalt),
     stageName: stageBit(stage)
   };
-  const stories = formal ? formalStory(ctx) : casualStory(ctx);
-  let story = pickAt(stories, i, 11 + uniqSalt);
-  if (!formal && bucket === "20s" && i % 4 === 0 && !story.startsWith("진짜")) {
-    story = `진짜 ${story}`;
-  } else if (!formal && bucket === "30s" && i % 5 === 0 && !story.startsWith("솔직히")) {
-    story = `솔직히 ${story}`;
-  } else if (!formal && bucket === "40s" && i % 6 === 0 && !story.startsWith("우선")) {
-    story = `우선 ${story}`;
-  } else if (formal && bucket === "60s" && i % 5 === 0 && !story.startsWith("돌이켜")) {
-    story = `돌이켜 보면 ${story}`;
-  }
-
+  const opening = openingFor(i, formal);
   const rhythm = (Math.imul(i ^ (uniqSalt * 13), 0x45d9f3b) >>> 0) % 10;
-  const extraN = rhythm < 2 ? 0 : rhythm < 6 ? 1 : rhythm < 9 ? 2 : 3;
-  const extras = pickDistinct(formal ? formalExtras(ctx) : casualExtras(ctx), i, 20 + uniqSalt, extraN);
-  const longN = rhythm >= 6 ? 2 : 0;
-  const longs = pickDistinct(formal ? formalLong(ctx) : casualLong(ctx), i, 40 + uniqSalt, longN);
+  let middle;
+  if (rhythm === 0) {
+    const shortPool = formal ? SHORT_FORMAL : SHORT_CASUAL;
+    middle = leadForAge(pickAt(shortPool, i, 11 + uniqSalt)(ctx), i, bucket, formal);
+  } else {
+    const stories = formal ? formalStory(ctx) : casualStory(ctx);
+    const story = leadForAge(pickAt(stories, i, 11 + uniqSalt), i, bucket, formal);
+    const extraN = rhythm < 2 ? 0 : rhythm < 6 ? 1 : rhythm < 9 ? 2 : 3;
+    const extras = pickDistinct(formal ? formalExtras(ctx) : casualExtras(ctx), i, 20 + uniqSalt, extraN);
+    const longN = rhythm >= 6 ? 2 : 0;
+    const longs = pickDistinct(formal ? formalLong(ctx) : casualLong(ctx), i, 40 + uniqSalt, longN);
+    middle = [story, ...extras, ...longs].join(" ");
+  }
 
   const closerPool = (formal ? CLOSER_FORMAL : CLOSER_CASUAL)[bucket][rating];
   let closer = polishCloser(pickAt(closerPool, i, 30 + uniqSalt), bucket);
@@ -559,7 +870,8 @@ function composeBody(i, rating, channelKey, stage, publishedAt, uniqSalt = 0) {
     emoticon = maybeEmoticon(i, bucket, rating);
   }
 
-  let body = [story, ...extras, ...longs, closer].join(" ").replace(/\s+/g, " ").trim();
+  const supplements = themeSupplements(`${opening} ${middle}`, formal, i);
+  let body = [opening, middle, ...supplements, closer].join(" ").replace(/\s+/g, " ").trim();
   if (emoticon) body = `${body}${emoticon}`;
   if (body.length < REVIEW_BODY_MIN) {
     body = `${body} ${formal ? "안내는 이 범위에서 확인했습니다." : "안내는 이 범위에서 확인했어요."}`;
@@ -585,11 +897,13 @@ export function publishedAtForIndex(i, count, end) {
 }
 
 export function generateReviewRows(count = 10_000) {
+  ensureOpeningInventory();
   const rows = [];
   const bodySha = new Set();
   const normSha = new Set();
   const snippetSha = new Set();
   const snippetPrefix60 = new Set();
+  const skeletons = new Set();
   const end = new Date();
   for (let i = 1; i <= count; i += 1) {
     const channel = CHANNELS[(i * 7) % CHANNELS.length];
@@ -597,18 +911,22 @@ export function generateReviewRows(count = 10_000) {
     const rating = ratingForIndex(i, count);
     const rng = mulberry32(i * 999_983);
     const formal = isFormalAgeBucket(ageBucketForIndex(i));
+    const displayName = displayNameFor(i, rng, formal);
     const publishedAt = publishedAtForIndex(i, count, end).toISOString();
     let body = "";
     let hashes = null;
+    let skeleton = "";
     for (let uniqSalt = 0; uniqSalt < 128; uniqSalt += 1) {
       body = composeBody(i, rating, channel, stage, publishedAt, uniqSalt);
       hashes = dedupHashesForBody(body);
+      skeleton = reviewSentenceSkeleton(body, displayName);
       const prefix60 = hashes.snippet.slice(0, 60);
       if (
         !bodySha.has(hashes.body_sha256) &&
         !normSha.has(hashes.body_norm_sha256) &&
         !snippetSha.has(hashes.snippet_sha256) &&
-        !snippetPrefix60.has(prefix60)
+        !snippetPrefix60.has(prefix60) &&
+        !skeletons.has(skeleton)
       ) {
         break;
       }
@@ -618,7 +936,8 @@ export function generateReviewRows(count = 10_000) {
       bodySha.has(hashes.body_sha256) ||
       normSha.has(hashes.body_norm_sha256) ||
       snippetSha.has(hashes.snippet_sha256) ||
-      snippetPrefix60.has(prefix60)
+      snippetPrefix60.has(prefix60) ||
+      skeletons.has(skeleton)
     ) {
       throw new Error(`Could not dedupe review body for row ${i}`);
     }
@@ -626,12 +945,13 @@ export function generateReviewRows(count = 10_000) {
     normSha.add(hashes.body_norm_sha256);
     snippetSha.add(hashes.snippet_sha256);
     snippetPrefix60.add(prefix60);
+    skeletons.add(skeleton);
     rows.push({
       /** Admin import dedup key only — never embedded in public review text. */
       rowId: String(i).padStart(5, "0"),
       publishedAt,
       rating,
-      displayName: displayNameFor(i, rng, formal),
+      displayName,
       body,
       tags: { channel, stage },
       featured: i <= 24 ? 1 : 0,

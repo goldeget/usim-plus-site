@@ -7,11 +7,17 @@ import {
   ratingDistributionForCorpus
 } from "../scripts/generate-review-rows.mjs";
 import {
+  makeSnippet,
   REVIEW_BODY_MAX,
   REVIEW_BODY_MIN,
   REVIEW_INTERNAL_ID_PATTERN,
   reviewHashes
 } from "../functions/_lib/reviews.js";
+import {
+  presentReview,
+  reviewDateMismatch,
+  reviewIdForSlot
+} from "../functions/_lib/review-dates.js";
 
 test("generated review corpus has unique dedup hashes and realistic bounds", async () => {
   const rows = generateReviewRows(10_000);
@@ -194,6 +200,46 @@ test("review body calendar dates match publishedAt in Asia/Seoul", () => {
   const lengths = rows.map(row => row.body.length);
   assert.ok(Math.min(...lengths) < 220, "some reviews stay short");
   assert.ok(Math.max(...lengths) > 420, "some reviews run long");
+});
+
+function displayedSkeleton(text, displayName) {
+  let value = String(text ?? "").normalize("NFC");
+  const name = String(displayName ?? "");
+  if (name) value = value.split(name).join(" ");
+  const bare = name.replace(/\*/g, "");
+  if (bare.length >= 2) value = value.split(bare).join(" ");
+  value = value
+    .replace(/\d{4}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일/g, " ")
+    .replace(/\d{1,2}\s*월\s*\d{1,2}\s*일/g, " ")
+    .replace(/(?:일|월|화|수|목|금|토)요일/g, " ")
+    .replace(/늦은 밤에|저녁 무렵에|아침 일찍|출근 전에|오전 중에|오후 중에|점심시간에|밤중에|새벽에|오전에|점심에|오후에|퇴근하고|저녁에|밤에/g, " ");
+  return value.replace(/\s+/g, " ").trim();
+}
+
+test("displayed review skeletons are unique after dates, weekdays, times, and names", () => {
+  const today = new Date("2026-10-27T03:00:00.000Z");
+  const rows = generateReviewRows(10_000);
+  const skeletons = new Map();
+  for (let slot = 0; slot < rows.length; slot += 1) {
+    const row = rows[slot];
+    const shown = presentReview({
+      id: reviewIdForSlot(slot),
+      slot,
+      rating: row.rating,
+      displayName: row.displayName,
+      basePublishedAt: row.publishedAt,
+      snippet: makeSnippet(row.body),
+      tags: row.tags,
+      featured: row.featured,
+      body: row.body
+    }, today, { includeBody: true });
+    assert.equal(reviewDateMismatch(shown.body, shown.publishedAt), null, `${row.rowId} display date`);
+    const skeleton = displayedSkeleton(shown.body, shown.displayName);
+    const prior = skeletons.get(skeleton);
+    assert.equal(prior, undefined, `skeleton collision ${prior} and ${row.rowId}`);
+    skeletons.set(skeleton, row.rowId);
+  }
+  assert.equal(skeletons.size, 10_000);
 });
 
 test("generated corpus snippet prefixes are diverse", async () => {
