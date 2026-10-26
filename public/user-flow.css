@@ -24,7 +24,6 @@ body::before,body::after { display: none; }
 button, a, input, summary { -webkit-tap-highlight-color: transparent; }
 a { color: var(--flow-blue-dark); text-underline-offset: 3px; }
 a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible { outline: 3px solid #70c5cf !important; outline-offset: 3px; }
-.skip { z-index: 100; }
 .site-shell { width: min(1120px, calc(100% - 40px)); margin-inline: auto; overflow: visible; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
 .site-shell::before,.site-shell::after { display: none; }
 .topbar { position: sticky; top: 0; z-index: 40; display: flex; min-height: 68px; align-items: center; justify-content: space-between; gap: 18px; padding: 10px clamp(0px, 1vw, 12px); border-bottom: 1px solid #dce5eb; background: #ffffffed; backdrop-filter: blur(16px); }
@@ -370,7 +369,6 @@ body::before,body::after { display: block; }
 body::before { content: ""; z-index: -2; position: fixed; inset: -10%; background: radial-gradient(ellipse 31% 44% at 10% 26%,#1641597a,transparent 85%),radial-gradient(ellipse 35% 28% at 91% 8%,#5c415144,transparent 75%),radial-gradient(ellipse 30% 49% at 81% 85%,#16304777,transparent 77%),linear-gradient(130deg,#020811,#06121d 48%,#03070b); }
 body::after { content: ""; z-index: -1; position: fixed; inset: 0; pointer-events: none; opacity: .2; background: repeating-linear-gradient(90deg,transparent 0 122px,#9befff09 123px 124px,transparent 125px 216px); }
 a { color: #8cffe8; }
-.skip { background: #0c1b2a; color: #f6fbff; border: 1px solid #60f1d4; }
 .site-shell { margin: 28px auto 42px; position: relative; isolation: isolate; overflow: hidden; border: 1px solid #52647861; border-radius: 22px; background: linear-gradient(165deg,rgba(8,18,29,.98),rgba(4,11,20,.99)); box-shadow: 0 36px 100px #000a,0 0 80px #48d4e008; }
 .site-shell::before,.site-shell::after { display: block; }
 .site-shell::before { content: ""; position: absolute; inset: 0 0 auto; height: 780px; pointer-events: none; z-index: -1; background: radial-gradient(ellipse at 74% 32%,#39b9c52a,transparent 42%),radial-gradient(ellipse at 44% 10%,#e4b87709,transparent 48%); }
