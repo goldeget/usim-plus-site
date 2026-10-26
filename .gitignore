@@ -14,4 +14,8 @@ execute-deploy-seed.txt
 seed10k.json
 batch100.json
 .mcp-payload.json
+.mcp-deploy-payload.json
+.mcp-deploy-code.js
+.worker.b64
+.seed-run.log
 scripts/.one-shot-seed-worker.mjs

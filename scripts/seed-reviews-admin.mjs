@@ -3,7 +3,7 @@
  * Remote bulk import via admin session cookie.
  * Usage:
  *   ADMIN_EMAIL=... ADMIN_PASSWORD=... node scripts/seed-reviews-admin.mjs --count=10000
- * Optional: ADMIN_ORIGIN=https://admin.climekr.com (default)
+ *   ... --start-batch=13 --end-batch=200   # resume after partial run
  *
  * Production re-seed (fixes legacy rows whose bodies/snippets contained corpus-XXXXX):
  * 1. Deploy this repo so admin import rejects internal ids in public text.
@@ -12,12 +12,16 @@
  *    Existing corpus_v1 source_row_id values dedupe re-import; a full wipe is required
  *    when replacing in-place rows that already consumed those ids.
  */
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import https from "node:https";
 import { generateReviewRows } from "./generate-review-rows.mjs";
 import { REVIEW_CAP } from "../functions/_lib/reviews.js";
 
-const REQUEST_TIMEOUT_MS = 180_000;
+const REQUEST_TIMEOUT_MS = 300_000;
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const corpusCache = join(__dirname, ".reviews-corpus.cache.json");
 
 function httpsRequest(url, options = {}) {
   const target = new URL(url);
@@ -71,12 +75,12 @@ function httpsRequest(url, options = {}) {
 }
 
 async function fetchWithTimeout(url, options = {}, attempt = 1) {
-  const maxAttempts = 5;
+  const maxAttempts = 8;
   try {
     return await httpsRequest(url, options);
   } catch (error) {
     if (attempt >= maxAttempts) throw error;
-    const delay = Math.min(2000 * attempt, 15_000);
+    const delay = Math.min(3000 * attempt, 30_000);
     console.warn(`Fetch retry ${attempt}/${maxAttempts} in ${delay}ms: ${error?.message || error}`);
     await new Promise(r => setTimeout(r, delay));
     return fetchWithTimeout(url, options, attempt + 1);
@@ -86,6 +90,10 @@ async function fetchWithTimeout(url, options = {}, attempt = 1) {
 const args = process.argv.slice(2);
 const countArg = args.find(a => a.startsWith("--count="));
 const count = Math.min(Number(countArg?.split("=")[1] || 10_000), REVIEW_CAP);
+const startBatchArg = args.find(a => a.startsWith("--start-batch="));
+const endBatchArg = args.find(a => a.startsWith("--end-batch="));
+const startBatch = Math.max(Number(startBatchArg?.split("=")[1] || 1), 1);
+const endBatch = endBatchArg ? Math.max(Number(endBatchArg.split("=")[1]), startBatch) : null;
 const origin = process.env.ADMIN_ORIGIN || "https://admin.climekr.com";
 const email = process.env.ADMIN_EMAIL;
 const password =
@@ -138,12 +146,28 @@ async function rebuildStats(cookie) {
   });
 }
 
-const rows = generateReviewRows(count);
-const cookie = await login();
+let rows;
+if (existsSync(corpusCache)) {
+  rows = JSON.parse(readFileSync(corpusCache, "utf8"));
+  if (rows.length !== count) {
+    rows = generateReviewRows(count);
+    writeFileSync(corpusCache, JSON.stringify(rows));
+  }
+} else {
+  rows = generateReviewRows(count);
+  writeFileSync(corpusCache, JSON.stringify(rows));
+}
+
+let cookie = await login();
 let ok = 0;
 let duplicate = 0;
 let invalid = 0;
-for (let offset = 0; offset < rows.length; offset += batchSize) {
+const startOffset = (startBatch - 1) * batchSize;
+const lastBatch = endBatch || Math.ceil(rows.length / batchSize);
+const endOffsetExclusive = Math.min(lastBatch * batchSize, rows.length);
+
+for (let offset = startOffset; offset < endOffsetExclusive; offset += batchSize) {
+  const batchNum = Math.floor(offset / batchSize) + 1;
   const batch = rows.slice(offset, offset + batchSize).map(r => ({
     rowId: r.rowId,
     body: r.body,
@@ -154,11 +178,29 @@ for (let offset = 0; offset < rows.length; offset += batchSize) {
     featured: Boolean(r.featured),
     sortBoost: r.sortBoost
   }));
-  const result = await importBatch(cookie, batch);
+  let result;
+  for (let attempt = 1; attempt <= 8; attempt += 1) {
+    try {
+      result = await importBatch(cookie, batch);
+      break;
+    } catch (error) {
+      if (attempt >= 8) throw error;
+      const delay = Math.min(4000 * attempt, 45_000);
+      console.warn(`Batch ${batchNum} retry ${attempt}/8 in ${delay}ms: ${error?.message || error}`);
+      await new Promise(r => setTimeout(r, delay));
+      if (attempt % 2 === 0) cookie = await login();
+    }
+  }
   ok += result.ok || 0;
   duplicate += result.duplicate || 0;
   invalid += result.invalid || 0;
-  console.log(`Batch ${Math.floor(offset / batchSize) + 1}/${Math.ceil(rows.length / batchSize)} ok=${result.ok} dup=${result.duplicate}`);
+  console.log(`Batch ${batchNum}/${Math.ceil(rows.length / batchSize)} ok=${result.ok} dup=${result.duplicate}`);
+  await new Promise(r => setTimeout(r, 600));
 }
-await rebuildStats(cookie);
+
+try {
+  await rebuildStats(cookie);
+} catch (error) {
+  console.warn(`rebuild-stats failed (re-run manually): ${error?.message || error}`);
+}
 console.log(`Done: ok=${ok} duplicate=${duplicate} invalid=${invalid}`);
