@@ -105,8 +105,29 @@ function pick(rng, arr) {
   return arr[Math.floor(rng() * arr.length)];
 }
 
-function ratingForIndex(_i) {
+/**
+ * Corpus rating mix targeting mean exactly 4.8 on a 5-point scale (integer stars).
+ * For count divisible by 5: 5·n5 + 4·n4 + 3·n3 = (48/10)·count, with n5 + n4 + n3 = count.
+ * Mostly 4–5 stars: n5 = (4/5)·count + n3, n4 = count/5 − 2·n3 (0 ≤ n3 ≤ count/10).
+ * At count=10_000 with n3=100: 8100×5 + 1800×4 + 100×3 → 48000/10000 = 4.8.
+ */
+function ratingCountsForCorpus(count) {
+  const n3 = count >= 1000 ? Math.min(100, Math.floor(count / 100)) : 0;
+  const n4 = Math.floor(count / 5) - 2 * n3;
+  const n5 = count - n4 - n3;
+  return { 3: n3, 4: n4, 5: n5 };
+}
+
+function ratingForIndex(i, count) {
+  const { 3: n3, 4: n4 } = ratingCountsForCorpus(count);
+  const slot = ((i - 1) * 7919) % count;
+  if (slot < n3) return 3;
+  if (slot < n3 + n4) return 4;
   return 5;
+}
+
+export function ratingDistributionForCorpus(count = 10_000) {
+  return ratingCountsForCorpus(count);
 }
 
 function displayNameFor(i, rng) {
@@ -189,7 +210,7 @@ export function generateReviewRows(count = 10_000) {
   const spanMs = end.getTime() - start.getTime();
   for (let i = 1; i <= count; i += 1) {
     const channel = CHANNELS[(i * 7) % CHANNELS.length];
-    const rating = ratingForIndex(i);
+    const rating = ratingForIndex(i, count);
     const rng = mulberry32(i * 999_983);
     const body = composeBody(i, rating, channel);
     const published = new Date(start.getTime() + (spanMs * i) / count);

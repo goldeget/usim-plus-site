@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { generateReviewRows } from "../scripts/generate-review-rows.mjs";
+import { generateReviewRows, ratingDistributionForCorpus } from "../scripts/generate-review-rows.mjs";
 import { REVIEW_BODY_MAX, REVIEW_BODY_MIN, reviewHashes } from "../functions/_lib/reviews.js";
 
 test("generated review corpus has unique dedup hashes and realistic bounds", async () => {
@@ -22,7 +22,12 @@ test("generated review corpus has unique dedup hashes and realistic bounds", asy
     normSha.add(hashes.body_norm_sha256);
     snippetSha.add(hashes.snippet_sha256);
   }
-  assert.ok(rows.every(r => r.rating === 5), "corpus uses 5-star ratings only");
+  const hist = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+  for (const row of rows) hist[row.rating] += 1;
+  const expected = ratingDistributionForCorpus(10_000);
+  assert.deepEqual(hist, { 1: 0, 2: 0, 3: expected[3], 4: expected[4], 5: expected[5] });
+  const mean = rows.reduce((s, r) => s + r.rating, 0) / rows.length;
+  assert.ok(Math.abs(mean - 4.8) < 1e-9, `mean rating ${mean} should be 4.8`);
   assert.ok(
     rows.every(r => r.tags && !Object.hasOwn(r.tags, "region")),
     "tags must not include region"
