@@ -1,0 +1,20 @@
+name = "usim-plus-review-refresh"
+main = "review-refresh-worker.js"
+compatibility_date = "2026-10-26"
+workers_dev = false
+
+[observability]
+enabled = true
+
+# 00:10 Asia/Seoul (UTC+9, no daylight saving) is 15:10 UTC.
+[triggers]
+crons = ["10 15 * * *"]
+
+[[d1_databases]]
+binding = "CONTENT_DB"
+database_name = "usim-plus-content"
+database_id = "23f98117-e3e7-4804-9d72-c8f15d812aa7"
+
+[[r2_buckets]]
+binding = "APPLICATIONS_BUCKET"
+bucket_name = "usim-plus-applications"
