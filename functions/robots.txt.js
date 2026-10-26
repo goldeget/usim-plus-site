@@ -1,5 +1,8 @@
+// Public crawl policy: everything is crawlable except admin and API routes.
+// Public content sections: / (home), /guide/, /reviews/, /topics/ (상황별 안내 페이지).
 const PUBLIC_ROBOTS = `User-agent: *
 Allow: /
+Allow: /topics/
 Disallow: /admin/
 Disallow: /api/
 

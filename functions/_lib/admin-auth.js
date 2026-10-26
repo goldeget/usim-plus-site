@@ -135,7 +135,7 @@ async function readLoginBody(request) {
 
 function loginRedirect(path, cookie) {
   const headers = new Headers({ "Cache-Control": "no-store", Location: path });
-  if (cookie) headers.set("Set-Cookie", cookie);
+  if (cookie) headers.append("Set-Cookie", cookie);
   return new Response(null, { status: 303, headers });
 }
 
@@ -178,10 +178,16 @@ export async function loginAdminRequest(request, env, now = Date.now()) {
     await env.CONTENT_DB.prepare(
       "INSERT INTO admin_sessions (token_hash, password_version, created_at, expires_at) VALUES (?, ?, ?, ?)"
     ).bind(tokenHash, passwordVersion, createdAt, expiresAt).run();
-    await env.CONTENT_DB.prepare("DELETE FROM admin_login_attempts WHERE ip_hash = ?").bind(ipHash).run();
+    try {
+      await env.CONTENT_DB.prepare("DELETE FROM admin_login_attempts WHERE ip_hash = ?").bind(ipHash).run();
+    } catch {
+      // Session is already stored. Cleanup of the rate-limit row must not fail login.
+    }
     const cookie = `${ADMIN_SESSION_COOKIE}=${token}; Path=/; Max-Age=${ADMIN_SESSION_TTL_MS / 1000}; Secure; HttpOnly; SameSite=Strict`;
     if (parsed.isForm) return loginRedirect(returnTo, cookie);
-    return jsonResponse({ ok: true, redirectTo: returnTo }, 200, { "Set-Cookie": cookie });
+    const response = jsonResponse({ ok: true, redirectTo: returnTo }, 200);
+    response.headers.append("Set-Cookie", cookie);
+    return response;
   } catch {
     return formErrorResponse(returnTo, "setup_required", 503, parsed.isForm);
   }

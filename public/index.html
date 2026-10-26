@@ -14,6 +14,10 @@
   <meta property="og:title" content="클라임유심 | 유심 개통 가능하면 최대 66만원" id="ogTitle" />
   <meta property="og:description" content="고객 개통·통신 비용은 회사가 전액 부담합니다. 대출이 아닌 유심 개통 혜택이며 3일·15일·30일 유지 조건 충족 시 한 건 최대 22만원, 전체 최대 66만원 지급 대상입니다." id="ogDescription" />
   <meta property="og:url" content="https://climekr.com/" />
+  <meta property="og:image" content="https://climekr.com/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:image" content="https://climekr.com/og-image.png" />
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="클라임유심 | 유심 개통 가능하면 최대 66만원" id="twitterTitle" />
   <meta name="twitter:description" content="고객 부담금 0원(개통·통신 비용 회사 전액 부담). 유심 개통 후 유지 조건 충족 시 최대 66만원 혜택 대상. 텔레그램·채널톡 상담." id="twitterDescription" />
@@ -641,6 +645,10 @@
     .operator-funded-costs span{color:#d0e7e9}
   </style>
   <link rel="stylesheet" href="/user-flow.css?v=20261025-business-footer-1" />
+  <link rel="stylesheet" href="/premium.css?v=20261027-premium-1" />
+  <link rel="stylesheet" href="/live-activity.css?v=20261027-live-1" />
+  <script>document.documentElement.classList.add('js');</script>
+  <script src="/live-activity.js?v=20261027-live-3" defer></script>
 </head>
 <body>
   <div class="site-shell">
@@ -668,6 +676,11 @@
             <p class="hero-chat-note" id="heroChatNote">이미 조회하셨다면 상담창에 사진을 보내 주세요.</p>
           </div>
           <p class="payout-note" id="payoutNote">고객 개통·통신 관련 비용은 회사 전액 부담. 지급은 유지 조건 충족 후 결정됩니다.</p>
+          <ul class="hero-trust" aria-label="안심하고 문의할 수 있는 이유">
+            <li><strong>고객 부담금 0원</strong><span>개통·통신 비용 회사 전액 부담</span></li>
+            <li><strong>30초 문의</strong><span>채널 선택 후 사진 한 장이면 접수 완료</span></li>
+            <li><strong>개인정보 보호</strong><span>민감 정보는 가리고 상담</span></li>
+          </ul>
         </div>
         <div class="hero-art" aria-label="유심 카드 그래픽">
           <div class="art-grid" aria-hidden="true"></div><div class="holo-ring ring-one" aria-hidden="true"></div><div class="holo-ring ring-two" aria-hidden="true"></div>
@@ -678,13 +691,58 @@
       <div class="content">
         <div class="quick-flow" id="steps" aria-label="참여 순서"><span id="quickFlow"><span>가능 여부 확인</span><span aria-hidden="true">→</span><span>조회 사진 전송</span><span aria-hidden="true">→</span><span>조건 확인 후 안내</span></span></div>
 
+        <section class="trust-bar" aria-label="서비스 현황" data-reveal>
+          <div class="trust-bar__item">
+            <span class="trust-bar__label">누적 상담 문의</span>
+            <strong class="trust-bar__num"><span data-live-counter>512,300</span><span class="trust-bar__unit">건</span></strong>
+          </div>
+          <div class="trust-bar__item" id="trustRating" hidden>
+            <span class="trust-bar__label">이용 후기 평균</span>
+            <strong class="trust-bar__num"><span id="trustRatingScore">4.8</span><span class="stars" id="trustRatingStars" role="img" aria-label="별점 5점 만점에 4.8점"></span></strong>
+          </div>
+          <div class="trust-bar__item">
+            <span class="trust-bar__label">실시간</span>
+            <strong class="trust-bar__num trust-bar__num--live"><span class="la-dot" aria-hidden="true"></span><span data-live-online data-live-online-template="지금 %n명이 상담 알아보는 중">지금 38명이 상담 알아보는 중</span></strong>
+          </div>
+        </section>
+
+        <section class="empathy" aria-labelledby="empathy-title" data-reveal>
+          <p class="section-kicker">혹시 이런 순간이신가요?</p>
+          <h2 id="empathy-title">급한 마음,<br>혼자 끌어안지 마세요</h2>
+          <ul class="empathy__list">
+            <li><a href="/topics/urgent-money/"><strong>월급날은 남았는데<br>생활비가 먼저 바닥</strong><span>공과금·카드값은<br>기다려주지 않으니까요</span><em>상황별 안내 보기 ›</em></a></li>
+            <li><a href="/topics/small-loan-alternatives/"><strong>경조사·병원비처럼<br>예상 못 한 지출</strong><span>아무에게도 말 못 한 사정,<br>혼자 앓지 마세요</span><em>상황별 안내 보기 ›</em></a></li>
+            <li><a href="/topics/loan-rejected/"><strong>빚은 지고 싶지 않을 때</strong><span>대출이 아닌 혜택으로<br>해결할 수 있어요</span><em>상황별 안내 보기 ›</em></a></li>
+          </ul>
+          <p class="empathy__resolve">선불 유심 개통 혜택은 대출이 아닙니다.<br>개통·통신 비용은 회사가 전액 부담합니다.<br>지급은 유지 조건 충족 후 결정됩니다.</p>
+          <a class="cta-pulse" href="#contact" data-cta-scroll>지금 무료 상담받기</a>
+        </section>
+
+        <section class="process" aria-labelledby="process-title" data-reveal>
+          <p class="section-kicker">진행 방법</p>
+          <h2 id="process-title">문의부터 완료까지<br>세 단계면 충분해요</h2>
+          <ol class="process__steps">
+            <li><span class="process__num" aria-hidden="true">1</span><strong>상담 채널로 문의</strong><span>텔레그램·채널톡,<br>편한 곳으로 30초</span></li>
+            <li><span class="process__num" aria-hidden="true">2</span><strong>사진 한 장 전송</strong><span>조회 화면 캡처 한 장이면<br>준비 끝</span></li>
+            <li><span class="process__num" aria-hidden="true">3</span><strong>조건 확인 후 진행</strong><span>안내받은 조건 그대로<br>진행하면 완료</span></li>
+          </ol>
+          <a class="process__cta" href="#contact" data-cta-scroll>지금 30초 문의하기</a>
+        </section>
+
         <section class="home-reviews" id="homeReviews" aria-labelledby="home-reviews-title" hidden>
           <div class="home-reviews__head">
-            <h2 id="home-reviews-title">이용 후기</h2>
-            <p class="home-reviews__stats" id="homeReviewsStats" aria-live="polite"></p>
+            <div class="home-reviews__title">
+              <p class="section-kicker">실제 참여 후기</p>
+              <h2 id="home-reviews-title">이용 후기</h2>
+              <p class="home-reviews__stats" id="homeReviewsStats" aria-live="polite"></p>
+            </div>
+            <div class="home-reviews__score" aria-hidden="true">
+              <strong id="homeReviewsAvg">4.8</strong>
+              <span class="stars" id="homeReviewsStars"></span>
+            </div>
           </div>
           <ul class="home-reviews__list" id="homeReviewsList"></ul>
-          <a class="home-reviews__link" href="/reviews/">후기 더 보기</a>
+          <a class="home-reviews__link" href="/reviews/">후기 더 보기 <span aria-hidden="true">→</span></a>
         </section>
 
         <section class="consultation-panel" id="contact" aria-labelledby="contact-title" tabindex="-1">
@@ -760,6 +818,7 @@
       <div class="site-footer__brand"><strong class="footer-mark">USIM+</strong><span id="footerBrand">클라임유심 · climekr.com</span><span>© <span id="footerYear">2026</span></span></div>
       <nav aria-label="유심 혜택과 상담 바로가기" style="display:flex;gap:14px;flex-wrap:wrap;margin:12px 0;font-size:14px">
         <a href="/guide/">유심 혜택·비용·지급 조건</a>
+        <a href="/topics/">상황별 안내</a>
         <a href="/links/">텔레그램·채널톡 상담</a>
       </nav>
       <p class="site-footer__terms" id="footerTerms">고객 개통·통신 비용 회사 전액 부담
@@ -785,6 +844,7 @@
     <span class="toast-icon" id="toastIcon" aria-hidden="true"></span>
     <span class="toast-copy"><strong id="toastTitle"></strong><span id="toastMessage"></span></span>
   </div>
+  <a class="sticky-cta" href="#contact" data-cta-scroll aria-label="상담 채널로 30초 문의하기"><span class="sticky-cta__pulse" aria-hidden="true"></span><strong>30초 상담 문의</strong><span>고객 부담금 0원</span></a>
   <script>
     (() => {
       const stepGrid=document.querySelector('.steps-grid');
@@ -832,6 +892,7 @@
         document.getElementById('termsHint').textContent=`한 건 최대 ${formatMoney(perCase)} · 최대 ${content.payout.maxCases}건 · 총 최대 ${formatMoney(total)}`;
         list.setAttribute('aria-label',`${expandTokens(content.copy.payoutAriaLabel,content)}. 한 건 최대 ${formatMoney(perCase)}, 총 최대 ${formatMoney(total)}`);
       }
+      const DEFAULT_CHANNEL_LINKS={telegram:'https://t.me/climeusim',channeltalk:'https://climeusim.channel.io'};
       function updateContactLinks(links,copy,operator){
         for(const anchor of document.querySelectorAll('[data-contact]')){
           const key=anchor.dataset.contact;
@@ -840,10 +901,12 @@
             const candidate=new URL(typeof links?.[key]==='string'?links[key].trim():'');
             if(candidate.protocol==='https:'&&candidate.hostname&&!candidate.username&&!candidate.password)href=candidate.href;
           }catch{}
+          // CMS 링크가 비어 있어도 공식 채널 기본 주소로 항상 연결한다
+          const fallback=href?'':(DEFAULT_CHANNEL_LINKS[key]||'');
           const hint=anchor.querySelector('small');
-          if(href){
-            anchor.href=href;anchor.removeAttribute('aria-disabled');anchor.setAttribute('aria-label',`${anchor.querySelector('strong').textContent} 열기 (새 창에서 열립니다)`);
-            anchor.target='_blank';anchor.rel='noopener noreferrer';if(hint)hint.textContent=copy.channelStart;
+          if(href||fallback){
+            anchor.href=href||fallback;anchor.removeAttribute('aria-disabled');anchor.setAttribute('aria-label',`${anchor.querySelector('strong').textContent} 열기 (새 창에서 열립니다)`);
+            anchor.target='_blank';anchor.rel='noopener noreferrer';if(hint)hint.textContent=href?copy.channelStart:'지금 상담 가능';
           }else{
             anchor.href='#contact';anchor.setAttribute('aria-disabled','true');anchor.setAttribute('aria-label',`${anchor.querySelector('strong').textContent} 링크가 아직 등록되지 않았습니다`);
             anchor.removeAttribute('target');anchor.removeAttribute('rel');if(hint)hint.textContent=copy.channelNotReady;
@@ -935,7 +998,73 @@
           stepGrid.append(card);
         });
       }
-      function stars(n){return '★'.repeat(n)+'☆'.repeat(5-n);}
+      function starRatingEl(rating,size){
+        const el=document.createElement('span');
+        el.className='stars';
+        el.style.setProperty('--pct',String(Math.max(0,Math.min(100,(rating/5)*100))));
+        if(size)el.style.setProperty('--size',size+'px');
+        el.setAttribute('role','img');
+        el.setAttribute('aria-label',`별점 5점 만점에 ${rating}점`);
+        return el;
+      }
+      function avatarEl(name){
+        const el=document.createElement('span');
+        const seed=String(name||'참').codePointAt(0)||0;
+        el.className=`review-avatar av-${1+(seed%5)}`;
+        el.setAttribute('aria-hidden','true');
+        el.textContent=String(name||'참').trim()[0]||'참';
+        return el;
+      }
+      function chipEl(text,kind){
+        const el=document.createElement('span');
+        el.className=`chip chip--${kind}`;
+        el.textContent=text;
+        return el;
+      }
+      function appendFormattedBody(el,text){
+        el.replaceChildren();
+        const sentences=String(text||'').split(/(?<=[.!?…])\s+|\n+/).map(s=>s.trim()).filter(Boolean);
+        if(!sentences.length){el.textContent=text||'';return;}
+        for(let i=0;i<sentences.length;i+=2){
+          const line=document.createElement('span');
+          line.className='line';
+          line.textContent=sentences.slice(i,i+2).join(' ');
+          el.append(line);
+        }
+      }
+      function reviewCardEl(item){
+        const li=document.createElement('li');
+        li.className='review-card';
+        if(item.featured)li.classList.add('review-card--featured');
+        const head=document.createElement('div');
+        head.className='review-card__head';
+        const who=document.createElement('div');
+        who.className='review-card__who';
+        const nameEl=document.createElement('span');
+        nameEl.className='review-card__name';
+        nameEl.textContent=item.displayName||'참여자';
+        const dateEl=document.createElement('time');
+        dateEl.className='review-card__date';
+        dateEl.dateTime=item.publishedAt;
+        const publishedDate=new Date(item.publishedAt);
+        dateEl.textContent=Number.isNaN(publishedDate.valueOf())?'':publishedDate.toLocaleDateString('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'short',day:'numeric'});
+        who.append(nameEl,dateEl);
+        const starsWrap=document.createElement('span');
+        starsWrap.className='review-card__stars';
+        starsWrap.append(starRatingEl(item.rating,14));
+        head.append(avatarEl(item.displayName),who,starsWrap);
+        const body=document.createElement('p');
+        body.className='review-card__body';
+        appendFormattedBody(body,item.snippet);
+        const foot=document.createElement('div');
+        foot.className='review-card__foot';
+        if(item.featured)foot.append(chipEl('추천 후기','featured'));
+        const persona=item.tags&&typeof item.tags==='object'?item.tags.persona:'';
+        if(persona)foot.append(chipEl(persona,'persona'));
+        foot.append(chipEl(`${item.rating}점`,'rating'));
+        li.append(head,body,foot);
+        return li;
+      }
       async function loadHomeReviews(){
         const section=document.getElementById('homeReviews');
         const statsEl=document.getElementById('homeReviewsStats');
@@ -949,26 +1078,22 @@
           const stats=await statsRes.json();
           const featured=await featRes.json();
           if(!stats.total||!featured.items?.length)return;
-          statsEl.textContent=`평균 ${stats.avgRating}점 · ${new Intl.NumberFormat('ko-KR').format(stats.total)}건`;
-          listEl.replaceChildren();
-          for(const item of featured.items){
-            const li=document.createElement('li');
-            li.className='home-reviews__item';
-            const meta=document.createElement('div');
-            meta.className='home-reviews__meta';
-            const starSpan=document.createElement('span');
-            starSpan.className='home-reviews__stars';
-            starSpan.setAttribute('aria-label',`${item.rating}점`);
-            starSpan.textContent=stars(item.rating);
-            const nameSpan=document.createElement('span');
-            nameSpan.textContent=item.displayName||'참여자';
-            meta.append(starSpan,nameSpan);
-            const text=document.createElement('p');
-            text.style.margin='0';
-            text.textContent=item.snippet;
-            li.append(meta,text);
-            listEl.append(li);
+          const avg=Number(stats.avgRating);
+          statsEl.textContent=`평균 ${avg}점 · ${new Intl.NumberFormat('ko-KR').format(stats.total)}건`;
+          document.getElementById('homeReviewsAvg').textContent=String(avg);
+          const homeStars=document.getElementById('homeReviewsStars');
+          homeStars.style.setProperty('--pct',String((avg/5)*100));
+          homeStars.style.setProperty('--size','15px');
+          const trustCard=document.getElementById('trustRating');
+          if(trustCard){
+            document.getElementById('trustRatingScore').textContent=String(avg);
+            const trustStars=document.getElementById('trustRatingStars');
+            trustStars.style.setProperty('--pct',String((avg/5)*100));
+            trustStars.setAttribute('aria-label',`별점 5점 만점에 ${avg}점`);
+            trustCard.hidden=false;
           }
+          listEl.replaceChildren();
+          for(const item of featured.items)listEl.append(reviewCardEl(item));
           section.hidden=false;
         }catch{}
       }
@@ -1044,6 +1169,31 @@
         showToast.timer=setTimeout(()=>{el.classList.remove('show');el.setAttribute('aria-hidden','true')},duration);
       }
       showToast.announcement=0;
+    })();
+  </script>
+  <script>
+    (() => {
+      // 공감·절차 CTA도 상담 패널로 스크롤 (메인 스크립트의 히어로 버튼과 동일 동작)
+      document.querySelectorAll('[data-cta-scroll]').forEach(anchor => anchor.addEventListener('click', event => {
+        event.preventDefault();
+        const panel = document.getElementById('contact');
+        if (!panel) return;
+        history.replaceState(null, '', '#contact');
+        requestAnimationFrame(() => { panel.scrollIntoView({ block: 'start' }); panel.focus({ preventScroll: true }); });
+      }));
+      // 스크롤 리빌: reduced-motion이거나 미지원 환경이면 즉시 표시
+      const targets = document.querySelectorAll('[data-reveal]');
+      const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduced || !('IntersectionObserver' in window)) {
+        targets.forEach(el => el.classList.add('is-visible'));
+        return;
+      }
+      const observer = new IntersectionObserver(entries => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observer.unobserve(entry.target); }
+        }
+      }, { threshold: .12, rootMargin: '0px 0px -8% 0px' });
+      targets.forEach(el => observer.observe(el));
     })();
   </script>
 </body>

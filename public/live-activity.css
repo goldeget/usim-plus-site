@@ -1,0 +1,127 @@
+/* 라이브 활동 위젯 (live-activity.js) — 다크 프리미엄 테마 */
+.la-toasts {
+  position: fixed;
+  left: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(330px, calc(100vw - 32px));
+  pointer-events: none;
+}
+body.has-sticky-cta .la-toasts {
+  bottom: calc(86px + env(safe-area-inset-bottom));
+}
+.la-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 12px;
+  border: 1px solid #2e4a5d;
+  border-radius: 14px;
+  background: linear-gradient(150deg, rgba(16, 35, 52, .96), rgba(9, 22, 35, .96));
+  box-shadow: 0 14px 40px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(140, 247, 255, .08);
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  transform: translateY(14px) translateX(-8px) scale(.97);
+  transition: opacity .38s ease, transform .38s cubic-bezier(.2, .9, .25, 1.1);
+}
+.la-toast.is-in {
+  opacity: 1;
+  transform: none;
+}
+.la-toast.is-out {
+  opacity: 0;
+  transform: translateY(8px) scale(.96);
+  transition: opacity .3s ease, transform .3s ease;
+}
+.la-toast__avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: #062730;
+  font-size: 15px;
+  font-weight: 850;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 4px 12px rgba(0, 0, 0, .35);
+}
+.la-avatar-1 { background: linear-gradient(145deg, #8cffe8, #3ecfb8); }
+.la-avatar-2 { background: linear-gradient(145deg, #ffd97a, #e8a020); }
+.la-avatar-3 { background: linear-gradient(145deg, #9fd8ff, #4a9fd8); }
+.la-avatar-4 { background: linear-gradient(145deg, #d5b8ff, #9670e0); }
+.la-avatar-5 { background: linear-gradient(145deg, #ffb8c6, #e0708a); }
+.la-toast__body {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+  line-height: 1.4;
+}
+.la-toast__body strong {
+  color: #f2fbff;
+  font-size: 13.5px;
+  font-weight: 750;
+  letter-spacing: -.02em;
+}
+.la-toast__body span {
+  color: #9db8c8;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.la-toast__close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  margin-left: 2px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #7d99ac;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+.la-toast__close:hover {
+  background: #ffffff12;
+  color: #e6f4fb;
+}
+
+/* 온라인 지표 펄스 도트 */
+.la-dot {
+  display: inline-block;
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4de8c0;
+  box-shadow: 0 0 0 0 rgba(77, 232, 192, .55);
+  animation: la-pulse 1.8s ease-out infinite;
+}
+@keyframes la-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(77, 232, 192, .55); }
+  70% { box-shadow: 0 0 0 9px rgba(77, 232, 192, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(77, 232, 192, 0); }
+}
+
+@media (max-width: 720px) {
+  .la-toasts {
+    left: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    width: min(310px, calc(100vw - 24px));
+  }
+  body.has-sticky-cta .la-toasts {
+    bottom: calc(92px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .la-toast { transition: none; }
+  .la-dot { animation: none; }
+}

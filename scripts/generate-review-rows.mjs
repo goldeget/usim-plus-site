@@ -26,17 +26,18 @@ import {
 import {
   FAMILY_RELAY_RE,
   PERSONA_MARKERS,
+  anchorLine,
   closerLine,
   diaryLine,
   doubtLine,
   extraLine,
+  freeLine,
   longCore,
   moreLine,
   openingLine,
-  perfLine,
   photoLine,
+  reliefLine,
   shortCore,
-  toFormal,
   zeroLine
 } from "./review-voice-packs.mjs";
 
@@ -58,7 +59,7 @@ function dedupHashesForBody(body) {
 }
 
 /** Bump when corpus voice changes so seed cache files regenerate. */
-export const REVIEW_CORPUS_VERSION = "usim-persona-situations-2026-10-27";
+export const REVIEW_CORPUS_VERSION = "usim-natural-voices-2026-10-27";
 
 const CHANNELS = ["channeltalk", "telegram", "line"];
 const STAGES = ["3", "15", "30", "consult"];
@@ -208,7 +209,7 @@ function whenPhrase(kst, i, salt) {
   const ymd = `${kst.year}년 ${md}`;
   const wd = `${kst.weekday}요일`;
   return pickAt(
-    [`${md} ${tod}`, `${ymd} ${tod}`, `${md} ${wd} ${tod}`, `${wd}인 ${md} ${tod}`],
+    [`${md} ${tod}`, `${ymd} ${tod}`, `${md} ${wd} ${tod}`, `${md} ${tod}`],
     i,
     8 + salt
   );
@@ -242,62 +243,14 @@ export function reviewSentenceSkeleton(text, displayName) {
   return value.replace(/\s+/g, " ").trim();
 }
 
-const ANCHOR = {
-  대학생: [
-    "대학생 용돈은 대출 창구가 더 좁았어요.",
-    "대학생이라 용돈 대출은 재학 중에는 잘 안 나왔어요.",
-    "용돈을 구하던 대학생 대출은 서류에서 짧았어요.",
-    "대학생 용돈 대출은 장학금 일정과 어긋나 있었어요."
-  ],
-  직장인: [
-    "직장인 대출은 급여가 찍혀도 쉽게 안 나왔어요.",
-    "직장인은 명세서만 보고 대출이 잘렸어요.",
-    "직장인 명의 대출은 기대출에서 막혀 있었어요.",
-    "같은 직장인도 생활비 대출은 거절이 먼저였어요."
-  ],
-  주부: [
-    "주부 대출은 소득 칸이 비어 막혀 있었어요.",
-    "주부는 살림 대출이 서류에서 떨어졌어요.",
-    "주부 명의로는 생활비 대출이 잘 안 나왔어요.",
-    "집안 살림을 맡은 주부 대출은 창구에서 짧았어요."
-  ],
-  사업자: [
-    "사업자는 매출과 별개로 사업자금 대출이 막혀 있었어요.",
-    "사업자 대출로는 사업자금이 안 나왔어요.",
-    "사업자는 가게 사업자금 대출이 담보에서 거절됐어요.",
-    "장부를 맡겨도 사업자는 사업자금 대출이 또 막혀 있었어요."
-  ],
-  육아맘: [
-    "육아맘 대출은 소득이 끊기면 바로 막혀 있었어요.",
-    "육아맘은 보육 대출이 서류에서 거절됐어요.",
-    "육아맘 명의 대출은 한도가 쉽게 안 나왔어요.",
-    "아이 키우는 육아맘 대출은 창구에서 짧았어요."
-  ],
-  경단녀: [
-    "경단녀 대출은 경력 공백에서 막혀 있었어요.",
-    "경단녀는 재취업 전 대출이 소득 칸에서 거절됐어요.",
-    "경단녀 명의로는 생활비 대출이 안 나왔어요.",
-    "일을 쉰 경단녀 대출은 증빙에서 짧았어요."
-  ]
-};
-
-const RELIEF = {
-  대학생: "교재는 다시 주문하고 통학비도 충전해 둘 수 있었어요. 학식만 줄이던 주가 지나갔어요.",
-  직장인: "카드 결제와 자동이체를 다시 맞춰 두었어요. 급여일만 세던 주가 지나갔어요.",
-  주부: "미뤄 둔 반찬거리와 쌀을 다시 장바구니에 담았어요. 빈 냉장고만 열어 보던 주가 지나갔어요.",
-  사업자: "밀렸던 재료 발주와 가게 월세를 같은 주에 맞춰 두었어요. 거래처 입금만 기다리던 주가 지나갔어요.",
-  육아맘: "떨어진 분유와 기저귀를 다시 채워 두었고 보육료 고지도 넘겼어요. 아이 병원 영수증만 쌓이던 주가 지나갔어요.",
-  경단녀: "밀린 공과금과 보험료를 경력 공백 중에 정리해 두었어요. 구직만 하고 청구서만 보던 달이 지나갔어요."
-};
-
 const BEATS = [
   [/유심\s*플랫폼|USIM\s*PLUS/, "platform"],
-  [/사진\s*캡처/, "photo"],
-  [/회사/, "company"],
-  [/절차/, "procedure"],
+  [/사진|캡처/, "photo"],
+  [/회사|그쪽|담당자/, "company"],
+  [/절차|진행|처리/, "procedure"],
   [/0원/, "zero"],
-  [/실적/, "performance"],
-  [/해결/, "solved"]
+  [/무료|수수료|부담|공짜|한 푼|비용/, "free"],
+  [/해결|풀렸|마련|급한 불|숨통|덕분|한숨|넘겼/, "solved"]
 ];
 
 function missingBeats(body) {
@@ -337,8 +290,7 @@ function composeBody(i, rating, channelKey, publishedAt) {
   const shape = (a + c) % 8;
   const long = shape === 4 || shape === 5;
   const opening = openingLine(persona, formal, a, b, c);
-  const anchor = formal ? toFormal(ANCHOR[persona][b % 4]) : ANCHOR[persona][b % 4];
-  const parts = [opening, anchor];
+  const parts = [opening, anchorLine(persona, formal, a + b + c)];
   if (long) parts.push(diaryLine(persona, formal, c));
   if (shape === 1 || shape === 4 || shape === 7) parts.push(doubtLine(persona, formal, c));
   if (shape === 3 || shape === 5) parts.push(extraLine(persona, formal, a));
@@ -349,9 +301,9 @@ function composeBody(i, rating, channelKey, publishedAt) {
   if (shape === 5 || shape === 6) parts.push(zeroLine(persona, formal, a));
   if (long) {
     parts.push(moreLine(persona, formal, a));
-    parts.push(formal ? toFormal(RELIEF[persona]) : RELIEF[persona]);
+    parts.push(reliefLine(persona, formal, a + c));
   }
-  parts.push(perfLine(persona, formal, a + c));
+  parts.push(freeLine(persona, formal, a + c));
   let closer = polishCloser(closerLine(persona, formal, rating, b), bucket);
   let emoticon = "";
   if (!formal && rating === 3 && (bucket === "20s" || bucket === "30s") && i % 2 === 0) {
@@ -362,6 +314,9 @@ function composeBody(i, rating, channelKey, publishedAt) {
   parts.push(closer);
   let body = parts.join(" ").replace(/\s+/g, " ").trim();
   if (emoticon) body = `${body}${emoticon}`;
+  if ((body.match(/캡처/g) || []).length > 1) {
+    throw new Error(`row ${i} repeats 캡처: ${body}`);
+  }
   return body;
 }
 
