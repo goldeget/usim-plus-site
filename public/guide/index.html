@@ -69,10 +69,14 @@
     h1,h2,h3,.button,nav a,footer{word-break:keep-all;line-break:strict;overflow-wrap:break-word}
     .lead,.notice,.section-head,.card p,.micro,.end p,footer{word-break:keep-all;overflow-wrap:break-word;line-break:strict}
     @supports (text-wrap:pretty){.lead,.notice,.section-head,.card p,.end p,footer{text-wrap:pretty}}
+    .lead__chunk,.lead__part{display:inline}
+    @media(max-width:760px){.lead{max-width:24em}.lead br{display:none}.lead__chunk,.lead__part{display:block}.lead__chunk+.lead__chunk{margin-top:.15em}.lead>br+.lead__chunk{margin-top:.55em}}
+    @supports(text-wrap:balance){@media(max-width:760px){.lead__part{text-wrap:balance}}}
     @supports (text-wrap:balance){h1,h2,h3,.button{text-wrap:balance}}
     @media(max-width:420px){.header-inner{align-items:flex-start}.header nav,nav{flex-wrap:wrap;justify-content:flex-end;gap:8px 10px}h1{font-size:clamp(30px,8.6vw,44px);line-height:1.28}.button{white-space:normal;line-height:1.35;padding:14px 16px}}
     @media(max-width:420px){.row{flex-wrap:wrap;gap:5px}.row span,.row strong{flex-basis:100%;text-align:left}}
   </style>
+  <link rel="stylesheet" href="/copy-typography.css?v=20261028-copy-1" />
 </head>
 <body>
   <header class="header"><div class="wrap header-inner">
@@ -83,8 +87,8 @@
     <section class="hero wrap">
       <div class="badge">CLIME 유심 개통 혜택 · 조건 안내</div>
       <h1>유심 혜택 · <strong>유지 기간과 지급 기준</strong></h1>
-      <p class="lead">클라임유심(CLIME)은 서울평가정보㈜가 운영합니다. 몰랐던 유심 혜택을 공식 안내로 유심 혜택 확인 후 조건에 따라 안내합니다.<br>유심과 휴대폰은 고객이 계속 보유·사용하며, 회사는 수거하지 않습니다.<br>3일·15일·30일 유지 확인 후 단계 지급 대상이 정해지며, 최대 66만원입니다.<br>상담은 텔레그램·채널톡입니다.</p>
-      <div class="notice"><strong>고객 부담금 0원 · 관련 비용 회사 부담</strong>은 운영사가 안내한 현재 조건입니다. 유심 개통⁠·회선 계약의 명의와 관리 책임, 회사 비용 부담 범위를 서면으로 확인하세요. 혜택은 상담이나 개통 직후 지급되는 것이 아니며 회선 유지 조건에 따라 결정됩니다.</div>
+      <p class="lead"><span class="lead__chunk"><span class="lead__part">클라임유심(CLIME)은 서울평가정보㈜가 운영합니다.</span></span> <span class="lead__chunk"><span class="lead__part">몰랐던 유심 혜택을 공식 안내로 유심 혜택 확인 후 조건에 따라 안내합니다.</span></span><br><span class="lead__chunk"><span class="lead__part">유심과 휴대폰은 고객이 계속 보유·사용하며,</span> <span class="lead__part">회사는 수거하지 않습니다.</span></span><br><span class="lead__chunk"><span class="lead__part">3일·15일·30일 유지 확인 후 단계 지급 대상이 정해지며,</span> <span class="lead__part">최대 66만원입니다.</span></span><br><span class="lead__chunk"><span class="lead__part">상담은 텔레그램·채널톡입니다.</span></span></p>
+      <div class="notice"><strong>고객 부담금 0원 · 관련 비용 회사 부담</strong>은 운영사가 안내한 현재 조건입니다. 유심 개통·회선 계약의 명의와 관리 책임, 회사 비용 부담 범위를 서면으로 확인하세요. 혜택은 상담이나 개통 직후 지급되는 것이 아니며 회선 유지 조건에 따라 결정됩니다.</div>
       <div class="actions">
         <a class="button primary" data-channel="telegram" href="https://t.me/climeusim" target="_blank" rel="noopener noreferrer" aria-label="텔레그램에서 유심 개통 혜택 상담 열기">텔레그램으로 조건 문의 ↗</a>
         <a class="button secondary" data-channel="channeltalk" href="https://climeusim.channel.io" target="_blank" rel="noopener noreferrer" aria-label="채널톡에서 유심 개통 혜택 상담 열기">채널톡으로 조건 문의 ↗</a>
@@ -93,12 +97,12 @@
     </section>
 
     <section class="section wrap" aria-labelledby="difference-title">
-      <h2 id="difference-title">대출과 무엇이 다른가요?</h2>
-      <p class="section-head">급하게 돈이 필요할수록 ‘즉시 지급’, ‘무조건 가능’이라는 표현 대신 실제 계약과 지급 조건을 먼저 살펴보는 것이 중요합니다.</p>
+      <h2 id="difference-title">지급은 이렇게 결정됩니다</h2>
+      <p class="section-head">실제 계약과 지급 조건을 먼저 확인하세요.</p>
       <div class="grid">
-        <article class="card"><span class="card-number">01</span><h3>대출이 아닙니다</h3><p>돈을 빌려주거나 신용대출을 중개하지 않습니다. 통신사의 본인 명의 회선 개통 가능 여부와 개통 혜택 적용 조건을 별도로 확인하는 방식입니다.</p></article>
+        <article class="card"><span class="card-number">01</span><h3>본인 명의 회선 개통</h3><p>통신사의 본인 명의 회선 개통 가능 여부와 개통 혜택 적용 조건을 확인하는 방식입니다.</p></article>
         <article class="card"><span class="card-number">02</span><h3>당일 지급을 보장하지 않습니다</h3><p>일정 기간 회선 유지 및 신청 내용 확인 후에 단계별 지급 대상이 결정됩니다. 상담 신청 자체가 지급 승인은 아닙니다.</p></article>
-        <article class="card"><span class="card-number">03</span><h3>고객 비용 0원 · 회사 전액 부담</h3><p>운영사가 개통⁠·통신 및 회선 유지와 관련된 비용을 전액 부담한다고 안내합니다. 신청 전에 실제 통신사 계약서상 요금 청구 주체와 회사 부담 범위, 본인 명의 회선의 책임을 확인하세요.</p></article>
+        <article class="card"><span class="card-number">03</span><h3>고객 비용 0원 · 회사 전액 부담</h3><p>운영사가 개통·통신 및 회선 유지와 관련된 비용을 전액 부담한다고 안내합니다. 신청 전에 실제 통신사 계약서상 요금 청구 주체와 회사 부담 범위, 본인 명의 회선의 책임을 확인하세요.</p></article>
       </div>
     </section>
 
@@ -124,10 +128,9 @@
         <a class="button primary" data-channel="telegram" href="https://t.me/climeusim" target="_blank" rel="noopener noreferrer">텔레그램 상담 ↗</a>
         <a class="button secondary" data-channel="channeltalk" href="https://climeusim.channel.io" target="_blank" rel="noopener noreferrer">채널톡 상담 ↗</a>
       </div>
-      <p class="micro">이 페이지는 금융기관 또는 대부업체의 대출 신청 페이지가 아닙니다.</p>
     </section>
   </main>
-  <footer><div class="wrap">CLIME 유심 혜택 안내 · <a href="/">공식 홈페이지</a> · <a href="/about/">CLIME 소개</a> · <a href="/links/">상담 링크 모음</a><br>혜택 금액과 유지 조건은 변경될 수 있습니다. 신청 전에 최신 약관과 개통 비용을 확인하세요.</div></footer>
+  <footer><div class="wrap">서울평가정보㈜ · 클라임유심 CLIME · 사업자등록번호 114-81-47958 · <a href="mailto:help@climekr.com">help@climekr.com</a><br><nav class="footer-nav" aria-label="사이트 안내"><a href="/about/">CLIME 소개</a> · <a href="/structure/">사업 구조</a> · <a href="/guide/">혜택 조건</a> · <a href="/disclosures/">고지·안내</a></nav></div></footer>
   <script>
     (async function () {
       try {

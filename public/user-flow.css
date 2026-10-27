@@ -500,3 +500,19 @@ a { color: #8cffe8; }
 .text-scale-lg body { font-size: 106%; }
 .a11y-toggle { position: fixed; right: 16px; bottom: 88px; z-index: 20; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid #6a8a9a; background: #0b1b2b; color: #dff7ff; font-size: 13px; cursor: pointer; }
 @media (max-width:720px){ .a11y-toggle { bottom: calc(72px + env(safe-area-inset-bottom)); } }
+
+/* Hero intro: semantic line groups (sentence chunks > phrase parts).
+   Desktop flows inline with the authored <br> line breaks; mobile stacks each
+   chunk/part as its own balanced line, like Toss/Kakao Bank copy blocks. */
+.hero-intro { max-width: min(100%, 38em); word-break: keep-all; line-break: strict; overflow-wrap: break-word; letter-spacing: -0.01em; }
+.hero-intro__chunk, .hero-intro__part { display: inline; }
+@media (max-width: 760px) {
+  .hero-intro { max-width: 24em; line-height: 1.75; }
+  .hero-intro br { display: none; }
+  .hero-intro__chunk, .hero-intro__part { display: block; }
+  .hero-intro__chunk + .hero-intro__chunk { margin-top: .15em; }
+  .hero-intro > br + .hero-intro__chunk { margin-top: .55em; }
+}
+@supports (text-wrap: balance) {
+  @media (max-width: 760px) { .hero-intro__part { text-wrap: balance; } }
+}

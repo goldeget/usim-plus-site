@@ -47,7 +47,7 @@ class TestHTMLRewriter {
         });
       } else if (selector.startsWith("#")) {
         const id = selector.slice(1);
-        html = html.replace(new RegExp(`(<[^>]*\\bid="${id}"[^>]*>)([\\s\\S]*?)(</[a-z0-9]+>)`, "i"), (all, open, inner, close) => {
+        html = html.replace(new RegExp(`(<(p|span|a|div|h[1-6]|li|strong|small|em|button)\\b[^>]*\\bid="${id}"[^>]*>)([\\s\\S]*?)(</\\2>)`, "i"), (all, open, tag, inner, close) => {
           let nextOpen = open;
           let value = inner;
           let asHtml = false;
@@ -131,7 +131,7 @@ test("serves edited title, social metadata and matching Organization/Service gra
       assert.ok(html.includes(`id="${id}">${escapeAttribute(content.operator[key])}</span>`), id);
     }
     assert.match(html, /id="operatorEmailLink" href="mailto:contact@example\.com"><span id="operatorEmail">contact@example\.com<\/span>/);
-    const intro = html.match(/id="homeIntro">([\s\S]*?)<\/p>/)?.[1] || "";
+    const intro = html.match(/id="homeIntro">([\s\S]*?)<\/p>/)?.[1].replace(/<\/?span[^>]*>/g, "") || "";
     assert.equal(intro.split("<br>").length, 5);
     assert.match(intro, /최대 18만원입니다\. 상담·신청 즉시 지급이 아닙니다\.<br>상담은 텔레그램·채널톡입니다\.$/);
     assert.doesNotMatch(intro, /\{\{MAX_TOTAL\}\}/);

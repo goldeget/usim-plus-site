@@ -35,6 +35,38 @@ function escapeHtml(value) {
     .replaceAll('"', "&quot;");
 }
 
+// Splits a sentence into phrase parts at ", " (outside parentheses) so mobile CSS can break there.
+function splitIntroParts(sentence) {
+  const parts = [];
+  let depth = 0, start = 0;
+  for (let i = 0; i < sentence.length; i++) {
+    const ch = sentence[i];
+    if (ch === "(") depth++;
+    else if (ch === ")") depth = Math.max(0, depth - 1);
+    else if (ch === "," && depth === 0 && /\s/.test(sentence[i + 1] || "")) {
+      parts.push(sentence.slice(start, i + 1).trim());
+      start = i + 1;
+    }
+  }
+  parts.push(sentence.slice(start).trim());
+  return parts.filter(Boolean);
+}
+
+// Structured, escaped hero intro: lines (<br>) > sentence chunks > phrase parts.
+// Desktop keeps it inline; mobile CSS turns chunks/parts into semantic block lines.
+function structuredIntroHtml(value, content) {
+  return expandTokens(value, content)
+    .replaceAll("\\n", "\n")
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(Boolean)
+    .map(line => line.replace(/([.!?])\s+/g, "$1\u0000").split("\u0000")
+      .map(sentence => `<span class="hero-intro__chunk">${splitIntroParts(sentence)
+        .map(part => `<span class="hero-intro__part">${escapeHtml(part)}</span>`).join(" ")}</span>`)
+      .join(" "))
+    .join("<br>");
+}
+
 function multilineHtml(value, content) {
   return expandTokens(value, content)
     .replaceAll("\\n", "\n")
@@ -192,7 +224,7 @@ export async function onRequest(context) {
     .on('meta[name="twitter:title"]', { element(element) { element.setAttribute("content", metadata.socialTitle); } })
     .on('meta[name="twitter:description"]', { element(element) { element.setAttribute("content", metadata.socialDescription); } })
     .on('script[type="application/ld+json"]', { element(element) { element.setInnerContent(jsonLdEscape(metadata.structuredData), { html: true }); } })
-    .on("#homeIntro", { element(element) { element.setInnerContent(multilineHtml(content.intro, content), { html: true }); } })
+    .on("#homeIntro", { element(element) { element.setInnerContent(structuredIntroHtml(content.intro, content), { html: true }); } })
     .on("#operatorCompany", { element(element) { element.setInnerContent(content.operator.company); } })
     .on("#operatorRepresentative", { element(element) { element.setInnerContent(content.operator.representative); } })
     .on("#operatorRepresentativeLabel", { element(element) { element.setInnerContent(content.copy.operatorRepresentativeLabel); } })

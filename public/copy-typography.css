@@ -1,0 +1,62 @@
+/* Shared Korean copy typography (Toss/Kakao-style line breaks).
+   Linked from every public page. No word-joiner hacks: breaks are semantic.
+
+   Markup:
+     <div class="copy-stack">            multi-line block (brand / operator / biz reg / benefit / hold / channels)
+       <p class="copy-line">...</p>      one semantic line; wraps only at word boundaries
+       <p class="copy-line"><span class="copy-chunk">문장 1.</span> <span class="copy-chunk">문장 2.</span></p>
+     </div>
+     .prose-ko                            long-form body copy with readable measure
+     .copy-chunk / .copy-part             inline on desktop, stacked + balanced on mobile
+     .copy-nowrap                         keep a short token (e.g. "3일·15일·30일") together
+*/
+
+:root { --copy-measure: 38em; --copy-measure-mobile: 24em; }
+
+/* Baseline for all Korean copy (zero specificity so page CSS can override). */
+:where(body) { word-break: keep-all; overflow-wrap: break-word; line-break: strict; }
+:where(p, li, dd, dt, summary, figcaption, blockquote, small, .lead, .notice, .micro, .section-head, .subtitle, .disclosure, .detail) {
+  word-break: keep-all; overflow-wrap: break-word; line-break: strict;
+}
+@supports (text-wrap: pretty) {
+  :where(p, li, dd, summary, blockquote, .lead, .notice, .micro, .section-head, .subtitle, .disclosure) { text-wrap: pretty; }
+}
+@supports (text-wrap: balance) {
+  :where(h1, h2, h3) { text-wrap: balance; }
+}
+:where(h1, h2, h3, h4) { word-break: keep-all; overflow-wrap: break-word; line-break: strict; }
+:where(a, code) { overflow-wrap: anywhere; }
+
+/* Readable measure: full width on mobile, capped on desktop. */
+.prose-ko, .copy-stack { max-width: min(100%, var(--copy-measure)); word-break: keep-all; overflow-wrap: break-word; line-break: strict; letter-spacing: -0.01em; }
+.prose-ko > p, .copy-stack > .copy-line { max-width: 100%; }
+.prose-ko > p + p { margin-top: .75em; }
+
+/* One semantic line per paragraph. */
+.copy-stack { display: grid; gap: .5em; }
+.copy-stack > .copy-line { margin: 0; }
+.copy-line { display: block; word-break: keep-all; overflow-wrap: break-word; }
+@supports (text-wrap: pretty) { .copy-line { text-wrap: pretty; } }
+
+.copy-chunk, .copy-part { display: inline; }
+.copy-nowrap { white-space: nowrap; }
+
+@media (max-width: 760px) {
+  .prose-ko, .copy-stack { max-width: min(100%, var(--copy-measure-mobile)); }
+  .copy-chunk, .copy-part { display: block; }
+  .copy-chunk + .copy-chunk { margin-top: .15em; }
+  .copy-stack { gap: .6em; }
+}
+@supports (text-wrap: balance) {
+  @media (max-width: 760px) { .copy-part, .copy-chunk:not(:has(.copy-part)) { text-wrap: balance; } }
+}
+
+/* Footer / meta lines: each <br>-separated line becomes its own readable line. */
+.copy-footer-lines { display: grid; gap: .3em; }
+.copy-footer-lines > span { display: block; }
+
+/* Existing hero/guide chunk classes share the same behavior. */
+.hero-intro__chunk, .hero-intro__part, .lead__chunk, .lead__part { display: inline; }
+@media (max-width: 760px) {
+  .hero-intro__chunk, .hero-intro__part, .lead__chunk, .lead__part { display: block; }
+}

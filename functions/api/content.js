@@ -3,7 +3,7 @@ import { isAdminRequest, readBoundedRequestBody } from "../_lib/applications.js"
 export const DEFAULT_CONTENT = {
   "schemaVersion": 4,
   "headline": "몰랐던 유심 혜택,\n유심 혜택 확인부터",
-  "intro": "클라임유심(CLIME, climekr.com)은 서울평가정보㈜가 운영합니다. 사업자등록번호 114-81-47958.\n몰랐던 유심 혜택을 서울평가정보㈜ 공식 안내로 유심 혜택 확인 후 조건에 따라 안내합니다.\n유심과 휴대폰은 고객이 계속 보유·사용하며, 회사는 수거하지 않습니다.\n3일·15일·30일 유지 확인 후 단계 지급 대상이 정해지며, 최대 {{MAX_TOTAL}}입니다. 상담·신청 즉시 지급이 아닙니다.\n상담은 텔레그램·채널톡입니다.",
+  "intro": "몰랐던 유심 혜택으로 최대 {{MAX_TOTAL}}.\n자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다.",
   "checklist": [
     {
       "title": "1. 개통 가능 여부 확인",
@@ -46,9 +46,9 @@ export const DEFAULT_CONTENT = {
   },
   "seo": {
     "title": "클라임유심 | 유심 혜택 · 유심 혜택 확인 · 최대 {{MAX_TOTAL}} | 서울평가정보㈜",
-    "description": "클라임유심(CLIME)은 서울평가정보㈜가 운영하는 유심 혜택 안내입니다. 몰랐던 유심 혜택을 공식 안내로 유심 혜택 확인 후 조건에 따라 안내합니다. 유심과 휴대폰은 고객이 계속 보유·사용하며 회사는 수거하지 않습니다. 3일·15일·30일 유지 확인 후 단계 지급 대상이 정해지며 최대 {{MAX_TOTAL}}입니다. 상담은 텔레그램·채널톡입니다.",
+    "description": "클라임유심(CLIME)은 서울평가정보㈜가 운영합니다. 몰랐던 유심 혜택으로 최대 {{MAX_TOTAL}}. 자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다.",
     "socialTitle": "클라임유심 | 유심 혜택 · 유심 혜택 확인 · 최대 {{MAX_TOTAL}} | 서울평가정보㈜",
-    "socialDescription": "클라임유심(CLIME)은 서울평가정보㈜가 운영하는 유심 혜택 안내입니다. 몰랐던 유심 혜택을 공식 안내로 유심 혜택 확인 후 조건에 따라 안내합니다. 유심과 휴대폰은 고객이 계속 보유·사용하며 회사는 수거하지 않습니다. 3일·15일·30일 유지 확인 후 단계 지급 대상이 정해지며 최대 {{MAX_TOTAL}}입니다. 상담은 텔레그램·채널톡입니다."
+    "socialDescription": "클라임유심(CLIME)은 서울평가정보㈜가 운영합니다. 몰랐던 유심 혜택으로 최대 {{MAX_TOTAL}}. 자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다."
   },
   "copy": {
     "brandSub": "유심 혜택 · 간편 참여 안내",
@@ -406,16 +406,16 @@ export async function onRequest({ request, env }) {
     try {
       const stored = JSON.parse(row.content);
       if (stored.schemaVersion === 4 && !validateContent(stored)) {
-        const content = withCurrentPublicSummary({
-          ...DEFAULT_CONTENT,
-          ...stored,
-          operator: normalizeOperator(stored.operator),
-          copy: { ...stored.copy, ...fixedPrivacyCopy() }
-        });
-        return json({ ...content, retentionDays: RETENTION_DAYS, updatedAt: row.updated_at, cmsReady: true });
+    const content = withCurrentPublicSummary({
+      ...DEFAULT_CONTENT,
+      ...stored,
+      operator: normalizeOperator(stored.operator),
+      copy: { ...stored.copy, ...fixedPrivacyCopy() }
+    });
+    return json({ ...content, retentionDays: RETENTION_DAYS, updatedAt: row.updated_at, cmsReady: true });
       }
       if (stored.schemaVersion === 3 && !validateV3(stored)) {
-        return json({ ...withCurrentPublicSummary(upgradedV3(stored)), retentionDays: RETENTION_DAYS, updatedAt: row.updated_at, cmsReady: true, legacyContent: true });
+    return json({ ...withCurrentPublicSummary(upgradedV3(stored)), retentionDays: RETENTION_DAYS, updatedAt: row.updated_at, cmsReady: true, legacyContent: true });
       }
       const supportLinks = safeSupportLinks(stored?.supportLinks);
       return json({ ...DEFAULT_CONTENT, supportLinks, retentionDays: RETENTION_DAYS, updatedAt: row.updated_at, cmsReady: true, legacyContent: true });
@@ -459,15 +459,15 @@ export async function onRequest({ request, env }) {
       try { current = JSON.parse(previous.content); } catch {}
       const currentIsValid = current?.schemaVersion === 4 && !validateContent(current);
       if (currentIsValid) {
-        // Older open admin tabs may omit new fields; retain their saved values.
-        safe.operator = normalizeOperator({ ...current.operator, ...content.operator });
+    // Older open admin tabs may omit new fields; retain their saved values.
+    safe.operator = normalizeOperator({ ...current.operator, ...content.operator });
       }
       if (content.supportLinks === undefined && current?.supportLinks) {
-        safe.supportLinks = safeSupportLinks(current.supportLinks);
+    safe.supportLinks = safeSupportLinks(current.supportLinks);
       }
       if (!currentIsValid) {
-        await env.CONTENT_DB.prepare("INSERT INTO site_content (id, content, updated_at) VALUES (?, ?, ?) ON CONFLICT(id) DO NOTHING")
-          .bind("home_legacy", previous.content, previous.updated_at || updatedAt).run();
+    await env.CONTENT_DB.prepare("INSERT INTO site_content (id, content, updated_at) VALUES (?, ?, ?) ON CONFLICT(id) DO NOTHING")
+      .bind("home_legacy", previous.content, previous.updated_at || updatedAt).run();
       }
     }
     await env.CONTENT_DB.prepare("INSERT INTO site_content (id, content, updated_at) VALUES (?, ?, ?) ON CONFLICT(id) DO UPDATE SET content = excluded.content, updated_at = excluded.updated_at")
