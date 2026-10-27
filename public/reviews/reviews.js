@@ -13,6 +13,28 @@
   let cursor = null;
   let loading = false;
 
+  /* A static host has no Pages Function. HTML/404 means "try /reviews/data".
+     A JSON error from the API is a real failure and stays on the error copy. */
+  async function fetchApiJson(url) {
+    try {
+      const res = await fetch(url, { headers: { Accept: "application/json" } });
+      const type = (res.headers.get("content-type") || "").toLowerCase();
+      if (!type.includes("json")) return { unavailable: true };
+      if (!res.ok) return { failed: true };
+      try {
+        return { data: await res.json() };
+      } catch {
+        return { unavailable: true };
+      }
+    } catch {
+      return { unavailable: true };
+    }
+  }
+
+  function staticReviews() {
+    return import("/reviews/static-fallback.js");
+  }
+
   function starRating(rating, size) {
     const el = document.createElement("span");
     el.className = "stars";
@@ -112,9 +134,10 @@
 
   async function loadStats() {
     try {
-      const res = await fetch("/api/reviews/stats", { headers: { Accept: "application/json" } });
-      if (!res.ok) throw new Error();
-      const data = await res.json();
+      const api = await fetchApiJson("/api/reviews/stats");
+      if (api.failed) throw new Error();
+      const data = api.unavailable ? await (await staticReviews()).staticReviewStats() : api.data;
+      if (!data || data.total == null) throw new Error();
       const avg = Number(data.avgRating);
       const total = Number(data.total);
       countUp(avgEl, avg, 1);
@@ -172,9 +195,12 @@
     body.addEventListener("click", async () => {
       if (li.dataset.expanded === "1") return;
       try {
-        const res = await fetch(`/api/reviews/${encodeURIComponent(item.id)}`, { headers: { Accept: "application/json" } });
-        if (!res.ok) return;
-        const detail = await res.json();
+        const api = await fetchApiJson(`/api/reviews/${encodeURIComponent(item.id)}`);
+        if (api.failed) return;
+        const detail = api.unavailable
+          ? await (await staticReviews()).staticReviewDetail(item.id)
+          : api.data;
+        if (!detail || typeof detail.body !== "string") return;
         appendFormattedBody(body, detail.body);
         body.classList.remove("is-clamped");
         li.classList.add("is-expanded");
@@ -195,9 +221,16 @@
       const params = new URLSearchParams({ limit: "20" });
       if (ratingFilter) params.set("rating", ratingFilter);
       if (!reset && cursor) params.set("cursor", cursor);
-      const res = await fetch(`/api/reviews?${params}`, { headers: { Accept: "application/json" } });
-      if (!res.ok) throw new Error();
-      const data = await res.json();
+      const api = await fetchApiJson(`/api/reviews?${params}`);
+      if (api.failed) throw new Error();
+      const data = api.unavailable
+        ? await (await staticReviews()).queryStaticReviews({
+            limit: 20,
+            rating: ratingFilter ? Number(ratingFilter) : null,
+            cursor: reset ? null : cursor
+          })
+        : api.data;
+      if (!data || !Array.isArray(data.items)) throw new Error();
       if (reset) list.replaceChildren();
       for (const item of data.items || []) list.append(renderItem(item));
       cursor = data.nextCursor;

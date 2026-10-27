@@ -11,7 +11,7 @@ const userFlowCss = await readFile(new URL("../public/user-flow.css", import.met
 test("preserves the dark visual identity and exposes direct consultation without a file form", () => {
   for (const element of ['<html lang="ko">','class="hero-payouts"','class="sim-image"','id="contact"','id="heroApplyButton" href="#contact"']) assert.ok(html.includes(element), element);
   assert.doesNotMatch(html, /type="file"|id="precheckForm"|FormData|challenges\.cloudflare\.com|turnstile\.render/);
-  assert.match(html, /에스씨아이평가정보\(주\)가 운영하는 정식 사업자 등록 업체입니다\.<br>폰깡이 아니며/);
+  assert.match(html, /서울평가정보\(주\)가 운영합니다\. 사업자등록번호 114-81-47958\.<br>몰랐던 유심 혜택을/);
   assert.match(html, /name="color-scheme" content="dark"/);
 });
 
@@ -52,7 +52,7 @@ test("keeps visible centered feedback for lookup and unavailable channels", () =
 });
 
 test("shows the operator registration details requested for the current footer", () => {
-  assert.match(html,/에스씨아이평가정보\(주\)/);
+  assert.match(html,/서울평가정보\(주\)/);
   assert.match(html,/대표자.*임동훈/);
   for(const value of ['114-81-47958','110111-0853419','sci0001@hometax.go.kr']) assert.equal(html.includes(value),true);
 });
@@ -89,17 +89,17 @@ test("admin-managed public copy covers payouts, lookup, privacy, footer, status,
 });
 
 
-test("renders the homepage announcement as five lines and the footer without visible backslash-n", () => {
+test("renders the homepage announcement lines and the footer without visible backslash-n", () => {
   const expectedIntro = [
-    "클라임유심(CLIME)은 에스씨아이평가정보(주)가 운영하는 정식 사업자 등록 업체입니다.",
-    "폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.",
-    "급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다.",
-    "개통·통신 비용은 회사가 전액 부담합니다.",
-    "3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상입니다."
+    "클라임유심(CLIME, climekr.com)은 서울평가정보(주)가 운영합니다. 사업자등록번호 114-81-47958.",
+    "몰랐던 유심 혜택을 서울평가정보(주) 공식 안내로 유심 혜택 확인 후 조건에 따라 안내합니다.",
+    "유심과 휴대폰은 고객이 계속 보유\u2060·사용하며, 회사는 수거하지 않습니다.",
+    "3일\u2060·15일\u2060·30일 유지 확인 후 단계 지급 대상이 정해지며, 최대 66만원입니다. 상담·신청 즉시 지급이 아닙니다.",
+    "상담은 텔레그램\u2060·채널톡입니다."
   ].join("<br>");
   assert.ok(html.includes('<p class="hero-intro" id="homeIntro">' + expectedIntro + '</p>'));
   assert.doesNotMatch(html, /id="homeIntro"[^>]*>[\s\S]*?\{\{MAX_TOTAL\}\}/);
-  assert.ok(html.includes('<p class="site-footer__terms" id="footerTerms">고객 개통·통신 비용 회사 전액 부담\n유지 조건 충족 시 최대 3건 · 최대 66만원 지급 대상</p>'));
+  assert.ok(html.includes('<p class="site-footer__terms" id="footerTerms">고객 개통\u2060·통신 비용 회사 전액 부담\n유지 조건 충족 시 최대 3건\u00A0· 최대 66만원 지급 대상</p>'));
   assert.match(html, /renderLineBreaks\(document\.getElementById\('homeIntro'\),content\.intro,content\)/);
   assert.match(html, /normalizeDisplayedLineBreaks\(expandTokens\(value,content\)\)/);
   assert.match(html, /normalizeDisplayedLineBreaks\(expandTokens\(copy\.footerTerms,content\)\)/);

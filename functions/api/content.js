@@ -2,8 +2,8 @@ import { isAdminRequest, readBoundedRequestBody } from "../_lib/applications.js"
 
 export const DEFAULT_CONTENT = {
   "schemaVersion": 4,
-  "headline": "유심 개통 가능하면\n최대 {{MAX_TOTAL}}",
-  "intro": "클라임유심(CLIME)은 에스씨아이평가정보(주)가 운영하는 정식 사업자 등록 업체입니다.\n폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.\n급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다.\n개통·통신 비용은 회사가 전액 부담합니다.\n3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.",
+  "headline": "몰랐던 유심 혜택,\n유심 혜택 확인부터",
+  "intro": "클라임유심(CLIME, climekr.com)은 서울평가정보(주)가 운영합니다. 사업자등록번호 114-81-47958.\n몰랐던 유심 혜택을 서울평가정보(주) 공식 안내로 유심 혜택 확인 후 조건에 따라 안내합니다.\n유심과 휴대폰은 고객이 계속 보유·사용하며, 회사는 수거하지 않습니다.\n3일·15일·30일 유지 확인 후 단계 지급 대상이 정해지며, 최대 {{MAX_TOTAL}}입니다. 상담·신청 즉시 지급이 아닙니다.\n상담은 텔레그램·채널톡입니다.",
   "checklist": [
     {
       "title": "1. 개통 가능 여부 확인",
@@ -36,23 +36,23 @@ export const DEFAULT_CONTENT = {
     "maxCases": 3
   },
   "operator": {
-    "company": "에스씨아이평가정보(주)",
+    "company": "서울평가정보(주)",
     "representative": "임동훈",
     "email": "help@climekr.com"
   },
   "seo": {
-    "title": "클라임유심 | 정식 사업자 유심 개통 혜택 · 최대 {{MAX_TOTAL}}",
-    "description": "클라임유심(CLIME)은 에스씨아이평가정보(주)가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다. 급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.",
-    "socialTitle": "클라임유심 | 정식 사업자 유심 개통 혜택 · 최대 {{MAX_TOTAL}}",
-    "socialDescription": "클라임유심(CLIME)은 에스씨아이평가정보(주)가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다. 급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다."
+    "title": "클라임유심 | 유심 혜택 · 유심 혜택 확인 · 최대 {{MAX_TOTAL}} | 서울평가정보(주)",
+    "description": "클라임유심(CLIME)은 서울평가정보(주)가 운영하는 유심 혜택 안내입니다. 몰랐던 유심 혜택을 공식 안내로 유심 혜택 확인 후 조건에 따라 안내합니다. 유심과 휴대폰은 고객이 계속 보유·사용하며 회사는 수거하지 않습니다. 3일·15일·30일 유지 확인 후 단계 지급 대상이 정해지며 최대 {{MAX_TOTAL}}입니다. 상담은 텔레그램·채널톡입니다.",
+    "socialTitle": "클라임유심 | 유심 혜택 · 유심 혜택 확인 · 최대 {{MAX_TOTAL}} | 서울평가정보(주)",
+    "socialDescription": "클라임유심(CLIME)은 서울평가정보(주)가 운영하는 유심 혜택 안내입니다. 몰랐던 유심 혜택을 공식 안내로 유심 혜택 확인 후 조건에 따라 안내합니다. 유심과 휴대폰은 고객이 계속 보유·사용하며 회사는 수거하지 않습니다. 3일·15일·30일 유지 확인 후 단계 지급 대상이 정해지며 최대 {{MAX_TOTAL}}입니다. 상담은 텔레그램·채널톡입니다."
   },
   "copy": {
-    "brandSub": "유심 개통 · 간편 참여 안내",
+    "brandSub": "유심 혜택 · 간편 참여 안내",
     "headerHelp": "상담하기",
-    "heroEyebrow": "고객 비용 회사 전액 부담 · 유심 혜택",
+    "heroEyebrow": "서울평가정보(주) 공식 안내 · 유심 혜택",
     "heroApplyLabel": "사진 심사 신청하기",
     "heroChatNote": "이미 조회하셨다면 상담창에 사진을 보내 주세요.",
-    "payoutNote": "고객 개통·통신비는 회사 전액 부담. 지급은 유지 조건 확인 후 결정됩니다.",
+    "payoutNote": "지급은 유지 조건 확인 후 결정됩니다. 상담·신청 즉시 지급이 아닙니다.",
     "payoutAriaLabel": "유지 기간별 지급 금액",
     "contactKicker": "운영자와 직접 상담",
     "contactTitle": "사진 보내고 상담하기",
@@ -166,24 +166,49 @@ const PREVIOUS_PUBLIC_SUMMARY = {
   socialDescription: "회사 개통·통신비 전액 부담(고객 비용 없음). 유심 개통 혜택은 유지 조건 충족 시 최대 {{MAX_TOTAL}}. 텔레그램·채널톡 상담."
 };
 
-// Older published intros kept the five sentences in one or two visual lines and
-// sometimes left {{MAX_TOTAL}} for the page to expand. Replace those exact copies
-// so every read renders the current five-line intro.
+// Older published intros omitted who keeps the USIM. Replace those exact copies
+// on read so the public page shows the current lead without rewriting stored content.
 const LEGACY_PUBLIC_INTROS = new Set([
+  "클라임유심(CLIME)은 서울평가정보(주)가 운영하는 정식 사업자 등록 업체입니다.\n폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.\n고객이 본인 명의로 회선을 개통해 유심과 휴대폰을 계속 보유·사용합니다. 회사는 유심을 수거하지 않으며, 다른 사람에게 회선을 넘기는 절차는 없습니다.\n급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다.\n개통·통신 비용은 회사가 전액 부담합니다.\n3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.\n상담은 텔레그램·채널톡입니다.",
+  "클라임유심(CLIME)은 서울평가정보(주)가 운영하는 정식 사업자 등록 업체입니다.\n폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.\n고객이 본인 명의로 회선을 개통해 유심과 휴대폰을 계속 보유·사용합니다. 회사는 유심을 수거하지 않으며, 다른 사람에게 회선을 넘기는 절차는 없습니다.\n급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다.\n개통·통신 비용은 회사가 전액 부담합니다.\n3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상입니다.\n상담은 텔레그램·채널톡입니다.",
   PREVIOUS_PUBLIC_SUMMARY.intro,
+  "클라임유심(CLIME)은 서울평가정보(주)가 운영하는 정식 사업자 등록 업체입니다.\n폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.\n급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다.\n개통·통신 비용은 회사가 전액 부담합니다.\n3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.",
+  "클라임유심(CLIME)은 서울평가정보(주)가 운영하는 정식 사업자 등록 업체입니다.\n폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.\n급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다.\n개통·통신 비용은 회사가 전액 부담합니다.\n3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상입니다.",
   "클라임유심(CLIME)은 에스씨아이평가정보(주)가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.\n급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.",
   "클라임유심(CLIME)은 에스씨아이평가정보(주)가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다. 급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.",
   "클라임유심(CLIME)은 에스씨아이평가정보(주)가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.\n급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상입니다.",
   "클라임유심(CLIME)은 에스씨아이평가정보(주)가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다. 급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상입니다."
 ]);
 
+const LEGACY_PUBLIC_DESCRIPTIONS = new Set([
+  "클라임유심(CLIME)은 서울평가정보(주)가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다. 고객이 본인 명의로 회선을 개통해 유심과 휴대폰을 계속 보유·사용합니다. 회사는 유심을 수거하지 않으며, 다른 사람에게 회선을 넘기는 절차는 없습니다. 급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다. 상담은 텔레그램·채널톡입니다.",
+  "클라임유심(CLIME)은 서울평가정보(주)가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다. 고객이 본인 명의로 회선을 개통해 유심과 휴대폰을 계속 보유·사용합니다. 회사는 유심을 수거하지 않으며, 다른 사람에게 회선을 넘기는 절차는 없습니다. 급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상입니다. 상담은 텔레그램·채널톡입니다.",
+  PREVIOUS_PUBLIC_SUMMARY.description,
+  "클라임유심(CLIME)은 서울평가정보(주)가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다. 급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.",
+  "클라임유심(CLIME)은 서울평가정보(주)가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다. 급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상입니다."
+]);
+
+const LEGACY_SEO_TITLES = new Set([
+  "클라임유심 | 정식 사업자 유심 개통 혜택 · 최대 {{MAX_TOTAL}}",
+  "클라임유심 | 정식 사업자 유심 개통 혜택 · 최대 66만원"
+]);
+
+const LEGACY_PUBLIC_SOCIAL_DESCRIPTIONS = new Set([
+  PREVIOUS_PUBLIC_SUMMARY.socialDescription,
+  ...LEGACY_PUBLIC_DESCRIPTIONS
+]);
+
 export function withCurrentPublicSummary(content) {
   if (!content || typeof content !== "object") return content;
   const seo = content.seo && typeof content.seo === "object" ? { ...content.seo } : content.seo;
   const next = { ...content, seo };
+  if (next.headline === "유심 개통 가능하면\n최대 {{MAX_TOTAL}}" || next.headline === "유심 개통 가능하면\n최대 66만원") next.headline = DEFAULT_CONTENT.headline;
+  if (seo && LEGACY_SEO_TITLES.has(seo.title)) seo.title = DEFAULT_CONTENT.seo.title;
+  if (seo && LEGACY_SEO_TITLES.has(seo.socialTitle)) seo.socialTitle = DEFAULT_CONTENT.seo.socialTitle;
+  if (next.copy && next.copy.heroEyebrow === "고객 비용 회사 전액 부담 · 유심 혜택") next.copy = { ...next.copy, heroEyebrow: DEFAULT_CONTENT.copy.heroEyebrow };
   if (LEGACY_PUBLIC_INTROS.has(next.intro)) next.intro = DEFAULT_CONTENT.intro;
-  if (seo && seo.description === PREVIOUS_PUBLIC_SUMMARY.description) seo.description = DEFAULT_CONTENT.seo.description;
-  if (seo && seo.socialDescription === PREVIOUS_PUBLIC_SUMMARY.socialDescription) seo.socialDescription = DEFAULT_CONTENT.seo.socialDescription;
+  if (seo && LEGACY_PUBLIC_DESCRIPTIONS.has(seo.description)) seo.description = DEFAULT_CONTENT.seo.description;
+  if (seo && LEGACY_PUBLIC_SOCIAL_DESCRIPTIONS.has(seo.socialDescription)) seo.socialDescription = DEFAULT_CONTENT.seo.socialDescription;
   return next;
 }
 

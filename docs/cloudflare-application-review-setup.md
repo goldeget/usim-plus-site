@@ -65,7 +65,7 @@ After deployment, verify all of the following with a real Turnstile challenge an
 - The R2 bucket has no public URL, and both lifecycle rules are enabled.
 - The `usim-plus-application-retention` Worker is deployed with its daily Cron Trigger, the same D1 binding, and the private R2 binding. It removes reviewed-prefix objects that are not referenced by a submission record.
 - D1 receipt metadata becomes eligible for deletion after 60 days from submission or review; the daily scheduled run deletes it, after which status lookup returns not found.
-- The public disclosure names `에스씨아이평가정보(주)`, `임동훈`, `help@climekr.com`, Cloudflare storage, the image purpose, the two 30-day image-retention cases, keyed IP and image-hash comparison, and the 60-day metadata period. It explains that raw IP is not stored and an IP match alone does not identify the same person.
+- The public disclosure names `서울평가정보(주)`, `임동훈`, `help@climekr.com`, Cloudflare storage, the image purpose, the two 30-day image-retention cases, keyed IP and image-hash comparison, and the 60-day metadata period. It explains that raw IP is not stored and an IP match alone does not identify the same person.
 
 Email at `help@climekr.com` is the only published support channel until other support URLs are provided.
 

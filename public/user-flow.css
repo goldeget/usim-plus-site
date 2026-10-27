@@ -384,8 +384,8 @@ a { color: #8cffe8; }
 .hero-intro { color: #c5d5df; }
 .hero-payouts { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; margin: 14px 0 0; }
 .hero-payouts > div { min-width: 0; padding: 10px 8px; border: 1px solid #34576c; border-radius: 12px; background: linear-gradient(140deg,#102437,#0a1726); text-align: center; }
-.hero-payouts small { display: block; color: #a4b7ca; font-size: 11px; line-height: 1.4; white-space: nowrap; }
-.hero-payouts strong { display: block; margin-top: 4px; color: #8cffe8; font-size: clamp(13px,1.45vw,17px); line-height: 1.35; letter-spacing: -.035em; white-space: nowrap; }
+.hero-payouts small { display: block; color: #a4b7ca; font-size: 11px; line-height: 1.4; white-space: normal; word-break: keep-all; line-break: strict; }
+.hero-payouts strong { display: block; margin-top: 4px; color: #8cffe8; font-size: clamp(13px,1.45vw,17px); line-height: 1.35; letter-spacing: -.035em; white-space: normal; word-break: keep-all; line-break: strict; }
 .hero-offer,.hero-offer strong { color: #8cffe8; }
 .terms-hint,.hero-caveat { color: #c1d0da; }
 .hero-actions { display: grid; gap: 8px; margin-top: 16px; }

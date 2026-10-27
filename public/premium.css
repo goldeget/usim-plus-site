@@ -314,12 +314,14 @@
 .trust-bar__num {
   display: flex;
   align-items: center;
+  flex-wrap: nowrap;
   gap: 8px;
   margin-top: 7px;
   color: #f6fbff;
   font-size: clamp(20px, 2.5vw, 26px);
   font-weight: 850;
   letter-spacing: -.04em;
+  white-space: nowrap;
 }
 .trust-bar__num .stars { --size: 15px; }
 .trust-bar__unit {
@@ -336,28 +338,39 @@
 
 /* 히어로 신뢰 포인트 */
 .hero-trust {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 20px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
   margin: 14px 0 0;
   padding: 0;
   list-style: none;
 }
 .hero-trust li {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
+  display: block;
+  min-width: 0;
+  padding: 12px 12px 11px;
+  border: 1px solid #2a4558;
+  border-radius: 12px;
+  background: rgba(8, 22, 34, .45);
   color: #93abbd;
-  font-size: 12.5px;
-  line-height: 1.6;
+  font-size: 13px;
+  line-height: 1.55;
 }
-.hero-trust li::before {
-  content: "✓";
-  color: #60f1d4;
-  font-weight: 900;
+.hero-trust li::before { content: none; }
+.hero-trust strong {
+  display: block;
+  margin-bottom: 3px;
+  color: #a8fff1;
+  font-weight: 750;
+  word-break: keep-all;
+  line-break: strict;
 }
-.hero-trust strong { color: #a8fff1; font-weight: 750; }
-.hero-trust span { color: #9db4c4; }
+.hero-trust span {
+  display: block;
+  color: #9db4c4;
+  word-break: keep-all;
+  line-break: strict;
+}
 
 /* ---------------- 홈: 공감 섹션 ---------------- */
 .empathy {
@@ -670,6 +683,7 @@ html.js [data-reveal].is-visible {
 
 /* ---------------- 반응형 ---------------- */
 @media (max-width: 760px) {
+  .hero-trust { grid-template-columns: 1fr; }
   .trust-bar { grid-template-columns: 1fr; gap: 9px; }
   .trust-bar__item { padding: 13px 16px; }
   .empathy__list,
@@ -700,4 +714,40 @@ html.js [data-reveal].is-visible {
   .sticky-cta__pulse { animation: none; }
   .review-card { transition: none; }
   .hist-row__fill { transition: none; }
+}
+
+/* 한국어 줄바꿈: 어절은 붙이고, 문장 끝의 짧은 조각은 위로 당긴다. */
+html {
+  word-break: keep-all;
+  line-break: strict;
+  overflow-wrap: break-word;
+}
+:where(h1, h2, h3, h4, p, li, a, button, span, small, strong, em, summary, label, dt, dd) {
+  word-break: keep-all;
+  line-break: strict;
+  overflow-wrap: break-word;
+}
+@supports (text-wrap: pretty) {
+  :where(p, li, summary, dd, .hero-intro, .hero-chat-note, .consultation-intro, .consultation-safety, .empathy__resolve, .operator-funded-costs, .site-footer, .site-footer__terms, .reviews-disclaimer, .reviews-snippet) {
+    text-wrap: pretty;
+  }
+}
+@supports (text-wrap: balance) {
+  :where(h1, h2, h3, .section-kicker) {
+    text-wrap: balance;
+  }
+}
+@media (max-width: 420px) {
+  .hero-actions .cta-main,
+  .hero-actions .cta-secondary,
+  .cta-pulse,
+  .process__cta,
+  .sticky-cta strong {
+    white-space: normal;
+    text-wrap: balance;
+    line-height: 1.3;
+  }
+  .site-footer nav { gap: 8px 12px; }
+  .consultation-panel { padding: 18px 14px; }
+  .quick-flow span { word-break: keep-all; }
 }

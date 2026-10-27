@@ -8,10 +8,12 @@ const sitemap = await readFile(new URL("../public/sitemap.xml", import.meta.url)
 const indexNowKey = "2cc7263262b5a365ad26c37e214acd2b";
 
 test("publishes a canonical Korean title, description, and social preview metadata", () => {
-  assert.match(page, /<title>클라임유심 \| 정식 사업자 유심 개통 혜택 · 최대 66만원<\/title>/);
+  assert.match(page, /<title>클라임유심 \| 유심 혜택 · 유심 혜택 확인 · 최대 66만원 \| 서울평가정보\(주\)<\/title>/);
   assert.match(page, /<link rel="canonical" href="https:\/\/climekr\.com\/"\s*\/>/);
-  assert.match(page, /name="description" content="[^\"]*에스씨아이평가정보\(주\)[^\"]*정식 사업자 등록 업체[^\"]*폰깡이 아니며[^\"]*대출 상품이 아닌 유심 개통 혜택[^\"]*급전[^\"]*최대 66만원[^\"]*"/);
+  assert.match(page, /name="description" content="[^\"]*서울평가정보\(주\)[^\"]*유심 혜택 확인[^\"]*최대 66만원[^\"]*"/);
   assert.doesNotMatch(page, /통신사|요금·약정|월 요금|해지 비용/);
+  assert.doesNotMatch(page, /통신혜택|통신 혜택|급전|폰깡|폰테크|<script src="\/live-activity/);
+  assert.doesNotMatch(page, /href="\/topics\//);
   assert.match(page, /property="og:url" content="https:\/\/climekr\.com\/"/);
   assert.match(page, /name="robots" content="index,follow/);
 });
@@ -25,8 +27,14 @@ test("describes the real public service without inventing hidden FAQ or review s
     assert.ok(types.includes(type), type);
   }
   assert.ok(graph.some(item => item["@type"] === "Organization" && item.email === "help@climekr.com"));
-  assert.match(graph.find(item => item["@type"] === "WebPage").description, /정식 사업자 등록 업체/);
-  assert.match(graph.find(item => item["@type"] === "WebPage").description, /폰깡이 아니며/);
+  assert.match(graph.find(item => item["@type"] === "WebPage").description, /서울평가정보\(주\)가 운영하는 유심 혜택 안내/);
+  assert.match(graph.find(item => item["@type"] === "WebPage").description, /유심 혜택 확인/);
+  const org = graph.find(item => item["@type"] === "Organization");
+  assert.equal(org["@id"], "https://climekr.com/#organization");
+  assert.equal(org.taxID, "114-81-47958");
+  assert.equal(org.address.streetAddress, "토정로 144 (상수동, 건양사빌딩)");
+  assert.deepEqual(org.sameAs, ["https://blog.naver.com/climeusimguide"]);
+  assert.equal(graph.find(item => item["@type"] === "Service").serviceType, "본인 명의 회선(알뜰·선불) 조건부 혜택 안내");
   assert.match(graph.find(item => item["@type"] === "Service").description, /3일·15일·30일/);
   assert.ok(!types.includes("FAQPage"), "Do not describe removed FAQ as visible");
   assert.doesNotMatch(page, /<section class="faq"|id="faq-title"|class="faq-list"/);
@@ -42,14 +50,14 @@ test("covers the requested climekr spellings and gives review searches useful, a
   assert.match(llms, /클라임유심 후기[\s\S]*climekr 유심 후기/);
   assert.match(llms, /클라임유심[\s\S]*climekr[\s\S]*참여 방법/);
   assert.match(llms, /개통 가능 여부 확인 버튼[\s\S]*상담창으로 사진을 보냅니다[\s\S]*유지 조건을 확인한 뒤 지급 대상이 결정됩니다/);
-  assert.match(llms, /에스씨아이평가정보\(주\)가 운영하는 정식 사업자 등록 업체입니다/);
+  assert.match(llms, /서울평가정보\(주\)가 운영합니다/);
   assert.match(llms, /사업자등록번호: 114-81-47958/);
-  assert.match(llms, /폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다/);
-  assert.match(llms, /급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다/);
-  assert.match(llms, /3일·15일·30일 유지 조건 충족 시 최대 66만원/);
+  assert.match(llms, /몰랐던 유심 혜택을 서울평가정보\(주\) 공식 안내로 유심 혜택 확인 후/);
+  assert.match(llms, /3일·15일·30일 유지 확인 후 단계 지급 대상이 정해지며, 최대 66만원/);
+  assert.doesNotMatch(llms.slice(0, 500), /통신혜택|통신 혜택|급전|폰깡|폰테크/);
+  assert.doesNotMatch(llms, /\/topics\/|주제별 정보 안내/);
   assert.doesNotMatch(llms, /명의도용|소액결제|불법 개통|위험 없음|100% 안전/);
-  assert.match(llms, /회사가 전액 부담/);
-  assert.match(llms, /대출·대부·당일대출 상품이 아닙니다/);
+  assert.match(llms, /회사는 수거하지 않습니다/);
   assert.doesNotMatch(llms, /사진 사전 검토|개통 현황 사진으로 사전 검토|유심 개통 사전 검토 안내/);
   assert.doesNotMatch(llms, /관련 검색어|이용 정보 검색어/);
   assert.doesNotMatch(page, /공개된 이용자 후기는 없습니다/);
@@ -60,6 +68,8 @@ test("covers the requested climekr spellings and gives review searches useful, a
 test("keeps private routes out of the public sitemap and gives AI readers accurate service context", () => {
   assert.match(sitemap, /<loc>https:\/\/climekr\.com\/<\/loc>/);
   assert.doesNotMatch(sitemap, /admin|api/);
+  assert.doesNotMatch(sitemap, /topics/);
+  assert.match(sitemap, /<loc>https:\/\/climekr\.com\/disclosures\/<\/loc>/);
   assert.match(llms, /실제 지급 대상은 신청 내용과 유지 조건 확인 후 결정됩니다/);
   assert.match(llms, /접수 후 30일/);
   assert.match(llms, /help@climekr\.com/);
@@ -72,6 +82,7 @@ test("blocks crawling on the admin hostname and private public-host routes", asy
   assert.match(publicRules, /Sitemap: https:\/\/climekr\.com\/sitemap\.xml/);
   assert.match(publicRules, /Disallow: \/admin\//);
   assert.match(publicRules, /Disallow: \/api\//);
+  assert.doesNotMatch(publicRules, /topics/);
 
   const adminResponse = await onRequest({ request: new Request("https://admin.climekr.com/robots.txt") });
   assert.match(await adminResponse.text(), /Disallow: \/\s*$/);

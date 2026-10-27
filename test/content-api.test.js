@@ -297,7 +297,7 @@ test("returns a clear unavailable response when the bound D1 content table canno
   assert.match(data.error, /저장소/);
 });
 
-test("replaces the published run-on intro, including a raw payout token, with five lines", async () => {
+test("replaces the published run-on intro, including a raw payout token, with the current lead", async () => {
   const { onRequest, DEFAULT_CONTENT } = await import("../functions/api/content.js");
   const cloudflare = createMemoryCloudflare();
   const stored = structuredClone(DEFAULT_CONTENT);
@@ -308,7 +308,7 @@ test("replaces the published run-on intro, including a raw payout token, with fi
   assert.equal(data.intro, DEFAULT_CONTENT.intro);
   assert.equal(data.intro.split("\n").length, 5);
   assert.match(data.intro, /\{\{MAX_TOTAL\}\}/);
-  assert.doesNotMatch(data.intro.split("\n")[1], /급전이 필요한/);
+  assert.doesNotMatch(data.intro, /급전|폰깡|통신혜택/);
 });
 
 test("keeps legacy editor content out of the current homepage while showing versioned defaults", async () => {
@@ -327,7 +327,7 @@ test("keeps legacy editor content out of the current homepage while showing vers
 
   assert.equal(data.schemaVersion, 4);
   assert.equal(data.legacyContent, true);
-  assert.equal(data.headline, "유심 개통 가능하면\n최대 {{MAX_TOTAL}}");
+  assert.equal(data.headline, "몰랐던 유심 혜택,\n유심 혜택 확인부터");
   assert.equal(data.intro, DEFAULT_CONTENT.intro);
   assert.deepEqual(data.checklist.map(step => step.title), ["1. 개통 가능 여부 확인", "2. 사진 보내고 상담하기", "3. 조건 확인 후 안내"]);
   assert.match(data.checklist[0].body, /조회 사이트/);

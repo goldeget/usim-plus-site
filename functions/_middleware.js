@@ -1,9 +1,18 @@
 import { getAdminSession, validatedAdminReturnPath } from "./_lib/admin-auth.js";
+import { isRetiredInvestmentPath, retiredInvestmentGone } from "./_lib/retired-investment.js";
 
 const ADMIN_HOST = "admin.climekr.com";
 const LOGIN_PAGE = "/admin/login";
 const LOGIN_PAGE_ALIASES = new Set([LOGIN_PAGE, "/admin/login.html"]);
 const LOGIN_ENDPOINT = "/api/admin/auth/login";
+
+const TOPICS_STRUCTURE_PATHS = new Set(["/topics/usim-benefit", "/topics/usim-benefit/", "/topics/usim-benefit/index.html"]);
+
+// Retired situational pages (급전·대출·직군) are replaced by the product pages.
+function topicsRedirectPath(pathname) {
+  if (pathname !== "/topics" && !pathname.startsWith("/topics/")) return null;
+  return TOPICS_STRUCTURE_PATHS.has(pathname) ? "/structure/" : "/guide/";
+}
 
 function noStore(response) {
   const headers = new Headers(response.headers);
@@ -51,7 +60,16 @@ export async function onRequest(context) {
     const canonicalUrl = new URL(url.href);
     canonicalUrl.protocol = "https:";
     canonicalUrl.hostname = "climekr.com";
+    if (canonicalUrl.pathname === "/about" || canonicalUrl.pathname === "/about/index.html") canonicalUrl.pathname = "/about/";
     return Response.redirect(canonicalUrl, 308);
+  }
+  if (isRetiredInvestmentPath(url.pathname)) return retiredInvestmentGone();
+  const topicsTarget = host !== ADMIN_HOST ? topicsRedirectPath(url.pathname) : null;
+  if (topicsTarget) return Response.redirect(new URL(topicsTarget, url.origin), 301);
+  if (url.pathname === "/about" || url.pathname === "/about/index.html") {
+    const aboutUrl = new URL(url.href);
+    aboutUrl.pathname = "/about/";
+    return Response.redirect(aboutUrl, 308);
   }
   if (host !== ADMIN_HOST && host !== "climekr.com") return noIndex(await context.next());
   if (host !== ADMIN_HOST) return context.next();

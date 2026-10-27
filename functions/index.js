@@ -58,8 +58,25 @@ function buildStructuredData(content, meta) {
         "@type": "Organization",
         "@id": organizationId,
         name: "클라임유심 · USIM PLUS",
-        alternateName: ["클라임유심", "climekr 유심"],
+        alternateName: ["클라임유심", "CLIME", "climekr", "climekr 유심", "USIM PLUS"],
         legalName: content.operator.company,
+        taxID: "114-81-47958",
+        foundingDate: "1992-07-27",
+        founder: { "@type": "Person", name: content.operator.representative },
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: "토정로 144 (상수동, 건양사빌딩)",
+          addressLocality: "마포구",
+          addressRegion: "서울특별시",
+          addressCountry: "KR"
+        },
+        sameAs: ["https://blog.naver.com/climeusimguide"],
+        subjectOf: {
+          "@type": "AboutPage",
+          "@id": "https://climekr.com/about/#webpage",
+          url: "https://climekr.com/about/",
+          name: "CLIME 소개 | 클라임유심 · 유심 개통 혜택"
+        },
         url: "https://climekr.com/",
         email: content.operator.email,
         contactPoint: {
@@ -91,8 +108,8 @@ function buildStructuredData(content, meta) {
       {
         "@type": "Service",
         "@id": serviceId,
-        name: "클라임유심 개통 혜택 참여",
-        serviceType: "유심 개통 혜택 안내 및 상담 채널 연결",
+        name: "클라임유심 유심 혜택 확인",
+        serviceType: "본인 명의 회선(알뜰·선불) 조건부 혜택 안내",
         provider: { "@id": organizationId },
         areaServed: { "@type": "Country", name: "대한민국" },
         availableLanguage: "Korean",

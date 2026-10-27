@@ -106,7 +106,7 @@ test("serves edited title, social metadata and matching Organization/Service gra
     assert.equal(graph.find(item => item["@type"] === "Organization").email, "help@climekr.com");
     const intro = html.match(/id="homeIntro">([\s\S]*?)<\/p>/)?.[1] || "";
     assert.equal(intro.split("<br>").length, 5);
-    assert.match(intro, /최대 18만원 지급 대상입니다\.$/);
+    assert.match(intro, /최대 18만원입니다\. 상담·신청 즉시 지급이 아닙니다\.<br>상담은 텔레그램·채널톡입니다\.$/);
     assert.doesNotMatch(intro, /\{\{MAX_TOTAL\}\}/);
   } finally {
     if (previous === undefined) delete globalThis.HTMLRewriter;
@@ -143,7 +143,7 @@ test("renders preserved v3 copy into raw metadata and matches the public content
     const graph = JSON.parse(json)["@graph"];
     assert.equal(graph.some(item => item["@type"] === "FAQPage"), false);
     assert.equal(graph.find(item => item["@type"] === "Organization").email, migrated.operator.email);
-    assert.equal(graph.find(item => item["@type"] === "Service").serviceType, "유심 개통 혜택 안내 및 상담 채널 연결");
+    assert.equal(graph.find(item => item["@type"] === "Service").serviceType, "본인 명의 회선(알뜰·선불) 조건부 혜택 안내");
   } finally {
     if (previous === undefined) delete globalThis.HTMLRewriter;
     else globalThis.HTMLRewriter = previous;
@@ -156,7 +156,7 @@ test("uses safe defaults when CMS content is unavailable", async () => {
   globalThis.HTMLRewriter = TestHTMLRewriter;
   try {
     const response = await onRequest({ request: new Request("https://climekr.com/"), env: {}, next: async () => new Response(page) });
-    assert.match(await response.text(), /<title>클라임유심 \| 정식 사업자 유심 개통 혜택 · 최대 66만원<\/title>/);
+    assert.match(await response.text(), /<title>클라임유심 \| 유심 혜택 · 유심 혜택 확인 · 최대 66만원 \| 서울평가정보\(주\)<\/title>/);
   } finally {
     if (previous === undefined) delete globalThis.HTMLRewriter;
     else globalThis.HTMLRewriter = previous;

@@ -34,7 +34,7 @@ The repository has no R2 binding. This environment has no Cloudflare API authent
 - Do not accept ID-card images or ask for resident registration numbers, authentication codes, passwords, or unrelated account details.
 - Do not add applicant contact fields. The receipt token is the result lookup mechanism.
 - The user asked to leave the Telegram, LINE, KakaoTalk, and Channel Talk cards disabled until real URLs are supplied.
-- The collection notice uses the user-supplied details: 에스씨아이평가정보(주), responsible person 임동훈, help@climekr.com.
+- The collection notice uses the user-supplied details: 서울평가정보(주), responsible person 임동훈, help@climekr.com.
 
 ## Approaches
 
@@ -66,7 +66,7 @@ The repository has no R2 binding. This environment has no Cloudflare API authent
 - Configure the 30-day R2 lifecycle rule and apply the new D1 migration to the existing usim-plus-content database.
 - Deploy `retention-worker.js` from `wrangler-retention.toml` with its daily Cron Trigger and the same `CONTENT_DB` binding.
 - Configure Turnstile site and secret keys for climekr.com and www.climekr.com.
-- The notice will name 에스씨아이평가정보(주), 임동훈, and help@climekr.com, as supplied by the user. Keep support-channel cards disabled until URLs are supplied.
+- The notice will name 서울평가정보(주), 임동훈, and help@climekr.com, as supplied by the user. Keep support-channel cards disabled until URLs are supplied.
 - A Cloudflare API token is not present in the current environment. Production resource creation and verification need either dashboard setup by the account owner or a token supplied securely through environment settings with the required R2, D1, Pages, and Turnstile permissions. GitHub pushes may deploy code, but they cannot create or bind these resources by themselves.
 
 ## Verification
