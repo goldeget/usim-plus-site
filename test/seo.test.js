@@ -8,9 +8,9 @@ const sitemap = await readFile(new URL("../public/sitemap.xml", import.meta.url)
 const indexNowKey = "2cc7263262b5a365ad26c37e214acd2b";
 
 test("publishes a canonical Korean title, description, and social preview metadata", () => {
-  assert.match(page, /<title>클라임유심 \| 유심 개통 가능하면 최대 66만원<\/title>/);
+  assert.match(page, /<title>클라임유심 \| 정식 사업자 유심 개통 혜택 · 최대 66만원<\/title>/);
   assert.match(page, /<link rel="canonical" href="https:\/\/climekr\.com\/"\s*\/>/);
-  assert.match(page, /name="description" content="[^\"]*클라임유심[^\"]*대출이 아닌 유심 개통 혜택[^\"]*최대 66만원[^\"]*"/);
+  assert.match(page, /name="description" content="[^\"]*에스씨아이평가정보\(주\)[^\"]*정식 사업자 등록 업체[^\"]*폰깡이 아니며[^\"]*대출 상품이 아닌 유심 개통 혜택[^\"]*급전[^\"]*최대 66만원[^\"]*"/);
   assert.doesNotMatch(page, /통신사|요금·약정|월 요금|해지 비용/);
   assert.match(page, /property="og:url" content="https:\/\/climekr\.com\/"/);
   assert.match(page, /name="robots" content="index,follow/);
@@ -25,7 +25,8 @@ test("describes the real public service without inventing hidden FAQ or review s
     assert.ok(types.includes(type), type);
   }
   assert.ok(graph.some(item => item["@type"] === "Organization" && item.email === "help@climekr.com"));
-  assert.match(graph.find(item => item["@type"] === "WebPage").description, /대출이 아닌 유심 개통 혜택/);
+  assert.match(graph.find(item => item["@type"] === "WebPage").description, /정식 사업자 등록 업체/);
+  assert.match(graph.find(item => item["@type"] === "WebPage").description, /폰깡이 아니며/);
   assert.match(graph.find(item => item["@type"] === "Service").description, /3일·15일·30일/);
   assert.ok(!types.includes("FAQPage"), "Do not describe removed FAQ as visible");
   assert.doesNotMatch(page, /<section class="faq"|id="faq-title"|class="faq-list"/);
@@ -41,7 +42,12 @@ test("covers the requested climekr spellings and gives review searches useful, a
   assert.match(llms, /클라임유심 후기[\s\S]*climekr 유심 후기/);
   assert.match(llms, /클라임유심[\s\S]*climekr[\s\S]*참여 방법/);
   assert.match(llms, /개통 가능 여부 확인 버튼[\s\S]*상담창으로 사진을 보냅니다[\s\S]*유지 조건을 확인한 뒤 지급 대상이 결정됩니다/);
-  assert.match(llms, /대출 상품이 아닌 유심 개통 혜택과 지급 조건/);
+  assert.match(llms, /에스씨아이평가정보\(주\)가 운영하는 정식 사업자 등록 업체입니다/);
+  assert.match(llms, /사업자등록번호: 114-81-47958/);
+  assert.match(llms, /폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다/);
+  assert.match(llms, /급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다/);
+  assert.match(llms, /3일·15일·30일 유지 조건 충족 시 최대 66만원/);
+  assert.doesNotMatch(llms, /명의도용|소액결제|불법 개통|위험 없음|100% 안전/);
   assert.match(llms, /회사가 전액 부담/);
   assert.match(llms, /대출·대부·당일대출 상품이 아닙니다/);
   assert.doesNotMatch(llms, /사진 사전 검토|개통 현황 사진으로 사전 검토|유심 개통 사전 검토 안내/);

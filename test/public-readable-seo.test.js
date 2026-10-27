@@ -20,7 +20,7 @@ test("all public pages use Korean language metadata and preserve meaningful text
   const visible = home.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
     .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, "");
   assert.doesNotMatch(visible, /\\n/, "No literal backslash-n text in main visible markup");
-  assert.match(visible, /고객의 유심 개통·통신·유지 관련 비용은 회사가 전액 부담합니다.\n개통 가능 여부를 확인하고 텔레그램·채널톡에서 조건을 문의하세요/);
+  assert.match(visible, /클라임유심\(CLIME\)은 에스씨아이평가정보\(주\)가 운영하는 정식 사업자 등록 업체입니다\. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.\n급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다\. 개통·통신 비용은 회사가 전액 부담합니다\. 3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상입니다/);
 });
 
 test("public Korean multiline copy and mobile readable text use native line wrapping", () => {
@@ -47,7 +47,8 @@ test("SEO retains original service information without fabricated ratings or bot
   const graph=JSON.parse(json)["@graph"];
   assert.deepEqual(graph.map(x=>x["@type"]), ["Organization","WebSite","WebPage","Service"]);
   assert.match(graph.find(x=>x["@type"]==="WebPage").description, /3일·15일·30일/);
-  assert.match(graph.find(x=>x["@type"]==="Service").description, /대출이 아닌 유심 개통 혜택/);
+  assert.match(graph.find(x=>x["@type"]==="Service").description, /정식 사업자 등록 업체/);
+  assert.match(graph.find(x=>x["@type"]==="Service").description, /폰깡이 아니며/);
   assert.doesNotMatch(json, /AggregateRating|"@type"\s*:\s*"Review"/);
   assert.match(guide, /rel="canonical" href="https:\/\/climekr\.com\/guide\/"/);
   assert.match(links, /name="robots" content="noindex,follow"/);

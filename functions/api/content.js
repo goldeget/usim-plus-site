@@ -3,7 +3,7 @@ import { isAdminRequest, readBoundedRequestBody } from "../_lib/applications.js"
 export const DEFAULT_CONTENT = {
   "schemaVersion": 4,
   "headline": "유심 개통 가능하면\n최대 {{MAX_TOTAL}}",
-  "intro": "고객의 유심 개통·통신·유지 관련 비용은 회사가 전액 부담합니다.\n개통 가능 여부를 확인하고 텔레그램·채널톡에서 조건을 문의하세요.",
+  "intro": "클라임유심(CLIME)은 에스씨아이평가정보(주)가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.\n급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.",
   "checklist": [
     {
       "title": "1. 개통 가능 여부 확인",
@@ -41,10 +41,10 @@ export const DEFAULT_CONTENT = {
     "email": "help@climekr.com"
   },
   "seo": {
-    "title": "클라임유심 | 유심 개통 가능하면 최대 {{MAX_TOTAL}}",
-    "description": "클라임유심(CLIME) 개통·통신 비용은 운영사 안내 기준 회사 전액 부담. 대출이 아닌 유심 개통 혜택이며 유지 조건 충족 시 최대 {{MAX_TOTAL}}. 텔레그램·채널톡으로 가입 조건을 문의하세요.",
-    "socialTitle": "클라임유심 | 유심 개통 가능 여부와 지급 안내",
-    "socialDescription": "회사 개통·통신비 전액 부담(고객 비용 없음). 유심 개통 혜택은 유지 조건 충족 시 최대 {{MAX_TOTAL}}. 텔레그램·채널톡 상담."
+    "title": "클라임유심 | 정식 사업자 유심 개통 혜택 · 최대 {{MAX_TOTAL}}",
+    "description": "클라임유심(CLIME)은 에스씨아이평가정보(주)가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다. 급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.",
+    "socialTitle": "클라임유심 | 정식 사업자 유심 개통 혜택 · 최대 {{MAX_TOTAL}}",
+    "socialDescription": "클라임유심(CLIME)은 에스씨아이평가정보(주)가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다. 급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다."
   },
   "copy": {
     "brandSub": "유심 개통 · 간편 참여 안내",
@@ -159,6 +159,22 @@ const MAX_CONTENT_REQUEST_BYTES = 160_000;
 const FIXED_PRIVACY_COPY_KEYS = Object.freeze([
   "privacyCollection", "privacyPurpose", "privacyStorage", "privacyConsent", "privacyProvider"
 ]);
+
+const PREVIOUS_PUBLIC_SUMMARY = {
+  intro: "고객의 유심 개통·통신·유지 관련 비용은 회사가 전액 부담합니다.\n개통 가능 여부를 확인하고 텔레그램·채널톡에서 조건을 문의하세요.",
+  description: "클라임유심(CLIME) 개통·통신 비용은 운영사 안내 기준 회사 전액 부담. 대출이 아닌 유심 개통 혜택이며 유지 조건 충족 시 최대 {{MAX_TOTAL}}. 텔레그램·채널톡으로 가입 조건을 문의하세요.",
+  socialDescription: "회사 개통·통신비 전액 부담(고객 비용 없음). 유심 개통 혜택은 유지 조건 충족 시 최대 {{MAX_TOTAL}}. 텔레그램·채널톡 상담."
+};
+
+export function withCurrentPublicSummary(content) {
+  if (!content || typeof content !== "object") return content;
+  const seo = content.seo && typeof content.seo === "object" ? { ...content.seo } : content.seo;
+  const next = { ...content, seo };
+  if (next.intro === PREVIOUS_PUBLIC_SUMMARY.intro) next.intro = DEFAULT_CONTENT.intro;
+  if (seo && seo.description === PREVIOUS_PUBLIC_SUMMARY.description) seo.description = DEFAULT_CONTENT.seo.description;
+  if (seo && seo.socialDescription === PREVIOUS_PUBLIC_SUMMARY.socialDescription) seo.socialDescription = DEFAULT_CONTENT.seo.socialDescription;
+  return next;
+}
 
 const json = (data, status = 200) => new Response(JSON.stringify(data), {
   status,
@@ -336,15 +352,15 @@ export async function onRequest({ request, env }) {
     try {
       const stored = JSON.parse(row.content);
       if (stored.schemaVersion === 4 && !validateContent(stored)) {
-        const content = {
+        const content = withCurrentPublicSummary({
           ...DEFAULT_CONTENT,
           ...stored,
           copy: { ...stored.copy, ...fixedPrivacyCopy() }
-        };
+        });
         return json({ ...content, retentionDays: RETENTION_DAYS, updatedAt: row.updated_at, cmsReady: true });
       }
       if (stored.schemaVersion === 3 && !validateV3(stored)) {
-        return json({ ...upgradedV3(stored), retentionDays: RETENTION_DAYS, updatedAt: row.updated_at, cmsReady: true, legacyContent: true });
+        return json({ ...withCurrentPublicSummary(upgradedV3(stored)), retentionDays: RETENTION_DAYS, updatedAt: row.updated_at, cmsReady: true, legacyContent: true });
       }
       const supportLinks = safeSupportLinks(stored?.supportLinks);
       return json({ ...DEFAULT_CONTENT, supportLinks, retentionDays: RETENTION_DAYS, updatedAt: row.updated_at, cmsReady: true, legacyContent: true });

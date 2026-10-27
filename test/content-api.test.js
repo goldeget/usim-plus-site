@@ -501,8 +501,8 @@ test("converts pasted literal backslash-n into real newlines for public multilin
   const content = freshContent();
   const slashN = String.fromCharCode(92) + "n";
   const introLines = [
-    "고객의 유심 개통·통신·유지 관련 비용은 회사가 전액 부담합니다.",
-    "개통 가능 여부를 확인하고 텔레그램·채널톡에서 조건을 문의하세요."
+    "첫 줄 안내입니다.",
+    "둘째 줄에서 조건을 확인하세요."
   ];
   const footerLines = [
     "고객 개통·통신 비용 회사 전액 부담",

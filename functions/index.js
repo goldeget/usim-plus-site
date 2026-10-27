@@ -1,4 +1,4 @@
-import { DEFAULT_CONTENT, fixedPrivacyCopy, upgradedV3, validateContent, validateV3 } from "./api/content.js";
+import { DEFAULT_CONTENT, fixedPrivacyCopy, upgradedV3, validateContent, validateV3, withCurrentPublicSummary } from "./api/content.js";
 
 const jsonLdEscape = value => JSON.stringify(value)
   .replaceAll("<", "\\u003c")
@@ -105,9 +105,9 @@ async function currentContent(env) {
     if (!row) return DEFAULT_CONTENT;
     const stored = JSON.parse(row.content);
     if (stored.schemaVersion === 4 && !validateContent(stored)) {
-      return { ...DEFAULT_CONTENT, ...stored, copy: { ...stored.copy, ...fixedPrivacyCopy() } };
+      return withCurrentPublicSummary({ ...DEFAULT_CONTENT, ...stored, copy: { ...stored.copy, ...fixedPrivacyCopy() } });
     }
-    if (stored.schemaVersion === 3 && !validateV3(stored)) return upgradedV3(stored);
+    if (stored.schemaVersion === 3 && !validateV3(stored)) return withCurrentPublicSummary(upgradedV3(stored));
     return DEFAULT_CONTENT;
   } catch {
     return DEFAULT_CONTENT;
