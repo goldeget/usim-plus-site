@@ -48,15 +48,19 @@ class TestHTMLRewriter {
       } else if (selector.startsWith("#")) {
         const id = selector.slice(1);
         html = html.replace(new RegExp(`(<[^>]*\\bid="${id}"[^>]*>)([\\s\\S]*?)(</[a-z0-9]+>)`, "i"), (all, open, inner, close) => {
+          let nextOpen = open;
           let value = inner;
           let asHtml = false;
+          let changedContent = false;
           handlers.element({
+            setAttribute(name, next) { nextOpen = setAttribute(nextOpen, name, next); },
             setInnerContent(next, options) {
               value = next;
               asHtml = Boolean(options && options.html);
+              changedContent = true;
             }
           });
-          return `${open}${asHtml ? value : escapeAttribute(value)}${close}`;
+          return `${nextOpen}${changedContent && !asHtml ? escapeAttribute(value) : value}${close}`;
         });
       }
     }
@@ -82,6 +86,15 @@ test("serves edited title, social metadata and matching Organization/Service gra
   content.seo.socialTitle = "공유 제목 {{MAX_TOTAL}}";
   content.seo.socialDescription = "공유 설명 {{MAX_PER_CASE}}";
   content.faqs[0] = { question: "새 질문", answer: "새 답변" };
+  content.operator = {
+    company: "테스트 & 법인㈜",
+    representative: "테스트 대표",
+    registrationNumber: "123-45-67890",
+    salesRegistration: "제2026-서울영등포-0001호",
+    address: "서울시 영등포구 테스트로 1 <별관>",
+    fax: "02-1234-5678",
+    email: "contact@example.com"
+  };
 
   const previous = globalThis.HTMLRewriter;
   globalThis.HTMLRewriter = TestHTMLRewriter;
@@ -103,7 +116,21 @@ test("serves edited title, social metadata and matching Organization/Service gra
     assert.equal(graph.find(item => item["@type"] === "WebPage").name, "18만원 지급 안내 | climekr");
     assert.equal(graph.find(item => item["@type"] === "WebPage").description, "검색 설명 18만원");
     assert.equal(graph.find(item => item["@type"] === "Service").description, "검색 설명 18만원");
-    assert.equal(graph.find(item => item["@type"] === "Organization").email, "help@climekr.com");
+    const organization = graph.find(item => item["@type"] === "Organization");
+    assert.equal(organization.legalName, content.operator.company);
+    assert.equal(organization.email, content.operator.email);
+    assert.equal(organization.taxID, content.operator.registrationNumber);
+    assert.equal(organization.identifier.value, content.operator.salesRegistration);
+    assert.equal(organization.address.streetAddress, content.operator.address);
+    assert.equal(organization.faxNumber, content.operator.fax);
+    for (const [id, key] of Object.entries({
+      operatorCompany: "company", operatorRepresentative: "representative",
+      operatorRegistrationNumber: "registrationNumber", operatorSalesRegistration: "salesRegistration",
+      operatorAddress: "address", operatorFax: "fax", operatorEmail: "email"
+    })) {
+      assert.ok(html.includes(`id="${id}">${escapeAttribute(content.operator[key])}</span>`), id);
+    }
+    assert.match(html, /id="operatorEmailLink" href="mailto:contact@example\.com"><span id="operatorEmail">contact@example\.com<\/span>/);
     const intro = html.match(/id="homeIntro">([\s\S]*?)<\/p>/)?.[1] || "";
     assert.equal(intro.split("<br>").length, 5);
     assert.match(intro, /최대 18만원 지급 대상입니다\.$/);

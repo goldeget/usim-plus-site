@@ -11,7 +11,7 @@ const userFlowCss = await readFile(new URL("../public/user-flow.css", import.met
 test("preserves the dark visual identity and exposes direct consultation without a file form", () => {
   for (const element of ['<html lang="ko">','class="hero-payouts"','class="sim-image"','id="contact"','id="heroApplyButton" href="#contact"']) assert.ok(html.includes(element), element);
   assert.doesNotMatch(html, /type="file"|id="precheckForm"|FormData|challenges\.cloudflare\.com|turnstile\.render/);
-  assert.match(html, /에스씨아이평가정보\(주\)가 운영하는 정식 사업자 등록 업체입니다\.<br>폰깡이 아니며/);
+  assert.match(html, /서울평가정보㈜가 운영하는 정식 사업자 등록 업체입니다\.<br>폰깡이 아니며/);
   assert.match(html, /name="color-scheme" content="dark"/);
 });
 
@@ -52,9 +52,9 @@ test("keeps visible centered feedback for lookup and unavailable channels", () =
 });
 
 test("shows the operator registration details requested for the current footer", () => {
-  assert.match(html,/에스씨아이평가정보\(주\)/);
-  assert.match(html,/대표자.*임동훈/);
-  for(const value of ['114-81-47958','110111-0853419','sci0001@hometax.go.kr']) assert.equal(html.includes(value),true);
+  assert.match(html,/서울평가정보㈜/);
+  assert.match(html,/대표이사.*김중근/);
+  for(const value of ['114-81-47958','제2022-서울영등포-2646호','서울시 영등포구 국회대로70길 23(여의도동, 용산빌딩)','02-3449-1678']) assert.equal(html.includes(value),true);
 });
 
 
@@ -91,7 +91,7 @@ test("admin-managed public copy covers payouts, lookup, privacy, footer, status,
 
 test("renders the homepage announcement as five lines and the footer without visible backslash-n", () => {
   const expectedIntro = [
-    "클라임유심(CLIME)은 에스씨아이평가정보(주)가 운영하는 정식 사업자 등록 업체입니다.",
+    "클라임유심(CLIME)은 서울평가정보㈜가 운영하는 정식 사업자 등록 업체입니다.",
     "폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.",
     "급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다.",
     "개통·통신 비용은 회사가 전액 부담합니다.",
