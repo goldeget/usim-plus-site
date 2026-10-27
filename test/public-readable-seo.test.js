@@ -20,7 +20,7 @@ test("all public pages use Korean language metadata and preserve meaningful text
   const visible = home.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
     .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, "");
   assert.doesNotMatch(visible, /\\n/, "No literal backslash-n text in main visible markup");
-  assert.match(visible, /클라임유심\(CLIME\)은 에스씨아이평가정보\(주\)가 운영하는 정식 사업자 등록 업체입니다\.<br>폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다\.<br>급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다\.<br>개통·통신 비용은 회사가 전액 부담합니다\.<br>3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상입니다/);
+  assert.match(visible, /클라임유심\(CLIME\)은 서울평가정보㈜가 운영하는 정식 사업자 등록 업체입니다\.<br>폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다\.<br>급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다\.<br>개통·통신 비용은 회사가 전액 부담합니다\.<br>3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상입니다/);
   assert.doesNotMatch(visible, /\{\{MAX_TOTAL\}\}/);
 });
 
