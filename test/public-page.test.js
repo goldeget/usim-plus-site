@@ -11,7 +11,7 @@ const userFlowCss = await readFile(new URL("../public/user-flow.css", import.met
 test("preserves the dark visual identity and exposes direct consultation without a file form", () => {
   for (const element of ['<html lang="ko">','class="hero-payouts"','class="sim-image"','id="contact"','id="heroApplyButton" href="#contact"']) assert.ok(html.includes(element), element);
   assert.doesNotMatch(html, /type="file"|id="precheckForm"|FormData|challenges\.cloudflare\.com|turnstile\.render/);
-  assert.match(html, /에스씨아이평가정보\(주\)가 운영하는 정식 사업자 등록 업체입니다\. 폰깡이 아니며/);
+  assert.match(html, /에스씨아이평가정보\(주\)가 운영하는 정식 사업자 등록 업체입니다\.<br>폰깡이 아니며/);
   assert.match(html, /name="color-scheme" content="dark"/);
 });
 
@@ -89,18 +89,23 @@ test("admin-managed public copy covers payouts, lookup, privacy, footer, status,
 });
 
 
-test("renders a clean two-line homepage announcement and footer without visible backslash-n", () => {
+test("renders the homepage announcement as five lines and the footer without visible backslash-n", () => {
   const expectedIntro = [
-    "클라임유심(CLIME)은 에스씨아이평가정보(주)가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.",
-    "급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상입니다."
-  ].join("\n");
+    "클라임유심(CLIME)은 에스씨아이평가정보(주)가 운영하는 정식 사업자 등록 업체입니다.",
+    "폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.",
+    "급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다.",
+    "개통·통신 비용은 회사가 전액 부담합니다.",
+    "3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상입니다."
+  ].join("<br>");
   assert.ok(html.includes('<p class="hero-intro" id="homeIntro">' + expectedIntro + '</p>'));
+  assert.doesNotMatch(html, /id="homeIntro"[^>]*>[\s\S]*?\{\{MAX_TOTAL\}\}/);
   assert.ok(html.includes('<p class="site-footer__terms" id="footerTerms">고객 개통·통신 비용 회사 전액 부담\n유지 조건 충족 시 최대 3건 · 최대 66만원 지급 대상</p>'));
-  assert.match(html, /normalizeDisplayedLineBreaks\(expandTokens\(content\.intro,content\)\)/);
+  assert.match(html, /renderLineBreaks\(document\.getElementById\('homeIntro'\),content\.intro,content\)/);
+  assert.match(html, /normalizeDisplayedLineBreaks\(expandTokens\(value,content\)\)/);
   assert.match(html, /normalizeDisplayedLineBreaks\(expandTokens\(copy\.footerTerms,content\)\)/);
   assert.match(html, /function normalizeDisplayedLineBreaks\(value\)/);
   assert.match(userFlowCss, /\.hero-intro,[^{]*\.site-footer__terms \{ white-space: pre-line; line-height: 1\.85; \}/);
-  assert.doesNotMatch(expectedIntro, /\\n/);
+  assert.doesNotMatch(expectedIntro, /\\n|\{\{MAX_TOTAL\}\}/);
 });
 
 test("removes public FAQ and the invisible FAQ schema without removing consultation or archived CMS data", () => {

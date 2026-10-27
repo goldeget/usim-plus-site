@@ -27,6 +27,24 @@ function expandTokens(value, content) {
   return String(value || "").replace(/\{\{([A-Z0-9_]+)\}\}/g, (match, key) => Object.hasOwn(tokens, key) ? tokens[key] : match);
 }
 
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+function multilineHtml(value, content) {
+  return expandTokens(value, content)
+    .replaceAll("\\n", "\n")
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(Boolean)
+    .map(escapeHtml)
+    .join("<br>");
+}
+
 
 function buildStructuredData(content, meta) {
   const organizationId = "https://climekr.com/#organization";
@@ -154,6 +172,7 @@ export async function onRequest(context) {
     .on('meta[name="twitter:title"]', { element(element) { element.setAttribute("content", metadata.socialTitle); } })
     .on('meta[name="twitter:description"]', { element(element) { element.setAttribute("content", metadata.socialDescription); } })
     .on('script[type="application/ld+json"]', { element(element) { element.setInnerContent(jsonLdEscape(metadata.structuredData), { html: true }); } })
+    .on("#homeIntro", { element(element) { element.setInnerContent(multilineHtml(content.intro, content), { html: true }); } })
     .transform(response));
   if (cache) {
     const put = cache.put(key, result.clone()).catch(() => {});

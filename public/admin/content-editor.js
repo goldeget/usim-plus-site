@@ -191,6 +191,8 @@ function refreshDerivedPreviews() {
   const prior = previousPreviewModel || next;
   const headline = document.getElementById("headline");
   if (headline.value === expandText(original.headline, prior)) headline.value = expandText(original.headline, next);
+  const intro = document.getElementById("introText");
+  if (intro && intro.value === expandText(original.intro, prior)) intro.value = expandText(original.intro, next);
   for (const group of Object.keys(COPY_FIELDS)) {
     for (const [key] of COPY_FIELDS[group]) {
       const field = document.getElementById(`copy-${key}`);
@@ -290,7 +292,7 @@ function fill(data) {
   retentionDays = data.retentionDays || retentionDays;
   document.getElementById("headline").value = expandText(data.headline, data);
   document.getElementById("headline").dataset.sourceText = data.headline;
-  document.getElementById("introText").value = data.intro;
+  document.getElementById("introText").value = expandText(data.intro, data);
   document.getElementById("telegramLink").value = data.supportLinks?.telegram || "";
   document.getElementById("lineLink").value = data.supportLinks?.line || "";
   document.getElementById("channeltalkLink").value = data.supportLinks?.channeltalk || "";
@@ -375,7 +377,7 @@ document.getElementById("editor").addEventListener("submit", async event => {
     ...original,
     schemaVersion: 4,
     headline: templateValue(document.getElementById("headline").value.trim(), original.headline, previewModel()),
-    intro: document.getElementById("introText").value.trim(),
+    intro: templateValue(document.getElementById("introText").value.trim(), original.intro, previewModel()),
     checklist: readEntries(document.getElementById("checklist"), "check"),
     faqs: readEntries(document.getElementById("faqs"), "faq", previewModel()),
     supportLinks: {

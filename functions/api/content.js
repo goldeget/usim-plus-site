@@ -3,7 +3,7 @@ import { isAdminRequest, readBoundedRequestBody } from "../_lib/applications.js"
 export const DEFAULT_CONTENT = {
   "schemaVersion": 4,
   "headline": "유심 개통 가능하면\n최대 {{MAX_TOTAL}}",
-  "intro": "클라임유심(CLIME)은 에스씨아이평가정보(주)가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.\n급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.",
+  "intro": "클라임유심(CLIME)은 에스씨아이평가정보(주)가 운영하는 정식 사업자 등록 업체입니다.\n폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.\n급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다.\n개통·통신 비용은 회사가 전액 부담합니다.\n3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.",
   "checklist": [
     {
       "title": "1. 개통 가능 여부 확인",
@@ -166,11 +166,22 @@ const PREVIOUS_PUBLIC_SUMMARY = {
   socialDescription: "회사 개통·통신비 전액 부담(고객 비용 없음). 유심 개통 혜택은 유지 조건 충족 시 최대 {{MAX_TOTAL}}. 텔레그램·채널톡 상담."
 };
 
+// Older published intros kept the five sentences in one or two visual lines and
+// sometimes left {{MAX_TOTAL}} for the page to expand. Replace those exact copies
+// so every read renders the current five-line intro.
+const LEGACY_PUBLIC_INTROS = new Set([
+  PREVIOUS_PUBLIC_SUMMARY.intro,
+  "클라임유심(CLIME)은 에스씨아이평가정보(주)가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.\n급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.",
+  "클라임유심(CLIME)은 에스씨아이평가정보(주)가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다. 급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.",
+  "클라임유심(CLIME)은 에스씨아이평가정보(주)가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.\n급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상입니다.",
+  "클라임유심(CLIME)은 에스씨아이평가정보(주)가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다. 급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상입니다."
+]);
+
 export function withCurrentPublicSummary(content) {
   if (!content || typeof content !== "object") return content;
   const seo = content.seo && typeof content.seo === "object" ? { ...content.seo } : content.seo;
   const next = { ...content, seo };
-  if (next.intro === PREVIOUS_PUBLIC_SUMMARY.intro) next.intro = DEFAULT_CONTENT.intro;
+  if (LEGACY_PUBLIC_INTROS.has(next.intro)) next.intro = DEFAULT_CONTENT.intro;
   if (seo && seo.description === PREVIOUS_PUBLIC_SUMMARY.description) seo.description = DEFAULT_CONTENT.seo.description;
   if (seo && seo.socialDescription === PREVIOUS_PUBLIC_SUMMARY.socialDescription) seo.socialDescription = DEFAULT_CONTENT.seo.socialDescription;
   return next;

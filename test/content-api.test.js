@@ -297,6 +297,20 @@ test("returns a clear unavailable response when the bound D1 content table canno
   assert.match(data.error, /저장소/);
 });
 
+test("replaces the published run-on intro, including a raw payout token, with five lines", async () => {
+  const { onRequest, DEFAULT_CONTENT } = await import("../functions/api/content.js");
+  const cloudflare = createMemoryCloudflare();
+  const stored = structuredClone(DEFAULT_CONTENT);
+  stored.intro = "클라임유심(CLIME)은 에스씨아이평가정보(주)가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.\n급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.";
+  cloudflare.siteContent.set("home", { id: "home", content: JSON.stringify(stored), updated_at: "2026-10-27T00:00:00.000Z" });
+  const response = await onRequest({ request: new Request("https://climekr.com/api/content"), env: createAdminEnvironment({ cloudflare }) });
+  const data = await response.json();
+  assert.equal(data.intro, DEFAULT_CONTENT.intro);
+  assert.equal(data.intro.split("\n").length, 5);
+  assert.match(data.intro, /\{\{MAX_TOTAL\}\}/);
+  assert.doesNotMatch(data.intro.split("\n")[1], /급전이 필요한/);
+});
+
 test("keeps legacy editor content out of the current homepage while showing versioned defaults", async () => {
   const { onRequest } = await import("../functions/api/content.js");
   const cloudflare = createMemoryCloudflare();

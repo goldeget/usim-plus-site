@@ -45,6 +45,19 @@ class TestHTMLRewriter {
           handlers.element({ setInnerContent(next) { value = next; } });
           return tag.replace(/>[\s\S]*<\/script>$/i, `>${value}</script>`);
         });
+      } else if (selector.startsWith("#")) {
+        const id = selector.slice(1);
+        html = html.replace(new RegExp(`(<[^>]*\\bid="${id}"[^>]*>)([\\s\\S]*?)(</[a-z0-9]+>)`, "i"), (all, open, inner, close) => {
+          let value = inner;
+          let asHtml = false;
+          handlers.element({
+            setInnerContent(next, options) {
+              value = next;
+              asHtml = Boolean(options && options.html);
+            }
+          });
+          return `${open}${asHtml ? value : escapeAttribute(value)}${close}`;
+        });
       }
     }
     return new Response(html, { status: response.status, headers: response.headers });
@@ -91,6 +104,10 @@ test("serves edited title, social metadata and matching Organization/Service gra
     assert.equal(graph.find(item => item["@type"] === "WebPage").description, "검색 설명 18만원");
     assert.equal(graph.find(item => item["@type"] === "Service").description, "검색 설명 18만원");
     assert.equal(graph.find(item => item["@type"] === "Organization").email, "help@climekr.com");
+    const intro = html.match(/id="homeIntro">([\s\S]*?)<\/p>/)?.[1] || "";
+    assert.equal(intro.split("<br>").length, 5);
+    assert.match(intro, /최대 18만원 지급 대상입니다\.$/);
+    assert.doesNotMatch(intro, /\{\{MAX_TOTAL\}\}/);
   } finally {
     if (previous === undefined) delete globalThis.HTMLRewriter;
     else globalThis.HTMLRewriter = previous;
