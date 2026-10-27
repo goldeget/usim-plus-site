@@ -17,6 +17,7 @@ import {
   isTodaySlotOnDay,
   listChunkPath,
   presentReview,
+  releasedTodaySlots,
   seoulTodayContext,
   slotFromReviewId,
   todayWindowSlots
@@ -176,14 +177,16 @@ export async function queryPublishedReviews(env, request, {
 } = {}) {
   const meta = await loadReviewMeta(env, request);
   const context = seoulTodayContext(today);
+  const released = new Set(releasedTodaySlots(context.todayDate));
   const skip = new Set(todayWindowSlots(context.todayDate));
-  const records = await loadSlots(env, request, skip);
+  const records = await loadSlots(env, request, released);
 
   for (const range of meta.chunks || []) {
     if (range.minDate > context.todayKey || range.maxDate < context.todayKey) continue;
     const chunk = await loadListChunk(env, request, range.chunk);
     for (const record of chunk.items) {
       if (record.baseSeoulDate !== context.todayKey || skip.has(record.slot)) continue;
+      if (Date.parse(record.basePublishedAt) > context.todayDate.getTime()) continue;
       skip.add(record.slot);
       records.push(record);
     }
@@ -286,5 +289,7 @@ export async function getPublishedReview(env, request, id, today = new Date()) {
   const meta = list.bySlot.get(slot);
   const stored = bodies.bySlot.get(slot);
   if (!meta || meta.id !== id || !stored || typeof stored.body !== "string") return null;
+  const context = seoulTodayContext(today);
+  if (isTodaySlotOnDay(slot, context.dayIndex) && !releasedTodaySlots(today).includes(slot)) return null;
   return presentReview({ ...meta, body: stored.body }, today, { includeBody: true });
 }

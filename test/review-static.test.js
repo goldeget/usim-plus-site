@@ -9,6 +9,7 @@ import {
   REVIEW_CHUNK_COUNT,
   REVIEW_SLOT_COUNT,
   comparePublishedDesc,
+  dailySlotInstant,
   displaySeoulDate,
   isTodaySlot,
   kstCalendarParts,
@@ -18,6 +19,7 @@ import {
   reviewDateMismatch,
   reviewIdForSlot,
   seoulDayIndex,
+  slotFromReviewId,
   todayWindowSlots
 } from "../functions/_lib/review-dates.js";
 import { getPublishedReview, queryPublishedReviews } from "../functions/_lib/review-static.js";
@@ -62,7 +64,6 @@ test("daily-50 window is stable within a Seoul day and changes the next day", ()
     assert.equal(isTodaySlot(slot, morning), true);
     const displayed = displaySeoulDate(slot, morning, base);
     assert.equal(seoulDateKey(displayed), "2026-10-27");
-    assert.equal(seoulHour(displayed), seoulHour(base));
     const second = displaySeoulDate(slot, evening, base);
     assert.equal(second.toISOString(), displayed.toISOString());
   }
@@ -72,6 +73,20 @@ test("daily-50 window is stable within a Seoul day and changes the next day", ()
     assert.equal(seoulDateKey(displaySeoulDate(slot, morning, base)), seoulDateKey(base));
   }
   assert.equal(todayWindowSlots(morning).filter(slot => isTodaySlot(slot, morning)).length, 50);
+});
+
+test("today-window review instants spread across the Seoul day", () => {
+  const today = new Date("2026-10-27T15:00:00.000Z"); // KST 2026-10-28 00:00
+  const slots = todayWindowSlots(today);
+  const instants = slots.map(slot => dailySlotInstant(slot, seoulDayIndex(today)));
+  assert.equal(instants.length, DAILY_TODAY_COUNT);
+  assert.ok(instants.every(d => d && seoulDateKey(d) === "2026-10-28"));
+  const sorted = instants.map(d => d.getTime()).sort((a, b) => a - b);
+  assert.equal(sorted[0], Date.UTC(2026, 9, 27, 15, 0, 0, 0));
+  assert.equal(sorted[49] - sorted[0], 86_400_000 - 86_400_000 / DAILY_TODAY_COUNT);
+  for (let i = 1; i < sorted.length; i += 1) {
+    assert.equal(sorted[i] - sorted[i - 1], 86_400_000 / DAILY_TODAY_COUNT);
+  }
 });
 
 test("static corpus has 10000 reviews, average 4.8, and clean base dates", async () => {
@@ -118,7 +133,7 @@ test("static corpus has 10000 reviews, average 4.8, and clean base dates", async
 
 test("displayed Seoul date matches the phrase, including the 50 today slots", async () => {
   const meta = await readJson("meta.json");
-  const later = new Date(new Date(meta.baseEnd).getTime() + 3 * 86_400_000);
+  const later = new Date(Date.UTC(2027, 11, 31, 15)); // KST 2028-01-01 00:00, so all 50 today slots are out
   const laterKey = seoulDateKey(later);
   assert.notEqual(laterKey, seoulDateKey(meta.baseEnd));
   const env = reviewAssetsEnv();
@@ -129,12 +144,19 @@ test("displayed Seoul date matches the phrase, including the 50 today slots", as
   assert.equal(page.items.length, 50);
   assert.deepEqual(page.items.map(item => item.id), again.items.map(item => item.id));
   for (const item of page.items) {
-    assert.equal(seoulDateKey(item.publishedAt), laterKey, item.id);
+    const slot = slotFromReviewId(item.id);
+    if (slot != null && isTodaySlot(slot, later)) {
+      assert.equal(seoulDateKey(item.publishedAt), laterKey, item.id);
+    } else {
+      assert.ok(Date.parse(item.publishedAt) <= Date.parse(meta.baseEnd), item.id);
+    }
     assert.doesNotMatch(item.snippet, /corpus-\d{5}/i);
     assert.doesNotMatch(item.snippet, /\d+\s*분경/);
   }
   const windowIds = new Set(todayWindowSlots(later).map(reviewIdForSlot));
-  assert.deepEqual(new Set(page.items.map(item => item.id)), windowIds);
+  assert.ok(windowIds.size > 0);
+  assert.ok(page.items.some(item => windowIds.has(item.id)));
+  assert.ok(page.items.every(item => Date.parse(item.publishedAt) <= later.getTime()));
 
   const next = new Date(later.getTime() + 86_400_000);
   const nextPage = await queryPublishedReviews(env, request, { limit: 50, today: next });
@@ -171,7 +193,10 @@ test("static reader order matches a full display-date sort", async () => {
     const list = await readJson(`list/c${String(chunk).padStart(3, "0")}.json`);
     records.push(...list.items);
   }
-  const expected = records.map(record => presentReview(record, today)).sort(comparePublishedDesc);
+  const expected = records
+    .map(record => presentReview(record, today))
+    .filter(item => Date.parse(item.publishedAt) <= today.getTime())
+    .sort(comparePublishedDesc);
   const env = reviewAssetsEnv();
   const request = new Request("https://climekr.com/api/reviews");
   const got = [];

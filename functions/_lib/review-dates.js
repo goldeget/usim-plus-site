@@ -115,6 +115,17 @@ export function moveToSeoulDay(clockSource, daySource) {
   return seoulWallToUtc(day.year, day.month, day.day, clock.hour, clock.minute, clock.second, clock.ms);
 }
 
+/** Today-window slots appear to roll in across the KST day: ~50/day, one every 28m48s. */
+export function dailySlotInstant(slot, dayIndex) {
+  const s = Number(slot);
+  if (!Number.isInteger(s) || s < 0 || s >= REVIEW_SLOT_COUNT) return null;
+  const rank = (dayIndex + s) % REVIEW_SLOT_COUNT;
+  if (rank >= DAILY_TODAY_COUNT) return null;
+  const ms = rank * (86_400_000 / DAILY_TODAY_COUNT);
+  const utcMs = dayIndex * 86_400_000 + ms - SEOUL_OFFSET_MS;
+  return new Date(utcMs);
+}
+
 export function seoulTodayContext(today = new Date()) {
   const todayDate = today instanceof Date ? today : new Date(today);
   return {
@@ -144,6 +155,16 @@ export function todayWindowSlots(today) {
   return slots;
 }
 
+/** Today slots that have appeared by this instant, oldest first. */
+export function releasedTodaySlots(today) {
+  const todayDate = today instanceof Date ? today : new Date(today);
+  const nowMs = todayDate.getTime();
+  return todayWindowSlots(todayDate).filter(slot => {
+    const when = dailySlotInstant(slot, seoulDayIndex(todayDate));
+    return when && when.getTime() <= nowMs;
+  });
+}
+
 /**
  * Display instant for a slot.
  * Window slots use today's Seoul calendar date and the base clock.
@@ -155,7 +176,9 @@ export function todayWindowSlots(today) {
 export function displaySeoulDate(slot, today, basePublishedAt) {
   const todayDate = today instanceof Date ? today : new Date(today);
   const base = basePublishedAt instanceof Date ? basePublishedAt : new Date(basePublishedAt);
-  if (isTodaySlot(slot, todayDate)) return moveToSeoulDay(base, todayDate);
+  if (isTodaySlot(slot, todayDate)) {
+    return dailySlotInstant(slot, seoulDayIndex(todayDate)) || moveToSeoulDay(base, todayDate);
+  }
   return new Date(base.getTime());
 }
 
@@ -238,10 +261,10 @@ export function presentReview(record, today, { includeBody = false, context = nu
   let publishedAt = record.basePublishedAt;
   let displayed = null;
   if (isTodaySlotOnDay(record.slot, ctx.dayIndex)) {
-    displayed = moveToSeoulDay(record.basePublishedAt, ctx.todayDate);
+    displayed = dailySlotInstant(record.slot, ctx.dayIndex) || moveToSeoulDay(record.basePublishedAt, ctx.todayDate);
     if (displayed.getTime() !== baseMs) publishedAt = displayed.toISOString();
   }
-  const shifted = publishedAt !== record.basePublishedAt;
+  let shifted = publishedAt !== record.basePublishedAt;
   let snippet = record.snippet;
   let body = includeBody ? record.body : undefined;
   if (shifted) {
