@@ -6,6 +6,68 @@ import { DEFAULT_CONTENT } from "../functions/api/content.js";
 
 const freshContent = () => structuredClone(DEFAULT_CONTENT);
 
+test("loads older schema 4 operator records without resetting saved content or consultation links", async () => {
+  const { onRequest } = await import("../functions/api/content.js");
+  const cloudflare = createMemoryCloudflare();
+  const stored = freshContent();
+  stored.headline = "개통 혜택 문의 · 최대 {{MAX_TOTAL}}";
+  stored.intro = "개통 가능 여부와 현재 조건을 상담 채널에서 확인하세요.";
+  stored.supportLinks.telegram = "https://t.me/current_operator";
+  stored.supportLinks.channeltalk = "https://current-operator.channel.io";
+  stored.operator = { company: "기존 법인㈜", representative: "기존 대표", email: "contact@example.com" };
+  cloudflare.siteContent.set("home", { id: "home", content: JSON.stringify(stored), updated_at: "2026-10-27T00:00:00.000Z" });
+
+  const response = await onRequest({ request: new Request("https://climekr.com/api/content"), env: createAdminEnvironment({ cloudflare }) });
+  const data = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(data.legacyContent, undefined);
+  assert.equal(data.headline, stored.headline);
+  assert.equal(data.intro, stored.intro);
+  assert.deepEqual(data.supportLinks, stored.supportLinks);
+  assert.deepEqual(data.payout, stored.payout);
+  assert.deepEqual(data.operator, { ...DEFAULT_CONTENT.operator, ...stored.operator });
+});
+
+test("retains all operator fields through CMS saves and writes from older admin tabs", async () => {
+  const { onRequest } = await import("../functions/api/content.js");
+  const cloudflare = createMemoryCloudflare();
+  const env = createAdminEnvironment({ cloudflare });
+  const headers = await createAdminSessionHeaders(env);
+  const content = freshContent();
+  content.operator = {
+    company: "  테스트 법인㈜  ",
+    representative: "  테스트 대표  ",
+    registrationNumber: " 123-45-67890 ",
+    salesRegistration: " 제2026-서울영등포-0001호 ",
+    address: " 서울시 영등포구 테스트로 1 (테스트빌딩) ",
+    fax: " 02-1234-5678 ",
+    email: "contact@example.com"
+  };
+  const expected = Object.fromEntries(Object.entries(content.operator).map(([key, value]) => [key, value.trim()]));
+  const save = value => onRequest({ request: new Request("https://admin.climekr.com/api/content", {
+    method: "PUT",
+    headers: { ...headers, origin: "https://admin.climekr.com", "Content-Type": "application/json" },
+    body: JSON.stringify(value)
+  }), env });
+
+  const firstSave = await save(content);
+  assert.equal(firstSave.status, 200);
+  assert.deepEqual((await firstSave.json()).content.operator, expected);
+  assert.deepEqual(JSON.parse(cloudflare.siteContent.get("home").content).operator, expected);
+
+  const legacyClientContent = freshContent();
+  legacyClientContent.operator = { company: expected.company, representative: expected.representative, email: expected.email };
+  legacyClientContent.intro = "관리자가 수정한 안내 문구를 유지합니다.";
+  const secondSave = await save(legacyClientContent);
+  assert.equal(secondSave.status, 200);
+  assert.deepEqual((await secondSave.json()).content.operator, expected);
+  const response = await onRequest({ request: new Request("https://climekr.com/api/content"), env });
+  const data = await response.json();
+  assert.deepEqual(data.operator, expected);
+  assert.equal(data.intro, legacyClientContent.intro);
+  assert.equal(cloudflare.siteContent.has("home_legacy"), false);
+});
+
 test("bounds authenticated CMS writes when Content-Length is missing", async () => {
   const { onRequest } = await import("../functions/api/content.js");
   const env = createAdminEnvironment({ cloudflare: createMemoryCloudflare() });

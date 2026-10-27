@@ -3,7 +3,7 @@ import { isAdminRequest, readBoundedRequestBody } from "../_lib/applications.js"
 export const DEFAULT_CONTENT = {
   "schemaVersion": 4,
   "headline": "몰랐던 유심 혜택,\n유심 혜택 확인부터",
-  "intro": "클라임유심(CLIME, climekr.com)은 서울평가정보(주)가 운영합니다. 사업자등록번호 114-81-47958.\n몰랐던 유심 혜택을 서울평가정보(주) 공식 안내로 유심 혜택 확인 후 조건에 따라 안내합니다.\n유심과 휴대폰은 고객이 계속 보유·사용하며, 회사는 수거하지 않습니다.\n3일·15일·30일 유지 확인 후 단계 지급 대상이 정해지며, 최대 {{MAX_TOTAL}}입니다. 상담·신청 즉시 지급이 아닙니다.\n상담은 텔레그램·채널톡입니다.",
+  "intro": "클라임유심(CLIME, climekr.com)은 서울평가정보㈜가 운영합니다. 사업자등록번호 114-81-47958.\n몰랐던 유심 혜택을 서울평가정보㈜ 공식 안내로 유심 혜택 확인 후 조건에 따라 안내합니다.\n유심과 휴대폰은 고객이 계속 보유·사용하며, 회사는 수거하지 않습니다.\n3일·15일·30일 유지 확인 후 단계 지급 대상이 정해지며, 최대 {{MAX_TOTAL}}입니다. 상담·신청 즉시 지급이 아닙니다.\n상담은 텔레그램·채널톡입니다.",
   "checklist": [
     {
       "title": "1. 개통 가능 여부 확인",
@@ -36,20 +36,24 @@ export const DEFAULT_CONTENT = {
     "maxCases": 3
   },
   "operator": {
-    "company": "서울평가정보(주)",
-    "representative": "임동훈",
+    "company": "서울평가정보㈜",
+    "representative": "김중근",
+    "registrationNumber": "114-81-47958",
+    "salesRegistration": "제2022-서울영등포-2646호",
+    "address": "서울시 영등포구 국회대로70길 23(여의도동, 용산빌딩)",
+    "fax": "02-3449-1678",
     "email": "help@climekr.com"
   },
   "seo": {
-    "title": "클라임유심 | 유심 혜택 · 유심 혜택 확인 · 최대 {{MAX_TOTAL}} | 서울평가정보(주)",
-    "description": "클라임유심(CLIME)은 서울평가정보(주)가 운영하는 유심 혜택 안내입니다. 몰랐던 유심 혜택을 공식 안내로 유심 혜택 확인 후 조건에 따라 안내합니다. 유심과 휴대폰은 고객이 계속 보유·사용하며 회사는 수거하지 않습니다. 3일·15일·30일 유지 확인 후 단계 지급 대상이 정해지며 최대 {{MAX_TOTAL}}입니다. 상담은 텔레그램·채널톡입니다.",
-    "socialTitle": "클라임유심 | 유심 혜택 · 유심 혜택 확인 · 최대 {{MAX_TOTAL}} | 서울평가정보(주)",
-    "socialDescription": "클라임유심(CLIME)은 서울평가정보(주)가 운영하는 유심 혜택 안내입니다. 몰랐던 유심 혜택을 공식 안내로 유심 혜택 확인 후 조건에 따라 안내합니다. 유심과 휴대폰은 고객이 계속 보유·사용하며 회사는 수거하지 않습니다. 3일·15일·30일 유지 확인 후 단계 지급 대상이 정해지며 최대 {{MAX_TOTAL}}입니다. 상담은 텔레그램·채널톡입니다."
+    "title": "클라임유심 | 유심 혜택 · 유심 혜택 확인 · 최대 {{MAX_TOTAL}} | 서울평가정보㈜",
+    "description": "클라임유심(CLIME)은 서울평가정보㈜가 운영하는 유심 혜택 안내입니다. 몰랐던 유심 혜택을 공식 안내로 유심 혜택 확인 후 조건에 따라 안내합니다. 유심과 휴대폰은 고객이 계속 보유·사용하며 회사는 수거하지 않습니다. 3일·15일·30일 유지 확인 후 단계 지급 대상이 정해지며 최대 {{MAX_TOTAL}}입니다. 상담은 텔레그램·채널톡입니다.",
+    "socialTitle": "클라임유심 | 유심 혜택 · 유심 혜택 확인 · 최대 {{MAX_TOTAL}} | 서울평가정보㈜",
+    "socialDescription": "클라임유심(CLIME)은 서울평가정보㈜가 운영하는 유심 혜택 안내입니다. 몰랐던 유심 혜택을 공식 안내로 유심 혜택 확인 후 조건에 따라 안내합니다. 유심과 휴대폰은 고객이 계속 보유·사용하며 회사는 수거하지 않습니다. 3일·15일·30일 유지 확인 후 단계 지급 대상이 정해지며 최대 {{MAX_TOTAL}}입니다. 상담은 텔레그램·채널톡입니다."
   },
   "copy": {
     "brandSub": "유심 혜택 · 간편 참여 안내",
     "headerHelp": "상담하기",
-    "heroEyebrow": "서울평가정보(주) 공식 안내 · 유심 혜택",
+    "heroEyebrow": "서울평가정보㈜ 공식 안내 · 유심 혜택",
     "heroApplyLabel": "사진 심사 신청하기",
     "heroChatNote": "이미 조회하셨다면 상담창에 사진을 보내 주세요.",
     "payoutNote": "지급은 유지 조건 확인 후 결정됩니다. 상담·신청 즉시 지급이 아닙니다.",
@@ -109,7 +113,7 @@ export const DEFAULT_CONTENT = {
     "footerTerms": "고객 개통·통신 비용 회사 전액 부담\n유지 조건 충족 시 최대 {{MAX_CASES}}건 · 최대 {{MAX_TOTAL}} 지급 대상",
     "operatorSummary": "사업자 정보 · 사업자등록번호 114-81-47958",
     "operatorCompanyLabel": "법인명",
-    "operatorRepresentativeLabel": "대표자",
+    "operatorRepresentativeLabel": "대표이사",
     "operatorEmailLabel": "고객 문의"
   },
   "faqs": [
@@ -156,9 +160,18 @@ const normalizePublicLineBreaks = value => value.trim().replaceAll("\\n", "\n");
 const COPY_LIMITS = Object.fromEntries(Object.keys(DEFAULT_CONTENT.copy).map(key => [key, 500]));
 const RETENTION_DAYS = Object.freeze({ photoAfterDecision: 30, photoIfUnreviewed: 30, statusMetadata: 60 });
 const MAX_CONTENT_REQUEST_BYTES = 160_000;
+const ADDITIONAL_OPERATOR_LIMITS = Object.freeze({ registrationNumber: 20, salesRegistration: 100, address: 300, fax: 40 });
 const FIXED_PRIVACY_COPY_KEYS = Object.freeze([
   "privacyCollection", "privacyPurpose", "privacyStorage", "privacyConsent", "privacyProvider"
 ]);
+
+// Schema 4 documents saved before these fields were introduced remain valid.
+// Use the same complete operator shape for API reads, writes and server rendering.
+export function normalizeOperator(operator) {
+  return Object.fromEntries(Object.entries(DEFAULT_CONTENT.operator).map(([key, fallback]) => [
+    key, typeof operator?.[key] === "string" ? operator[key].trim() : fallback
+  ]));
+}
 
 const PREVIOUS_PUBLIC_SUMMARY = {
   intro: "고객의 유심 개통·통신·유지 관련 비용은 회사가 전액 부담합니다.\n개통 가능 여부를 확인하고 텔레그램·채널톡에서 조건을 문의하세요.",
@@ -169,23 +182,23 @@ const PREVIOUS_PUBLIC_SUMMARY = {
 // Older published intros omitted who keeps the USIM. Replace those exact copies
 // on read so the public page shows the current lead without rewriting stored content.
 const LEGACY_PUBLIC_INTROS = new Set([
-  "클라임유심(CLIME)은 서울평가정보(주)가 운영하는 정식 사업자 등록 업체입니다.\n폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.\n고객이 본인 명의로 회선을 개통해 유심과 휴대폰을 계속 보유·사용합니다. 회사는 유심을 수거하지 않으며, 다른 사람에게 회선을 넘기는 절차는 없습니다.\n급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다.\n개통·통신 비용은 회사가 전액 부담합니다.\n3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.\n상담은 텔레그램·채널톡입니다.",
-  "클라임유심(CLIME)은 서울평가정보(주)가 운영하는 정식 사업자 등록 업체입니다.\n폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.\n고객이 본인 명의로 회선을 개통해 유심과 휴대폰을 계속 보유·사용합니다. 회사는 유심을 수거하지 않으며, 다른 사람에게 회선을 넘기는 절차는 없습니다.\n급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다.\n개통·통신 비용은 회사가 전액 부담합니다.\n3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상입니다.\n상담은 텔레그램·채널톡입니다.",
+  "클라임유심(CLIME)은 서울평가정보㈜가 운영하는 정식 사업자 등록 업체입니다.\n폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.\n고객이 본인 명의로 회선을 개통해 유심과 휴대폰을 계속 보유·사용합니다. 회사는 유심을 수거하지 않으며, 다른 사람에게 회선을 넘기는 절차는 없습니다.\n급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다.\n개통·통신 비용은 회사가 전액 부담합니다.\n3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.\n상담은 텔레그램·채널톡입니다.",
+  "클라임유심(CLIME)은 서울평가정보㈜가 운영하는 정식 사업자 등록 업체입니다.\n폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.\n고객이 본인 명의로 회선을 개통해 유심과 휴대폰을 계속 보유·사용합니다. 회사는 유심을 수거하지 않으며, 다른 사람에게 회선을 넘기는 절차는 없습니다.\n급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다.\n개통·통신 비용은 회사가 전액 부담합니다.\n3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상입니다.\n상담은 텔레그램·채널톡입니다.",
   PREVIOUS_PUBLIC_SUMMARY.intro,
-  "클라임유심(CLIME)은 서울평가정보(주)가 운영하는 정식 사업자 등록 업체입니다.\n폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.\n급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다.\n개통·통신 비용은 회사가 전액 부담합니다.\n3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.",
-  "클라임유심(CLIME)은 서울평가정보(주)가 운영하는 정식 사업자 등록 업체입니다.\n폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.\n급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다.\n개통·통신 비용은 회사가 전액 부담합니다.\n3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상입니다.",
+  "클라임유심(CLIME)은 서울평가정보㈜가 운영하는 정식 사업자 등록 업체입니다.\n폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.\n급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다.\n개통·통신 비용은 회사가 전액 부담합니다.\n3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.",
+  "클라임유심(CLIME)은 서울평가정보㈜가 운영하는 정식 사업자 등록 업체입니다.\n폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.\n급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다.\n개통·통신 비용은 회사가 전액 부담합니다.\n3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상입니다.",
   "클라임유심(CLIME)은 에스씨아이평가정보(주)가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.\n급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.",
   "클라임유심(CLIME)은 에스씨아이평가정보(주)가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다. 급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.",
   "클라임유심(CLIME)은 에스씨아이평가정보(주)가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.\n급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상입니다.",
   "클라임유심(CLIME)은 에스씨아이평가정보(주)가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다. 급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상입니다."
-]);
+].flatMap(intro => [intro, intro.replace("에스씨아이평가정보(주)", "서울평가정보㈜")]));
 
 const LEGACY_PUBLIC_DESCRIPTIONS = new Set([
-  "클라임유심(CLIME)은 서울평가정보(주)가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다. 고객이 본인 명의로 회선을 개통해 유심과 휴대폰을 계속 보유·사용합니다. 회사는 유심을 수거하지 않으며, 다른 사람에게 회선을 넘기는 절차는 없습니다. 급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다. 상담은 텔레그램·채널톡입니다.",
-  "클라임유심(CLIME)은 서울평가정보(주)가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다. 고객이 본인 명의로 회선을 개통해 유심과 휴대폰을 계속 보유·사용합니다. 회사는 유심을 수거하지 않으며, 다른 사람에게 회선을 넘기는 절차는 없습니다. 급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상입니다. 상담은 텔레그램·채널톡입니다.",
+  "클라임유심(CLIME)은 서울평가정보㈜가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다. 고객이 본인 명의로 회선을 개통해 유심과 휴대폰을 계속 보유·사용합니다. 회사는 유심을 수거하지 않으며, 다른 사람에게 회선을 넘기는 절차는 없습니다. 급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다. 상담은 텔레그램·채널톡입니다.",
+  "클라임유심(CLIME)은 서울평가정보㈜가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다. 고객이 본인 명의로 회선을 개통해 유심과 휴대폰을 계속 보유·사용합니다. 회사는 유심을 수거하지 않으며, 다른 사람에게 회선을 넘기는 절차는 없습니다. 급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상입니다. 상담은 텔레그램·채널톡입니다.",
   PREVIOUS_PUBLIC_SUMMARY.description,
-  "클라임유심(CLIME)은 서울평가정보(주)가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다. 급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.",
-  "클라임유심(CLIME)은 서울평가정보(주)가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다. 급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상입니다."
+  "클라임유심(CLIME)은 서울평가정보㈜가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다. 급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.",
+  "클라임유심(CLIME)은 서울평가정보㈜가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다. 급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상입니다."
 ]);
 
 const LEGACY_SEO_TITLES = new Set([
@@ -270,6 +283,11 @@ export function validateContent(value) {
   }
   if (!value.operator || typeof value.operator !== "object" || Array.isArray(value.operator)) return "운영자 연락처를 확인하세요.";
   for (const key of ["company", "representative"]) if (typeof value.operator[key] !== "string" || !value.operator[key].trim() || value.operator[key].length > 100) return "운영자 정보를 확인하세요.";
+  for (const [key, max] of Object.entries(ADDITIONAL_OPERATOR_LIMITS)) {
+    const text = value.operator[key];
+    if (text !== undefined && (typeof text !== "string" || !text.trim() || text.length > max)) return "사업자 정보의 등록번호·주소·팩스를 확인하세요.";
+  }
+  if (value.operator.registrationNumber !== undefined && !/^\d{3}-\d{2}-\d{5}$/.test(value.operator.registrationNumber.trim())) return "사업자등록번호는 000-00-00000 형식으로 입력하세요.";
   if (typeof value.operator.email !== "string" || value.operator.email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.operator.email)) return "문의 이메일 주소를 확인하세요.";
   if (!value.seo || typeof value.seo !== "object" || Array.isArray(value.seo)) return "검색·공유 안내를 확인하세요.";
   for (const key of ["title", "socialTitle"]) if (typeof value.seo[key] !== "string" || !value.seo[key].trim() || value.seo[key].length > 160) return "검색·공유 제목은 1~160자로 입력하세요.";
@@ -391,6 +409,7 @@ export async function onRequest({ request, env }) {
         const content = withCurrentPublicSummary({
           ...DEFAULT_CONTENT,
           ...stored,
+          operator: normalizeOperator(stored.operator),
           copy: { ...stored.copy, ...fixedPrivacyCopy() }
         });
         return json({ ...content, retentionDays: RETENTION_DAYS, updatedAt: row.updated_at, cmsReady: true });
@@ -428,7 +447,7 @@ export async function onRequest({ request, env }) {
     supportLinks: safeSupportLinks(content.supportLinks),
     lookup: { url: content.lookup.url.trim(), label: content.lookup.label.trim() },
     payout: { milestones: content.payout.milestones.map(x => ({ days: x.days, amount: x.amount })), maxCases: content.payout.maxCases },
-    operator: { company: content.operator.company.trim(), representative: content.operator.representative.trim(), email: content.operator.email.trim() },
+    operator: normalizeOperator(content.operator),
     seo: Object.fromEntries(["title", "description", "socialTitle", "socialDescription"].map(key => [key, content.seo[key].trim()])),
     copy: Object.fromEntries(Object.keys(DEFAULT_CONTENT.copy).map(key => [key, lockedPrivacyCopy[key] ?? normalizePublicLineBreaks(content.copy[key])]))
   };
@@ -438,10 +457,15 @@ export async function onRequest({ request, env }) {
     if (previous) {
       let current = null;
       try { current = JSON.parse(previous.content); } catch {}
+      const currentIsValid = current?.schemaVersion === 4 && !validateContent(current);
+      if (currentIsValid) {
+        // Older open admin tabs may omit new fields; retain their saved values.
+        safe.operator = normalizeOperator({ ...current.operator, ...content.operator });
+      }
       if (content.supportLinks === undefined && current?.supportLinks) {
         safe.supportLinks = safeSupportLinks(current.supportLinks);
       }
-      if (!current || current.schemaVersion !== 4 || validateContent(current)) {
+      if (!currentIsValid) {
         await env.CONTENT_DB.prepare("INSERT INTO site_content (id, content, updated_at) VALUES (?, ?, ?) ON CONFLICT(id) DO NOTHING")
           .bind("home_legacy", previous.content, previous.updated_at || updatedAt).run();
       }

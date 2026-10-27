@@ -8,9 +8,9 @@ const sitemap = await readFile(new URL("../public/sitemap.xml", import.meta.url)
 const indexNowKey = "2cc7263262b5a365ad26c37e214acd2b";
 
 test("publishes a canonical Korean title, description, and social preview metadata", () => {
-  assert.match(page, /<title>클라임유심 \| 유심 혜택 · 유심 혜택 확인 · 최대 66만원 \| 서울평가정보\(주\)<\/title>/);
+  assert.match(page, /<title>클라임유심 \| 유심 혜택 · 유심 혜택 확인 · 최대 66만원 \| 서울평가정보㈜<\/title>/);
   assert.match(page, /<link rel="canonical" href="https:\/\/climekr\.com\/"\s*\/>/);
-  assert.match(page, /name="description" content="[^\"]*서울평가정보\(주\)[^\"]*유심 혜택 확인[^\"]*최대 66만원[^\"]*"/);
+  assert.match(page, /name="description" content="[^\"]*서울평가정보㈜[^\"]*유심 혜택 확인[^\"]*최대 66만원[^\"]*"/);
   assert.doesNotMatch(page, /통신사|요금·약정|월 요금|해지 비용/);
   assert.doesNotMatch(page, /통신혜택|통신 혜택|급전|폰깡|폰테크|<script src="\/live-activity/);
   assert.doesNotMatch(page, /href="\/topics\//);
@@ -27,12 +27,12 @@ test("describes the real public service without inventing hidden FAQ or review s
     assert.ok(types.includes(type), type);
   }
   assert.ok(graph.some(item => item["@type"] === "Organization" && item.email === "help@climekr.com"));
-  assert.match(graph.find(item => item["@type"] === "WebPage").description, /서울평가정보\(주\)가 운영하는 유심 혜택 안내/);
+  assert.match(graph.find(item => item["@type"] === "WebPage").description, /서울평가정보㈜가 운영하는 유심 혜택 안내/);
   assert.match(graph.find(item => item["@type"] === "WebPage").description, /유심 혜택 확인/);
   const org = graph.find(item => item["@type"] === "Organization");
   assert.equal(org["@id"], "https://climekr.com/#organization");
   assert.equal(org.taxID, "114-81-47958");
-  assert.equal(org.address.streetAddress, "토정로 144 (상수동, 건양사빌딩)");
+  assert.equal(org.address.streetAddress, "서울시 영등포구 국회대로70길 23(여의도동, 용산빌딩)");
   assert.deepEqual(org.sameAs, ["https://blog.naver.com/climeusimguide"]);
   assert.equal(graph.find(item => item["@type"] === "Service").serviceType, "본인 명의 회선(알뜰·선불) 조건부 혜택 안내");
   assert.match(graph.find(item => item["@type"] === "Service").description, /3일·15일·30일/);
@@ -50,9 +50,9 @@ test("covers the requested climekr spellings and gives review searches useful, a
   assert.match(llms, /클라임유심 후기[\s\S]*climekr 유심 후기/);
   assert.match(llms, /클라임유심[\s\S]*climekr[\s\S]*참여 방법/);
   assert.match(llms, /개통 가능 여부 확인 버튼[\s\S]*상담창으로 사진을 보냅니다[\s\S]*유지 조건을 확인한 뒤 지급 대상이 결정됩니다/);
-  assert.match(llms, /서울평가정보\(주\)가 운영합니다/);
+  assert.match(llms, /서울평가정보㈜가 운영합니다/);
   assert.match(llms, /사업자등록번호: 114-81-47958/);
-  assert.match(llms, /몰랐던 유심 혜택을 서울평가정보\(주\) 공식 안내로 유심 혜택 확인 후/);
+  assert.match(llms, /몰랐던 유심 혜택을 서울평가정보㈜ 공식 안내로 유심 혜택 확인 후/);
   assert.match(llms, /3일·15일·30일 유지 확인 후 단계 지급 대상이 정해지며, 최대 66만원/);
   assert.doesNotMatch(llms.slice(0, 500), /통신혜택|통신 혜택|급전|폰깡|폰테크/);
   assert.doesNotMatch(llms, /\/topics\/|주제별 정보 안내/);

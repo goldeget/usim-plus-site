@@ -11,7 +11,7 @@ const userFlowCss = await readFile(new URL("../public/user-flow.css", import.met
 test("preserves the dark visual identity and exposes direct consultation without a file form", () => {
   for (const element of ['<html lang="ko">','class="hero-payouts"','class="sim-image"','id="contact"','id="heroApplyButton" href="#contact"']) assert.ok(html.includes(element), element);
   assert.doesNotMatch(html, /type="file"|id="precheckForm"|FormData|challenges\.cloudflare\.com|turnstile\.render/);
-  assert.match(html, /서울평가정보\(주\)가 운영합니다\. 사업자등록번호 114-81-47958\.<br>몰랐던 유심 혜택을/);
+  assert.match(html, /서울평가정보㈜가 운영합니다\. 사업자등록번호 114-81-47958\.<br>몰랐던 유심 혜택을/);
   assert.match(html, /name="color-scheme" content="dark"/);
 });
 
@@ -52,9 +52,9 @@ test("keeps visible centered feedback for lookup and unavailable channels", () =
 });
 
 test("shows the operator registration details requested for the current footer", () => {
-  assert.match(html,/서울평가정보\(주\)/);
-  assert.match(html,/대표자.*임동훈/);
-  for(const value of ['114-81-47958','110111-0853419','sci0001@hometax.go.kr']) assert.equal(html.includes(value),true);
+  assert.match(html,/서울평가정보㈜/);
+  assert.match(html,/대표이사.*김중근/);
+  for(const value of ['114-81-47958','제2022-서울영등포-2646호','서울시 영등포구 국회대로70길 23(여의도동, 용산빌딩)','02-3449-1678']) assert.equal(html.includes(value),true);
 });
 
 
@@ -91,8 +91,8 @@ test("admin-managed public copy covers payouts, lookup, privacy, footer, status,
 
 test("renders the homepage announcement lines and the footer without visible backslash-n", () => {
   const expectedIntro = [
-    "클라임유심(CLIME, climekr.com)은 서울평가정보(주)가 운영합니다. 사업자등록번호 114-81-47958.",
-    "몰랐던 유심 혜택을 서울평가정보(주) 공식 안내로 유심 혜택 확인 후 조건에 따라 안내합니다.",
+    "클라임유심(CLIME, climekr.com)은 서울평가정보㈜가 운영합니다. 사업자등록번호 114-81-47958.",
+    "몰랐던 유심 혜택을 서울평가정보㈜ 공식 안내로 유심 혜택 확인 후 조건에 따라 안내합니다.",
     "유심과 휴대폰은 고객이 계속 보유\u2060·사용하며, 회사는 수거하지 않습니다.",
     "3일\u2060·15일\u2060·30일 유지 확인 후 단계 지급 대상이 정해지며, 최대 66만원입니다. 상담·신청 즉시 지급이 아닙니다.",
     "상담은 텔레그램\u2060·채널톡입니다."

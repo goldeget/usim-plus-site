@@ -1,4 +1,4 @@
-import { DEFAULT_CONTENT, fixedPrivacyCopy, upgradedV3, validateContent, validateV3, withCurrentPublicSummary } from "./api/content.js";
+import { DEFAULT_CONTENT, fixedPrivacyCopy, normalizeOperator, upgradedV3, validateContent, validateV3, withCurrentPublicSummary } from "./api/content.js";
 
 const jsonLdEscape = value => JSON.stringify(value)
   .replaceAll("<", "\\u003c")
@@ -60,16 +60,19 @@ function buildStructuredData(content, meta) {
         name: "클라임유심 · USIM PLUS",
         alternateName: ["클라임유심", "CLIME", "climekr", "climekr 유심", "USIM PLUS"],
         legalName: content.operator.company,
-        taxID: "114-81-47958",
-        foundingDate: "1992-07-27",
+        taxID: content.operator.registrationNumber,
+        identifier: {
+          "@type": "PropertyValue",
+          propertyID: "통신판매업신고",
+          value: content.operator.salesRegistration
+        },
         founder: { "@type": "Person", name: content.operator.representative },
         address: {
           "@type": "PostalAddress",
-          streetAddress: "토정로 144 (상수동, 건양사빌딩)",
-          addressLocality: "마포구",
-          addressRegion: "서울특별시",
+          streetAddress: content.operator.address,
           addressCountry: "KR"
         },
+        faxNumber: content.operator.fax,
         sameAs: ["https://blog.naver.com/climeusimguide"],
         subjectOf: {
           "@type": "AboutPage",
@@ -140,7 +143,7 @@ async function currentContent(env) {
     if (!row) return DEFAULT_CONTENT;
     const stored = JSON.parse(row.content);
     if (stored.schemaVersion === 4 && !validateContent(stored)) {
-      return withCurrentPublicSummary({ ...DEFAULT_CONTENT, ...stored, copy: { ...stored.copy, ...fixedPrivacyCopy() } });
+      return withCurrentPublicSummary({ ...DEFAULT_CONTENT, ...stored, operator: normalizeOperator(stored.operator), copy: { ...stored.copy, ...fixedPrivacyCopy() } });
     }
     if (stored.schemaVersion === 3 && !validateV3(stored)) return withCurrentPublicSummary(upgradedV3(stored));
     return DEFAULT_CONTENT;
@@ -190,6 +193,15 @@ export async function onRequest(context) {
     .on('meta[name="twitter:description"]', { element(element) { element.setAttribute("content", metadata.socialDescription); } })
     .on('script[type="application/ld+json"]', { element(element) { element.setInnerContent(jsonLdEscape(metadata.structuredData), { html: true }); } })
     .on("#homeIntro", { element(element) { element.setInnerContent(multilineHtml(content.intro, content), { html: true }); } })
+    .on("#operatorCompany", { element(element) { element.setInnerContent(content.operator.company); } })
+    .on("#operatorRepresentative", { element(element) { element.setInnerContent(content.operator.representative); } })
+    .on("#operatorRepresentativeLabel", { element(element) { element.setInnerContent(content.copy.operatorRepresentativeLabel); } })
+    .on("#operatorRegistrationNumber", { element(element) { element.setInnerContent(content.operator.registrationNumber); } })
+    .on("#operatorSalesRegistration", { element(element) { element.setInnerContent(content.operator.salesRegistration); } })
+    .on("#operatorAddress", { element(element) { element.setInnerContent(content.operator.address); } })
+    .on("#operatorFax", { element(element) { element.setInnerContent(content.operator.fax); } })
+    .on("#operatorEmail", { element(element) { element.setInnerContent(content.operator.email); } })
+    .on("#operatorEmailLink", { element(element) { element.setAttribute("href", `mailto:${content.operator.email}`); } })
     .transform(response));
   if (cache) {
     const put = cache.put(key, result.clone()).catch(() => {});

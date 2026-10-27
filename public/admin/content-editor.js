@@ -43,7 +43,7 @@ const COPY_FIELDS = {
   footer: [
     ["footerBrand", "하단 브랜드 문구"], ["footerTerms", "하단 지급 안내"],
     ["operatorSummary", "운영자 정보 펼치기 문구"], ["operatorCompanyLabel", "법인명 앞 문구"],
-    ["operatorRepresentativeLabel", "대표자 앞 문구"], ["operatorEmailLabel", "이메일 앞 문구"]
+    ["operatorRepresentativeLabel", "대표이사 앞 문구"], ["operatorEmailLabel", "이메일 앞 문구"]
   ]
 };
 
@@ -301,6 +301,10 @@ function fill(data) {
   document.getElementById("maxCases").value = data.payout.maxCases;
   document.getElementById("operatorCompany").value = data.operator.company;
   document.getElementById("operatorRepresentative").value = data.operator.representative;
+  document.getElementById("operatorRegistrationNumber").value = data.operator.registrationNumber ?? "";
+  document.getElementById("operatorSalesRegistration").value = data.operator.salesRegistration ?? "";
+  document.getElementById("operatorAddress").value = data.operator.address ?? "";
+  document.getElementById("operatorFax").value = data.operator.fax ?? "";
   document.getElementById("operatorEmail").value = data.operator.email;
   renderPayoutFields(data.payout);
   const model = previewModel();
@@ -392,6 +396,10 @@ document.getElementById("editor").addEventListener("submit", async event => {
     operator: {
       company: document.getElementById("operatorCompany").value.trim(),
       representative: document.getElementById("operatorRepresentative").value.trim(),
+      registrationNumber: document.getElementById("operatorRegistrationNumber").value.trim(),
+      salesRegistration: document.getElementById("operatorSalesRegistration").value.trim(),
+      address: document.getElementById("operatorAddress").value.trim(),
+      fax: document.getElementById("operatorFax").value.trim(),
       email: document.getElementById("operatorEmail").value.trim()
     }
   };

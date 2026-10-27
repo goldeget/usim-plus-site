@@ -114,7 +114,7 @@ export function retiredInvestmentGone() {
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex">
   <title>종료된 페이지 | 클라임유심 CLIME</title>
-  <meta name="description" content="이 주소의 이전 페이지는 종료되었습니다. 현재 climekr.com의 CLIME은 서울평가정보(주)가 운영하는 유심 개통 혜택 안내입니다.">
+  <meta name="description" content="이 주소의 이전 페이지는 종료되었습니다. 현재 climekr.com의 CLIME은 서울평가정보㈜가 운영하는 유심 개통 혜택 안내입니다.">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <style>
     :root{color-scheme:dark}*{box-sizing:border-box}
@@ -132,7 +132,7 @@ export function retiredInvestmentGone() {
 <main>
   <div class="eyebrow">CLIME · 클라임유심</div>
   <h1>이 페이지는 종료되었습니다</h1>
-  <p>요청하신 주소의 이전 안내는 더 이상 제공되지 않습니다. 지금 climekr.com의 CLIME은 서울평가정보(주)가 운영하는 유심 개통 혜택 안내입니다.</p>
+  <p>요청하신 주소의 이전 안내는 더 이상 제공되지 않습니다. 지금 climekr.com의 CLIME은 서울평가정보㈜가 운영하는 유심 개통 혜택 안내입니다.</p>
   <div class="actions">
     <a href="/">유심 혜택 홈</a>
     <a class="secondary" href="/about/">CLIME 소개</a>
