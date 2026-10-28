@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 
@@ -95,7 +95,8 @@ test("renders the homepage announcement lines and the footer without visible bac
   assert.match(heroIntroHtml, /hero-intro__part/);
   assert.equal(heroIntroHtml.replace(/<\/?span[^>]*>/g, ''), expectedIntro);
   assert.doesNotMatch(html, /id="homeIntro"[^>]*>[\s\S]*?\{\{MAX_TOTAL\}\}/);
-  assert.ok(html.includes('<p class="site-footer__terms" id="footerTerms">몰랐던 유심 혜택 · 최대 66만원\n자세한 혜택·조건은 텔레그램·채널톡 상담</p>'));
+  const normalizedHtml = html.replace(/\r\n/g, "\n");
+  assert.ok(normalizedHtml.includes('<p class="site-footer__terms" id="footerTerms">몰랐던 유심 혜택 · 최대 66만원\n자세한 혜택·조건은 텔레그램·채널톡 상담</p>'));
   assert.match(html, /renderHeroIntro\(document\.getElementById\('homeIntro'\),content\.intro,content\)/);
   assert.match(html, /normalizeDisplayedLineBreaks\(expandTokens\(value,content\)\)/);
   assert.match(html, /normalizeDisplayedLineBreaks\(expandTokens\(copy\.footerTerms,content\)\)/);

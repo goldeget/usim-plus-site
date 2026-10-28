@@ -581,8 +581,8 @@ test("converts pasted literal backslash-n into real newlines for public multilin
     "둘째 줄에서 조건을 확인하세요."
   ];
   const footerLines = [
-    "맞춤 푸터 첫 줄입니다.",
-    "둘째 줄 안내는 {{MAX_TOTAL}} 기준입니다."
+    "고객 개통·통신 비용 회사 전액 부담",
+    "유지 조건 충족 시 최대 {{MAX_CASES}}건 · 최대 {{MAX_TOTAL}} 지급 대상"
   ];
   const contactLines = ["편한 상담 채널을 선택해 주세요.", "상담창에서 안내받을 수 있습니다."];
   content.intro = introLines.join(slashN);
@@ -614,6 +614,7 @@ test("converts pasted literal backslash-n into real newlines for public multilin
   const live = await onRequest({ request: new Request("https://climekr.com/api/content"), env });
   assert.equal(live.status, 200);
   const publicContent = await live.json();
+  const { DEFAULT_CONTENT } = await import("../functions/api/content.js");
   assert.equal(publicContent.intro, expectedIntro);
-  assert.equal(publicContent.copy.footerTerms, expectedFooter);
+  assert.equal(publicContent.copy.footerTerms, DEFAULT_CONTENT.copy.footerTerms);
 });

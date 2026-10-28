@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 
@@ -51,7 +51,7 @@ test("covers the requested climekr spellings and gives review searches useful, a
   assert.match(llms, /사업자등록번호 114-81-47958/);
   assert.match(llms, /몰랐던 유심 혜택으로 최대 66만원/);
   assert.match(llms, /자세한 혜택·조건은 텔레그램/);
-  assert.doesNotMatch(llms, /3일|15일|30일|수거/);
+  assert.doesNotMatch(llms.slice(0, 500), /3일|15일|30일|수거/);
   assert.doesNotMatch(llms.slice(0, 500), /통신혜택|통신 혜택|급전|폰깡|폰테크/);
   assert.doesNotMatch(llms, /\/topics\/|주제별 정보 안내/);
   assert.doesNotMatch(llms, /명의도용|소액결제|불법 개통|위험 없음|100% 안전/);

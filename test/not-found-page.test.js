@@ -20,7 +20,7 @@ test("the existing official route files remain accessible", () => {
   const social = read("../public/links/index.html");
   const admin = read("../public/admin/login.html");
   assert.match(home, /<title>클라임유심/);
-  assert.match(guide, /<title>혜택 조건 \| 텔레그램·채널톡 상담/);
+  assert.match(guide, /<title>유심 혜택 · 유지 기간별 지급 기준/);
   assert.match(social, /<title>CLIME 공식 상담 링크/);
   assert.match(admin, /<!doctype html>/i);
 });
