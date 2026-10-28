@@ -387,6 +387,23 @@ test("migrates stored homepage SEO still using loan-first search and social desc
   assert.doesNotMatch(data.seo.description, /대출이 아닌|3일·15일·30일/);
 });
 
+test("moves one-line operator phrases onto designed line breaks", async () => {
+  const { withCurrentPublicSummary, DEFAULT_CONTENT } = await import("../functions/api/content.js");
+  const stored = structuredClone(DEFAULT_CONTENT);
+  stored.headline = "몰랐던 유심 혜택 · 최대 {{MAX_TOTAL}}";
+  stored.copy = {
+    ...stored.copy,
+    operatorSummary: "사업자 정보 · 사업자등록번호 114-81-47958",
+    payoutNote: "지급은 유지 조건 확인 후 결정됩니다. 상담·신청 즉시 지급이 아닙니다."
+  };
+  const next = withCurrentPublicSummary(stored);
+  assert.equal(next.headline, "몰랐던 유심 혜택\n최대 {{MAX_TOTAL}}");
+  assert.equal(next.copy.operatorSummary, "사업자 정보\n사업자등록번호 114-81-47958");
+  assert.equal(next.copy.payoutNote, "지급은 유지 조건 확인 후 결정됩니다.\n상담·신청 즉시 지급이 아닙니다.");
+  assert.match(next.intro, /3일·15일·30일/);
+  assert.match(next.intro, /\{\{MAX_TOTAL\}\}/);
+});
+
 test("keeps legacy editor content out of the current homepage while showing versioned defaults", async () => {
   const { onRequest } = await import("../functions/api/content.js");
   const cloudflare = createMemoryCloudflare();

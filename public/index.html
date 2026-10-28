@@ -624,7 +624,7 @@
     .operator-info {flex:0 0 100%;color:#a8bcc9;font-size:12px;text-align:left}
     .operator-info summary {display:inline-block;cursor:pointer;color:#c9dbe5;text-decoration:underline;text-underline-offset:3px}
     .operator-info span {display:block;margin-top:4px}
-    .operator-info__details {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 24px;margin-top:12px;line-height:1.7;overflow-wrap:anywhere}
+    .operator-info__details {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 24px;margin-top:12px;line-height:1.7;overflow-wrap:break-word;word-break:keep-all;line-break:strict}
     .operator-info__details p {margin:0}
     .operator-info__details p strong {color:#c9dbe5;font-weight:650}
     .operator-info__details span {display:inline;margin:0}
@@ -651,7 +651,7 @@
     .consultation-panel .channel:not([aria-disabled=true]){opacity:1;cursor:pointer}
     .consultation-panel .channel[aria-disabled=true]{opacity:.6;cursor:not-allowed}
     .consultation-panel .channel[aria-disabled=true]:hover{transform:none}
-    .channel-readiness{margin:18px 0 0;font-size:14px;line-height:1.75;color:#c4d6e2;word-break:keep-all;overflow-wrap:anywhere}
+    .channel-readiness{margin:18px 0 0;font-size:14px;line-height:1.75;color:#c4d6e2;word-break:keep-all;overflow-wrap:break-word;line-break:strict}
     .consultation-safety{margin:18px 0 12px;font-size:14px;color:#a8bfce}
     .consultation-email{display:inline-block;font-size:15px;color:#79f4df;line-height:1.8;overflow-wrap:anywhere;max-width:100%}
     .legacy-help{color:#b5cbd5;font-size:15px;margin-bottom:20px}
@@ -666,9 +666,9 @@
     .operator-funded-costs strong{display:block;margin-bottom:4px;color:#aafde5;font-size:18px;word-break:keep-all}
     .operator-funded-costs span{display:block;color:#d0e7e9;word-break:keep-all;line-break:strict}
   </style>
-  <link rel="stylesheet" href="/user-flow.css?v=20261025-business-footer-1" />
+  <link rel="stylesheet" href="/user-flow.css?v=20261029-phrase-1" />
   <link rel="stylesheet" href="/premium.css?v=20261027-premium-1" />
-  <link rel="stylesheet" href="/copy-typography.css?v=20261028-copy-1" />
+  <link rel="stylesheet" href="/copy-typography.css?v=20261029-phrase-1" />
   <script>document.documentElement.classList.add('js');</script>
 </head>
 <body>
@@ -680,16 +680,16 @@
     <main id="main">
       <section class="hero" id="top" aria-labelledby="hero-title">
         <div class="hero-copy">
-          <div class="eyebrow"><span class="point" aria-hidden="true"></span><span id="heroEyebrow">서울평가정보㈜ 공식 안내 · 유심 혜택</span></div>
-          <h1 id="hero-title">몰랐던 유심 혜택 · 최대 66만원</h1>
+          <div class="eyebrow"><span class="point" aria-hidden="true"></span><span id="heroEyebrow">서울평가정보㈜ 공식 안내<span class="only-pc"> · </span><br class="mo">유심 혜택</span></div>
+          <h1 id="hero-title">몰랐던 유심 혜택<br>최대 66만원</h1>
           <p class="hero-intro" id="homeIntro">몰랐던 유심 혜택으로 최대 66만원.<br>3일·15일·30일 유지 확인 후 단계 지급 대상이 정해집니다.<br>자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다.</p>
           <div class="hero-payouts" id="payoutConditions" aria-label="혜택 안내" hidden></div>
           <div class="hero-actions">
             <a class="cta-main" id="eligibilityButton" href="https://www.credit.or.kr/credit/search" target="_blank" rel="noopener noreferrer">개통 가능 여부 확인 <span aria-hidden="true">↗</span></a>
             <a class="cta-secondary" id="heroApplyButton" href="#contact">텔레그램·채널톡 상담하기</a>
           </div>
-          <p class="payout-note" id="payoutNote">지급은 유지 조건 확인 후 결정됩니다. 상담·신청 즉시 지급이 아닙니다.</p>
-          <p class="hero-trust" id="heroTrust">서울평가정보㈜ 공식 안내 · 사업자등록번호 114-81-47958</p>
+          <p class="payout-note" id="payoutNote">지급은 유지 조건 확인 후 결정됩니다.<br>상담·신청 즉시 지급이 아닙니다.</p>
+          <p class="hero-trust" id="heroTrust">서울평가정보㈜ 공식 안내<br>사업자등록번호 <span class="copy-nowrap">114-81-47958</span></p>
         </div>
         <div class="hero-art" aria-label="유심 카드 그래픽">
           <div class="art-grid" aria-hidden="true"></div><div class="holo-ring ring-one" aria-hidden="true"></div><div class="holo-ring ring-two" aria-hidden="true"></div>
@@ -732,7 +732,7 @@
         </section>
         <section class="lookup-view" id="statusView" aria-label="기존 홈페이지 접수 조회">
           <details class="lookup-details" id="statusLookupDetails">
-            <summary class="lookup-disclosure" id="statusDisclosure">이전에 홈페이지에서 신청했어요 · 기존 접수 조회</summary>
+            <summary class="lookup-disclosure" id="statusDisclosure">이전에 홈페이지에서 신청했어요<span class="only-pc"> · </span><br class="mo">기존 접수 조회</summary>
             <section class="lookup-panel" aria-labelledby="lookupTitle">
               <h3 id="lookupTitle">기존 접수 정보 입력</h3><p class="legacy-help" id="statusHelp">예전에 홈페이지에 사진을 제출한 신청만 조회할 수 있습니다.
 상담창으로 보낸 사진과 진행 상황은 같은 상담창에서 확인해 주세요.</p>
@@ -776,7 +776,7 @@
       <p class="site-footer__terms" id="footerTerms">몰랐던 유심 혜택 · 최대 66만원
 자세한 혜택·조건은 텔레그램·채널톡 상담</p>
       <details class="operator-info">
-        <summary id="operatorSummary">사업자 정보 · 사업자등록번호 114-81-47958</summary>
+        <summary id="operatorSummary">사업자 정보<br>사업자등록번호 <span class="copy-nowrap">114-81-47958</span></summary>
         <div class="operator-info__details">
           <p><strong id="operatorCompanyLabel">법인명</strong>: <span id="operatorCompany">서울평가정보㈜</span></p>
           <p><strong id="operatorRepresentativeLabel">대표이사</strong>: <span id="operatorRepresentative">김중근</span></p>
@@ -854,7 +854,8 @@
         document.getElementById('channelReadiness').textContent=expandTokens(ready?copy.channelReady:copy.channelMissing,{...currentContent,operator});
         const emailLink=document.getElementById('consultationEmail');
         emailLink.href=`mailto:${operator.email}`;document.getElementById('emailAddress').textContent=operator.email;
-        document.getElementById('privacyOperator').textContent=`${operator.company} · 개인정보 책임자 ${operator.representative} · 문의 ${operator.email}`;
+        const privacyOperator=document.getElementById('privacyOperator');
+        privacyOperator.replaceChildren(document.createTextNode(operator.company),document.createElement('br'),document.createTextNode(`개인정보 책임자 ${operator.representative}`),document.createElement('br'),document.createTextNode(`문의 ${operator.email}`));
         glueVisibleText(document.body);
       }
       document.querySelectorAll('[data-contact]').forEach(anchor=>anchor.addEventListener('click',event=>{
@@ -879,6 +880,26 @@
       }
       function normalizeDisplayedLineBreaks(value){
         return glueSeparators(String(value).replaceAll("\\n", "\n"));
+      }
+      function renderViewportPhrases(element,value){
+        const lines=String(value||'').replaceAll('\\n','\n').split(/\r?\n/).map(line=>line.trim()).filter(Boolean);
+        element.replaceChildren();
+        lines.forEach((line,lineIndex)=>{
+          if(lineIndex)element.append(document.createElement('br'));
+          const parts=line.split(/[\u00A0 ]·[\u00A0 ]/).map(part=>part.trim()).filter(Boolean);
+          parts.forEach((part,partIndex)=>{
+            if(partIndex){
+              const sep=document.createElement('span');
+              sep.className='only-pc';
+              sep.textContent=' · ';
+              element.append(sep);
+              const br=document.createElement('br');
+              br.className='mo';
+              element.append(br);
+            }
+            element.append(document.createTextNode(part));
+          });
+        });
       }
       function renderLineBreaks(element,value,content){
         const lines=normalizeDisplayedLineBreaks(expandTokens(value,content)).split(/\r?\n/).map(line=>line.trim()).filter(Boolean);
@@ -913,9 +934,9 @@
         renderHeroIntro(document.getElementById('homeIntro'),content.intro,content);
         document.getElementById('brandSub').textContent=copy.brandSub;
         document.getElementById('headerHelp').textContent=copy.headerHelp;
-        document.getElementById('heroEyebrow').textContent=copy.heroEyebrow;
+        renderViewportPhrases(document.getElementById('heroEyebrow'),copy.heroEyebrow);
         document.getElementById('heroApplyButton').textContent=copy.heroApplyLabel;
-        document.getElementById('payoutNote').textContent=copy.payoutNote;
+        renderLineBreaks(document.getElementById('payoutNote'),copy.payoutNote,content);
         renderPayout(content);
         const lookupButton=document.getElementById('eligibilityButton');
         lookupButton.href=content.lookup.url;
@@ -929,7 +950,7 @@
         document.getElementById('contactIntro').textContent=copy.contactIntro;
         document.getElementById('consultationSafety').textContent=copy.consultationSafety;
         document.getElementById('emailLinkLabel').textContent=copy.emailLinkLabel;
-        document.getElementById('statusDisclosure').textContent=copy.statusDisclosure;
+        renderViewportPhrases(document.getElementById('statusDisclosure'),copy.statusDisclosure);
         document.getElementById('lookupTitle').textContent=copy.statusTitle;
         document.getElementById('statusHelp').textContent=copy.statusHelp;
         document.getElementById('statusIdLabel').firstChild.textContent=copy.statusIdLabel;
@@ -940,7 +961,7 @@
         document.getElementById('footerBrand').textContent=copy.footerBrand;
         document.getElementById('footerTerms').textContent=normalizeDisplayedLineBreaks(expandTokens(copy.footerTerms,content));
         document.getElementById('footerYear').textContent=String(new Date().getFullYear());
-        document.getElementById('operatorSummary').textContent=copy.operatorSummary;
+        renderLineBreaks(document.getElementById('operatorSummary'),copy.operatorSummary,content);
         document.getElementById('operatorCompanyLabel').textContent=copy.operatorCompanyLabel;
         document.getElementById('operatorRepresentativeLabel').textContent=copy.operatorRepresentativeLabel;
         document.getElementById('operatorEmailLabel').textContent=copy.operatorEmailLabel;

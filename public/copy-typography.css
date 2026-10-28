@@ -1,5 +1,5 @@
 /* Shared Korean copy typography (Toss/Kakao-style line breaks).
-   Linked from every public page. No word-joiner hacks: breaks are semantic.
+   Linked from every public page. Breaks are semantic, never mid-syllable.
 
    Markup:
      <div class="copy-stack">            multi-line block (brand / operator / biz reg / benefit / hold / channels)
@@ -8,7 +8,11 @@
      </div>
      .prose-ko                            long-form body copy with readable measure
      .copy-chunk / .copy-part             inline on desktop, stacked + balanced on mobile
-     .copy-nowrap                         keep a short token (e.g. "3일·15일·30일") together
+     .copy-nowrap                         keep a short token (number, ㈜ phrase, "3일·15일·30일") together
+     <br>                                 phrase break on both desktop and mobile
+     <br class="pc">                      desktop-only break (Toss br.pc)
+     <br class="mo">                      mobile-only break (Toss br.mo / KakaoBank br_mo)
+     <span class="only-pc"> · </span>     separator shown only when the mobile break is hidden
 */
 
 :root { --copy-measure: 38em; --copy-measure-mobile: 24em; }
@@ -25,7 +29,8 @@
   :where(h1, h2, h3) { text-wrap: balance; }
 }
 :where(h1, h2, h3, h4) { word-break: keep-all; overflow-wrap: break-word; line-break: strict; }
-:where(a, code) { overflow-wrap: anywhere; }
+:where(a) { overflow-wrap: break-word; }
+:where(code) { overflow-wrap: anywhere; }
 
 /* Readable measure: full width on mobile, capped on desktop. */
 .prose-ko, .copy-stack { max-width: min(100%, var(--copy-measure)); word-break: keep-all; overflow-wrap: break-word; line-break: strict; letter-spacing: -0.01em; }
@@ -51,9 +56,28 @@
   @media (max-width: 760px) { .copy-part, .copy-chunk:not(:has(.copy-part)) { text-wrap: balance; } }
 }
 
-/* Footer / meta lines: each <br>-separated line becomes its own readable line. */
-.copy-footer-lines { display: grid; gap: .3em; }
-.copy-footer-lines > span { display: block; }
+/* Footer / meta lines: each child is one legal phrase (company, registration, contact). */
+.copy-footer-lines { display: grid; gap: .3em; margin: .35em 0 .15em; }
+.copy-footer-lines > span { display: block; word-break: keep-all; overflow-wrap: break-word; line-break: strict; }
+
+/* Toss br.pc / KakaoBank br_mo. Hide only; a shown <br> keeps the native line break.
+   Do not set display on the visible break — .hero-intro already hides its own <br> on mobile. */
+@media (min-width: 761px) {
+  br.mo, .only-mo { display: none; }
+}
+@media (max-width: 760px) {
+  br.pc, .only-pc { display: none; }
+}
+
+/* Badges and the operator summary are flex/inline-flex; a <br> inside them would
+   become a flex item instead of a line break. Block formatting makes the phrase break real. */
+.badge { display: inline-block; max-width: 100%; white-space: normal; vertical-align: top; line-height: 1.45; }
+#operatorSummary { display: block; width: max-content; max-width: 100%; line-height: 1.55; text-align: left; word-break: keep-all; overflow-wrap: break-word; line-break: strict; }
+#operatorSummary .copy-nowrap,
+p.hero-trust span { display: inline; white-space: nowrap; }
+p.hero-trust { display: block; max-width: 36em; margin: 14px 0 0; font-size: 13px; line-height: 1.65; word-break: keep-all; overflow-wrap: break-word; line-break: strict; }
+nav.footer-nav { display: block; margin-top: .45em; line-height: 1.7; }
+nav.footer-nav a { white-space: nowrap; }
 
 /* Existing hero/guide chunk classes share the same behavior. */
 .hero-intro__chunk, .hero-intro__part, .lead__chunk, .lead__part { display: inline; }

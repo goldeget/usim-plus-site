@@ -31,7 +31,8 @@ test("all public pages use Korean language metadata and preserve meaningful text
 test("home page stays slim: one hero hook, no duplicate step sections", () => {
   const visible = home.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
     .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, "");
-  assert.match(visible, /<h1[^>]*>몰랐던 유심 혜택 · 최대 66만원<\/h1>/);
+  assert.match(visible, /<h1[^>]*>몰랐던 유심 혜택<br>최대 66만원<\/h1>/);
+  assert.match(visible, /id="heroTrust">서울평가정보㈜ 공식 안내<br>사업자등록번호 <span class="copy-nowrap">114-81-47958<\/span>/);
   assert.doesNotMatch(visible, /유심 혜택 확인 순서|문의부터 완료까지|class="steps-grid"|id="quickFlow"|class="empathy"|class="process"/);
   assert.doesNotMatch(visible, /class="guide-disclosure"|신청 방법|신청 순서/);
   assert.match(visible, /id="payoutNote"/);
@@ -73,7 +74,7 @@ test("structure page stays short: unified hook, payout rows, no legacy explainer
 });
 
 test("guide page stays short: unified hero hook, milestone rows, no card explainer blocks", () => {
-  assert.match(guide, /몰랐던 유심 혜택으로 <strong>최대 66만원<\/strong>/);
+  assert.match(guide, /몰랐던 유심 혜택으로<br><strong>최대 66만원<\/strong>/);
   assert.match(guide, /data-milestones/);
   assert.match(guide, /data-total/);
   assert.match(guide, /footer-hook/);
@@ -118,4 +119,26 @@ test("SEO retains original service information without fabricated ratings or bot
   assert.match(home, /rel="canonical" href="https:\/\/climekr\.com\/"/);
   assert.match(home, /id="payoutConditions"/);
   assert.match(home, /id="contact"/);
+});
+
+test("phrase breaks keep operator lines and milestone numbers intact", () => {
+  const typography = read("../public/copy-typography.css");
+  assert.match(typography, /@media \(min-width: 761px\) \{\s*br\.mo, \.only-mo \{ display: none; \}/);
+  assert.match(typography, /@media \(max-width: 760px\) \{\s*br\.pc, \.only-pc \{ display: none; \}/);
+  assert.match(typography, /word-break:\s*keep-all/);
+  assert.doesNotMatch(typography, /word-break:\s*break-all/);
+  for (const [name, html] of [["about", about], ["guide", guide], ["structure", structure], ["links", links], ["404", notFound]]) {
+    assert.match(html, /class="copy-footer-lines"/, name);
+    assert.match(html, /사업자등록번호 <span class="copy-nowrap">114-81-47958<\/span>/, name);
+    assert.match(html, /<br class="mo">/, name);
+  }
+  assert.match(home, /id="eligibilityButton"[^>]*href="https:\/\/www\.credit\.or\.kr\/credit\/search"/);
+  assert.match(home, /id="contactLookupLink"/);
+  assert.match(structure, /3일 유지 확인[\s\S]*5만원/);
+  assert.match(structure, /15일 유지 확인[\s\S]*7만원/);
+  assert.match(structure, /30일 유지 확인[\s\S]*10만원/);
+  assert.match(structure, /22만원 \/ 건/);
+  assert.match(structure, /총 최대 66만원/);
+  assert.match(guide, /3일 유지 확인[\s\S]*5만원 지급 대상/);
+  assert.match(guide, /최대 66만원/);
 });

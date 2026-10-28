@@ -33,7 +33,7 @@ export async function onRequest(context) {
   const rows = payout.milestones.map(stage =>
     `<div class="row"><span>${stage.days}일 유지 단계</span><strong>${currency(stage.amount)} 지급 대상</strong></div>`
   ).join("") +
-    `<div class="row"><span>1건 전체 조건 충족 · 최대 ${payout.maxCases}건</span><strong><em>${currency(perCase)} / 건</em></strong></div>`;
+    `<div class="row"><span>1건 전체 조건 충족<span class="only-pc"> · </span><br class="mo">최대 ${payout.maxCases}건</span><strong><em>${currency(perCase)} / 건</em></strong></div>`;
 
   const headers = new Headers(response.headers);
   headers.set("Cache-Control", "public, max-age=0, s-maxage=15");
