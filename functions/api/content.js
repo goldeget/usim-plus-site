@@ -2,20 +2,20 @@ import { isAdminRequest, readBoundedRequestBody } from "../_lib/applications.js"
 
 export const DEFAULT_CONTENT = {
   "schemaVersion": 4,
-  "headline": "몰랐던 유심 혜택,\n유심 혜택 확인부터",
+  "headline": "몰랐던 유심 혜택 · 최대 {{MAX_TOTAL}}",
   "intro": "몰랐던 유심 혜택으로 최대 {{MAX_TOTAL}}.\n3일·15일·30일 유지 확인 후 단계 지급 대상이 정해집니다.\n자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다.",
   "checklist": [
     {
-      "title": "1. 개통 가능 여부 확인",
-      "body": "조회 사이트에서 본인 명의 개통 가능 여부를 확인하세요."
+      "title": "상담 채널 연결",
+      "body": "텔레그램·채널톡 중 편한 채널로 혜택·조건을 문의하세요."
     },
     {
-      "title": "2. 사진 보내고 상담하기",
-      "body": "조회 결과를 캡처해 텔레그램·채널톡 상담창으로 보내 주세요."
+      "title": "조건 안내",
+      "body": "운영자가 같은 대화에서 유지 조건과 지급 기준을 안내합니다."
     },
     {
-      "title": "3. 조건 확인 후 안내",
-      "body": "운영자가 같은 대화에서 다음 절차를 안내합니다. 유지 조건 확인 후 지급 대상이 결정됩니다."
+      "title": "유지 확인",
+      "body": "유지 조건 확인 후 지급 대상이 결정됩니다. 상담 직후 지급이 아닙니다."
     }
   ],
   "supportLinks": {
@@ -25,7 +25,7 @@ export const DEFAULT_CONTENT = {
   },
   "lookup": {
     "url": "https://www.credit.or.kr/credit/search",
-    "label": "개통 가능 여부 확인"
+    "label": "신용정보원 가입내역 조회"
   },
   "payout": {
     "milestones": [
@@ -54,15 +54,15 @@ export const DEFAULT_CONTENT = {
     "brandSub": "유심 혜택 · 간편 참여 안내",
     "headerHelp": "상담하기",
     "heroEyebrow": "서울평가정보㈜ 공식 안내 · 유심 혜택",
-    "heroApplyLabel": "사진 심사 신청하기",
+    "heroApplyLabel": "텔레그램·채널톡 상담하기",
     "heroChatNote": "이미 조회하셨다면 상담창에 사진을 보내 주세요.",
     "payoutNote": "지급은 유지 조건 확인 후 결정됩니다. 상담·신청 즉시 지급이 아닙니다.",
     "payoutAriaLabel": "유지 기간별 지급 금액",
     "contactKicker": "운영자와 직접 상담",
-    "contactTitle": "사진 보내고 상담하기",
+    "contactTitle": "상담하기",
     "contactIntro": "편한 상담 채널을 선택해 주세요.\n조회 사진 전송부터 결과 안내까지, 같은 대화에서 이어집니다.",
-    "contactLookupPrompt": "아직 조회하지 않으셨나요?",
-    "contactLookupLabel": "개통 가능 여부 확인",
+    "contactLookupPrompt": "참고용 조회",
+    "contactLookupLabel": "신용정보원 가입내역 조회",
     "channelReady": "상담창이 새 창으로 열립니다. 사진을 보낸 상담창에서 답변을 확인해 주세요.",
     "channelMissing": "현재 연결된 상담 채널이 없습니다. {{EMAIL}}으로 문의해 주세요.",
     "channelStart": "상담 시작하기",

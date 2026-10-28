@@ -39,36 +39,31 @@
     h1 strong{background:linear-gradient(100deg,#8bf2ff,#a5bbff);color:transparent;background-clip:text}
     .lead{color:#c6d4e7;font-size:clamp(16px,2.15vw,20px);line-height:1.84;max-width:780px;margin:0 0 29px}
     .notice{border:1px solid #65b4db73;border-radius:15px;background:#0b2f506b;padding:18px 20px;max-width:860px;line-height:1.7;font-size:15px}
-    .notice strong{color:#c1f9fe}.actions{display:flex;gap:13px;flex-wrap:wrap;margin-top:27px}
+    .actions{display:flex;gap:13px;flex-wrap:wrap;margin-top:27px}
     .button{display:inline-flex;align-items:center;justify-content:center;gap:10px;text-decoration:none;text-align:center;border-radius:14px;padding:17px 25px;font-size:16px;font-weight:800;min-height:56px;transition:transform .15s,box-shadow .15s}
     .button:hover{transform:translateY(-2px)}.button.primary{color:#06203e;background:linear-gradient(115deg,#6af0f1,#57aaff);box-shadow:0 8px 40px #1568b550}
     .button.secondary{background:#142e51;border:1px solid #52789c;color:#eef7ff}.button.neutral{background:#fff;color:#082548}
     .micro{color:var(--muted);font-size:12px;line-height:1.7;margin:16px 0 0}
     .section{padding:28px 0 55px}.section h2{margin:0 0 12px;font-size:clamp(27px,3.5vw,38px);letter-spacing:-.04em}
     .section-head{max-width:770px;color:var(--muted);line-height:1.75;margin-bottom:22px}
-    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:17px}.card{border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(145deg,#132a4d,#0b1b36);padding:25px;box-shadow:0 13px 32px #0000001f}
-    .card-number{display:inline-flex;align-items:center;justify-content:center;background:#2e81b936;border:1px solid #4a99cd60;color:var(--cyan);width:36px;height:36px;border-radius:12px;font-size:14px;font-weight:900}
-    h3{font-size:20px;margin:17px 0 11px;letter-spacing:-.028em}.card p,.card li{line-height:1.75;color:#bfd0e3;font-size:15px}.card p{margin:0}
     .band{border:1px solid #42628c;border-radius:24px;background:linear-gradient(125deg,#133d63,#112446 78%);padding:29px;display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}
     .band strong{font-size:clamp(22px,4vw,33px);display:block;margin:9px 0;color:#ccfaff}.band small{color:#bed0e4}.band .label{font-size:13px;color:#a6c6e8;font-weight:800}
     .rows{border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-top:17px;background:#091b34}
     .row{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:17px 24px;border-bottom:1px solid var(--line)}
     .row:last-child{border:0}.row span{color:#c2d3e9}.row strong{text-align:right}.row em{font-style:normal;color:#96eef0}
     .end{margin:25px auto 76px;padding:36px;border-radius:27px;text-align:center;background:linear-gradient(135deg,#123e6d,#0c2549);border:1px solid #397db680}
-    .end h2{font-size:32px;letter-spacing:-.04em;margin:0 0 14px}.end p{max-width:690px;margin:0 auto 22px;color:#c6d6e9;line-height:1.7}
-    .end .actions{justify-content:center;margin-top:0}
+    .end h2{font-size:32px;letter-spacing:-.04em;margin:0 0 22px}.end .actions{justify-content:center;margin-top:0}
     footer{border-top:1px solid #ffffff24;padding:25px 0 38px;color:#a4b4ca;font-size:13px;line-height:1.8}
     footer a{text-decoration:underline;text-underline-offset:3px}
-    @media(max-width:760px){.header-inner{min-height:66px}.logo{font-size:18px}nav{gap:13px}nav a{font-size:12px}.hero{padding:55px 0 34px}
-      .grid{grid-template-columns:1fr}.card{padding:22px}.band{padding:24px}.row{padding:16px}.wrap{padding:0 18px}
+    @media(max-width:760px){.header-inner{min-height:66px}.logo{font-size:18px}nav{gap:13px}nav a{font-size:12px}.hero{padding:55px 0 34px}.band{padding:24px}.row{padding:16px}.wrap{padding:0 18px}
       .actions{flex-direction:column}.actions .button{width:100%}.end{width:calc(100% - 36px);padding:25px;margin-bottom:46px}.end h2{font-size:25px}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.button{transition:none}}
 
     /* Korean word wrapping and legible rhythm without extra UI components. */
     html{word-break:keep-all;line-break:strict}
     h1,h2,h3,.button,nav a,footer{word-break:keep-all;line-break:strict;overflow-wrap:break-word}
-    .lead,.notice,.section-head,.card p,.micro,.end p,footer{word-break:keep-all;overflow-wrap:break-word;line-break:strict}
-    @supports (text-wrap:pretty){.lead,.notice,.section-head,.card p,.end p,footer{text-wrap:pretty}}
+    .lead,.notice,.section-head,.micro,footer{word-break:keep-all;overflow-wrap:break-word;line-break:strict}
+    @supports (text-wrap:pretty){.lead,.notice,.section-head,footer{text-wrap:pretty}}
     .lead__chunk,.lead__part{display:inline}
     @media(max-width:760px){.lead{max-width:24em}.lead br{display:none}.lead__chunk,.lead__part{display:block}.lead__chunk+.lead__chunk{margin-top:.15em}.lead>br+.lead__chunk{margin-top:.55em}}
     @supports(text-wrap:balance){@media(max-width:760px){.lead__part{text-wrap:balance}}}
@@ -88,7 +83,7 @@
       <div class="badge">CLIME 혜택 조건</div>
       <h1>몰랐던 유심 혜택으로 <strong>최대 66만원</strong></h1>
       <p class="lead">몰랐던 유심 혜택으로 최대 66만원 지급 가능, 확인하세요.<br>자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다.</p>
-      <div class="notice"><strong>고객 부담금 0원 · 관련 비용 회사 부담</strong>은 운영사가 안내한 현재 조건입니다. 유심 개통·회선 계약의 명의와 관리 책임, 회사 비용 부담 범위를 서면으로 확인하세요. 혜택은 상담이나 개통 직후 지급되는 것이 아니며 회선 유지 조건에 따라 결정됩니다.</div>
+      <div class="notice">혜택은 상담·신청 직후 지급되지 않습니다. <a href="/disclosures/">고지·안내</a></div>
       <div class="actions">
         <a class="button primary" data-channel="telegram" href="https://t.me/climeusim" target="_blank" rel="noopener noreferrer" aria-label="텔레그램에서 유심 개통 혜택 상담 열기">텔레그램으로 조건 문의 ↗</a>
         <a class="button secondary" data-channel="channeltalk" href="https://climeusim.channel.io" target="_blank" rel="noopener noreferrer" aria-label="채널톡에서 유심 개통 혜택 상담 열기">채널톡으로 조건 문의 ↗</a>
@@ -96,19 +91,9 @@
       <p class="micro">상담 전 주민등록번호, 신분증 전체 이미지, 휴대전화 인증번호, 비밀번호는 보내지 마세요.</p>
     </section>
 
-    <section class="section wrap" aria-labelledby="difference-title">
-      <h2 id="difference-title">지급은 이렇게 결정됩니다</h2>
-      <p class="section-head">실제 계약과 지급 조건을 먼저 확인하세요.</p>
-      <div class="grid">
-        <article class="card"><span class="card-number">01</span><h3>본인 명의 회선 개통</h3><p>통신사의 본인 명의 회선 개통 가능 여부와 개통 혜택 적용 조건을 확인하는 방식입니다.</p></article>
-        <article class="card"><span class="card-number">02</span><h3>당일 지급을 보장하지 않습니다</h3><p>일정 기간 회선 유지 및 신청 내용 확인 후에 단계별 지급 대상이 결정됩니다. 상담 신청 자체가 지급 승인은 아닙니다.</p></article>
-        <article class="card"><span class="card-number">03</span><h3>고객 비용 0원 · 회사 전액 부담</h3><p>운영사가 개통·통신 및 회선 유지와 관련된 비용을 전액 부담한다고 안내합니다. 신청 전에 실제 통신사 계약서상 요금 청구 주체와 회사 부담 범위, 본인 명의 회선의 책임을 확인하세요.</p></article>
-      </div>
-    </section>
-
     <section class="section wrap" id="criteria" aria-labelledby="criteria-title">
-      <h2 id="criteria-title">현재 지급 기준은 어떻게 확인하나요?</h2>
-      <p class="section-head">운영자가 관리하는 실제 안내 데이터를 자동으로 불러옵니다. 정보가 조회되지 않으면 상담 시 최신 지급표와 회선별 적용 조건을 요청하세요.</p>
+      <h2 id="criteria-title">유지 기간별 지급 안내</h2>
+      <p class="section-head">운영사 안내 기준입니다. 자세한 조건은 상담과 <a href="/disclosures/">고지·안내</a>에서 확인하세요.</p>
       <div class="band">
         <div><span class="label">전체 조건 충족 시 최대 혜택 · 고객 비용 0원(회사 부담)</span><strong data-total aria-live="polite">최신 조건 확인 중</strong><small>유지 조건 확인 후 지급 대상 결정 · 신청자별 상이</small></div>
         <a class="button neutral" href="#contact">상담 채널 보기 ↘</a>
@@ -122,8 +107,7 @@
 
 
     <section class="end wrap" id="contact" aria-labelledby="contact-title">
-      <h2 id="contact-title">참여 전에, 실제 조건부터 확인하세요</h2>
-      <p>상담만으로 지급이 확정되지는 않습니다. 본인 명의 가입 가능 여부, 통신요금, 혜택 지급 기준을 모두 확인한 뒤 결정할 수 있습니다.</p>
+      <h2 id="contact-title">조건 확인 후 상담하세요</h2>
       <div class="actions">
         <a class="button primary" data-channel="telegram" href="https://t.me/climeusim" target="_blank" rel="noopener noreferrer">텔레그램 상담 ↗</a>
         <a class="button secondary" data-channel="channeltalk" href="https://climeusim.channel.io" target="_blank" rel="noopener noreferrer">채널톡 상담 ↗</a>

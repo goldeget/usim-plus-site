@@ -60,11 +60,11 @@ test("shows the operator registration details requested for the current footer",
 
 test("preserves the original query destination separately from photo conversations", () => {
   const links=[...html.matchAll(/<a\b[^>]*href="https:\/\/www\.credit\.or\.kr\/credit\/search"[^>]*>/g)];
-  assert.equal(links.length,3,"query links remain in hero, contact section and instructions");
+  assert.equal(links.length,1,"optional lookup link remains in hero only");
   for(const link of links){assert.match(link[0],/target="_blank"/);assert.match(link[0],/rel="noopener noreferrer"/);}
   assert.match(html, /id="eligibilityButton"/);
-  assert.match(html, /id="heroApplyButton" href="#contact">사진 심사 신청하기/);
-  assert.doesNotMatch(html,/type="file"/);
+  assert.match(html, /id="heroApplyButton" href="#contact">텔레그램·채널톡 상담하기/);
+  assert.doesNotMatch(html,/type="file"|id="contactLookupLink"/);
 });
 
 test("admin-managed public copy covers payouts, lookup, privacy, footer, status, and search metadata", () => {
@@ -111,7 +111,7 @@ test("removes public FAQ and the invisible FAQ schema without removing consultat
   assert.doesNotMatch(html, /<section class="faq"|id="faq-title"|class="faq-list"/);
   assert.doesNotMatch(html, /FAQPage|faqSchema|faqList/);
   assert.doesNotMatch(userFlowCss, /\.faq(?:\s|\.|\{|-)/);
-  assert.match(html, /class="guide-disclosure"/);
+  assert.doesNotMatch(html, /class="guide-disclosure"|신청 방법|신청 순서|유심 혜택 확인 순서/);
   assert.match(html, /id="contact"/);
   assert.match(html, /id="payoutConditions"/);
   assert.match(contentApi, /faqs: content\.faqs\.map/);
