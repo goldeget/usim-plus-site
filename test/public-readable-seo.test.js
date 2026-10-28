@@ -37,6 +37,15 @@ test("public Korean multiline copy and mobile readable text use native line wrap
   assert.match(links, /\.subtitle,\.disclosure,\.detail,small\{word-break:keep-all/);
 });
 
+test("structure page stays short: unified hook, payout rows, no legacy explainer blocks", () => {
+  assert.match(structure, /몰랐던 유심 혜택으로 최대 66만원/);
+  assert.match(structure, /3일 유지 확인[\s\S]*5만원 지급 대상/);
+  assert.match(structure, /총 최대 66만원/);
+  assert.match(structure, /id="operator-title"/);
+  assert.match(structure, /김중근/);
+  assert.doesNotMatch(structure, /개통 대상 회선|사업 구조 한눈에 보기|CLIME 이용 원칙|돈은 어디서 나오는가|혜택의 재원|유심의 귀속/);
+});
+
 test("visible FAQs are removed on main and guide, and not re-created by JavaScript or schema", () => {
   assert.doesNotMatch(home, /<section class="faq"|id="faq-title"|faqList|faqSchema|FAQPage/);
   assert.doesNotMatch(guide, /<section class="faq"|id="faq-title"|FAQPage/);
