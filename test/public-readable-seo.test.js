@@ -28,12 +28,37 @@ test("all public pages use Korean language metadata and preserve meaningful text
   assert.doesNotMatch(visible, /\{\{MAX_TOTAL\}\}/);
 });
 
+test("home page stays slim: one hero hook, no duplicate step sections", () => {
+  const visible = home.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, "");
+  assert.match(visible, /<h1[^>]*>몰랐던 유심 혜택 · 최대 66만원<\/h1>/);
+  assert.doesNotMatch(visible, /유심 혜택 확인 순서|문의부터 완료까지|class="steps-grid"|id="quickFlow"|class="empathy"|class="process"/);
+  assert.doesNotMatch(visible, /class="guide-disclosure"|신청 방법|신청 순서/);
+  assert.match(visible, /id="payoutNote"/);
+  assert.match(visible, /class="hero-trust"/);
+});
+
+const RETENTION_MARKETING = /유심은 고객 보유|본인 명의로 계속|계속 보유·사용|유심을 수거|유심·단말은 고객 보유|고객이 계속 보유/;
+
+test("public HTML avoids legacy USIM retention marketing hooks", () => {
+  const pages = [
+    ["home", home],
+    ["guide", guide],
+    ["structure", structure],
+    ["about", about],
+  ];
+  for (const [name, html] of pages) {
+    const visible = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "").replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, "");
+    assert.doesNotMatch(visible, RETENTION_MARKETING, name);
+  }
+});
+
 test("public Korean multiline copy and mobile readable text use native line wrapping", () => {
   assert.match(css, /white-space:\s*pre-line;\s*line-height:\s*1\.85/);
   assert.match(css, /\.hero-intro,\.consultation-intro,\.section-intro,\.step p,\.legacy-help,\.site-footer__terms\{/);
   assert.match(css, /word-break:keep-all/);
   assert.match(css, /overflow-wrap:break-word/);
-  assert.match(guide, /\.lead,\.notice,\.section-head,\.card p,\.micro,\.end p,footer\{word-break:keep-all/);
+  assert.match(guide, /\.lead,\.notice,\.section-head,\.micro,footer\{word-break:keep-all/);
   assert.match(guide, /@media\(max-width:420px\)\{\.row\{flex-wrap:wrap/);
   assert.match(links, /\.subtitle,\.disclosure,\.detail,small\{word-break:keep-all/);
 });
@@ -45,6 +70,16 @@ test("structure page stays short: unified hook, payout rows, no legacy explainer
   assert.match(structure, /id="operator-title"/);
   assert.match(structure, /김중근/);
   assert.doesNotMatch(structure, /개통 대상 회선|사업 구조 한눈에 보기|CLIME 이용 원칙|돈은 어디서 나오는가|혜택의 재원|유심의 귀속/);
+});
+
+test("guide page stays short: unified hero hook, milestone rows, no card explainer blocks", () => {
+  assert.match(guide, /몰랐던 유심 혜택으로 <strong>최대 66만원<\/strong>/);
+  assert.match(guide, /data-milestones/);
+  assert.match(guide, /data-total/);
+  assert.match(guide, /footer-hook/);
+  assert.match(guide, /href="\/disclosures\/">고지·안내/);
+  assert.doesNotMatch(guide, /지급은 이렇게 결정됩니다|difference-title|<span class="card-number">01<\/span>/);
+  assert.doesNotMatch(guide, /현재 지급 기준은 어떻게 확인하나요/);
 });
 
 test("about page stays short: unified hero hook, operator table, guide link, no card explainer blocks", () => {

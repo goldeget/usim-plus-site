@@ -14,14 +14,23 @@ import { reviewAssetsEnv } from "../test-support/review-assets.js";
 
 const dataRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../public/reviews/data");
 
+/** LF-only compare so CI (Linux) and local (Windows) agree on mirrored modules. */
+function normalizeModuleSource(source) {
+  return source.replace(/^\uFEFF/, "").replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+}
+
 async function readJson(pathname) {
   const rel = pathname.replace(/^\/reviews\/data\//, "");
   return JSON.parse(await readFile(path.join(dataRoot, rel), "utf8"));
 }
 
 test("browser review dates stay identical to the function module", async () => {
-  const server = await readFile(new URL("../functions/_lib/review-dates.js", import.meta.url), "utf8");
-  const browser = await readFile(new URL("../public/reviews/review-dates.js", import.meta.url), "utf8");
+  const server = normalizeModuleSource(
+    await readFile(new URL("../functions/_lib/review-dates.js", import.meta.url), "utf8")
+  );
+  const browser = normalizeModuleSource(
+    await readFile(new URL("../public/reviews/review-dates.js", import.meta.url), "utf8")
+  );
   assert.equal(browser, server);
 });
 

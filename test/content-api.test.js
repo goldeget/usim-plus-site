@@ -403,10 +403,9 @@ test("keeps legacy editor content out of the current homepage while showing vers
 
   assert.equal(data.schemaVersion, 4);
   assert.equal(data.legacyContent, true);
-  assert.equal(data.headline, "몰랐던 유심 혜택,\n유심 혜택 확인부터");
+  assert.equal(data.headline, DEFAULT_CONTENT.headline);
   assert.equal(data.intro, DEFAULT_CONTENT.intro);
-  assert.deepEqual(data.checklist.map(step => step.title), ["1. 개통 가능 여부 확인", "2. 사진 보내고 상담하기", "3. 조건 확인 후 안내"]);
-  assert.match(data.checklist[0].body, /조회 사이트/);
+  assert.deepEqual(data.checklist.map(step => step.title), DEFAULT_CONTENT.checklist.map(step => step.title));
   assert.equal(data.checklist[1].body, DEFAULT_CONTENT.checklist[1].body);
   assert.match(data.faqs.find(item => item.question === "상담하거나 사진을 보내면 바로 지급되나요?").answer, /신청 내용과 유지 조건 확인/);
   assert.doesNotMatch(JSON.stringify(data), /통신사|요금·약정|월 요금|해지 비용|사진 사전 검토/);

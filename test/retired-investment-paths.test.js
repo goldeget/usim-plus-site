@@ -78,6 +78,14 @@ test("topics static assets are not redirected with retired topic HTML pages", as
   assert.equal(current.nextCalls, 1);
 });
 
+test("legacy root topics.css URL redirects to the static asset path", async () => {
+  const current = context("https://climekr.com/topics.css");
+  const response = await onRequest(current.value);
+  assert.equal(response.status, 301);
+  assert.equal(response.headers.get("location"), "https://climekr.com/topics/topics.css");
+  assert.equal(current.nextCalls, 0);
+});
+
 test("www and bare about URLs resolve to the canonical USIM introduction", async () => {
   const www = context("https://www.climekr.com/about");
   const wwwResponse = await onRequest(www.value);

@@ -13,8 +13,14 @@ test('benefits guide has unique self-canonical and describes actual service', ()
   assert.match(guide, /rel="canonical" href="https:\/\/climekr\.com\/guide\/"/);
   assert.match(guide, /<h1>몰랐던 유심 혜택으로 <strong>최대 66만원<\/strong><\/h1>/);
   assert.doesNotMatch(guide.slice(0, guide.indexOf('class="notice"')), /자금이 급할 때|급전|폰깡|통신혜택/);
-  assert.match(guide, /혜택은 상담이나 개통 직후 지급되는 것이 아니며/);
-  assert.match(guide, /고객 비용 0원\u00A0· 회사 전액 부담/);
+  assert.match(guide, /혜택은 상담·신청 직후 지급되지 않습니다/);
+  assert.match(guide, /href="\/disclosures\/">고지·안내/);
+});
+
+test('benefits guide stays short: milestone grid without numbered card explainer blocks', () => {
+  assert.doesNotMatch(guide, /지급은 이렇게 결정됩니다|difference-title|<span class="card-number">01<\/span>/);
+  assert.match(guide, /유지 기간별 지급 안내/);
+  assert.match(guide, /footer-hook/);
 });
 
 test('benefits guide displays payout amounts from the current public API', () => {

@@ -2,6 +2,18 @@
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 
+const topicPages = [
+  "../public/topics/index.html",
+  "../public/topics/urgent-money/index.html",
+  "../public/topics/loan-rejected/index.html",
+  "../public/topics/small-loan-alternatives/index.html",
+  "../public/topics/business/index.html",
+  "../public/topics/housewife/index.html",
+  "../public/topics/student/index.html",
+  "../public/topics/worker/index.html",
+  "../public/topics/usim-benefit/index.html"
+];
+
 const html = await readFile(new URL("../public/index.html", import.meta.url), "utf8");
 const adminContent = await readFile(new URL("../public/admin/content.html", import.meta.url), "utf8");
 const adminContentEditor = await readFile(new URL("../public/admin/content-editor.js", import.meta.url), "utf8");
@@ -60,11 +72,25 @@ test("shows the operator registration details requested for the current footer",
 
 test("preserves the original query destination separately from photo conversations", () => {
   const links=[...html.matchAll(/<a\b[^>]*href="https:\/\/www\.credit\.or\.kr\/credit\/search"[^>]*>/g)];
-  assert.equal(links.length,1,"optional lookup link remains in hero only");
+  assert.equal(links.length,2,"lookup stays on the hero button and the contact panel");
   for(const link of links){assert.match(link[0],/target="_blank"/);assert.match(link[0],/rel="noopener noreferrer"/);}
-  assert.match(html, /id="eligibilityButton"/);
+  assert.match(html, /id="eligibilityButton"[^>]*>개통 가능 여부 확인/);
+  assert.match(html, /id="contactLookupLink"/);
   assert.match(html, /id="heroApplyButton" href="#contact">텔레그램·채널톡 상담하기/);
-  assert.doesNotMatch(html,/type="file"|id="contactLookupLink"/);
+  assert.match(html, /contactLookupLink\.href=content\.lookup\.url/);
+  assert.doesNotMatch(html,/type="file"/);
+});
+
+test("topic pages keep the benefit lookup and the 66만 consult story", async () => {
+  const banned = /대출|급전|폰깡|대포폰|스미싱|보이스피싱|수거|고객 보유|폰테크/;
+  for (const file of topicPages) {
+    const page = await readFile(new URL(file, import.meta.url), "utf8");
+    assert.doesNotMatch(page, banned, file);
+    assert.match(page, /몰랐던 유심 혜택으로<br><strong>최대 66만원<\/strong>/, file);
+    assert.match(page, /https:\/\/www\.credit\.or\.kr\/credit\/search/, file);
+    assert.match(page, /텔레그램/, file);
+    assert.match(page, /climeusim\.channel\.io/, file);
+  }
 });
 
 test("admin-managed public copy covers payouts, lookup, privacy, footer, status, and search metadata", () => {

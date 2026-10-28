@@ -66,6 +66,9 @@ export async function onRequest(context) {
     return Response.redirect(canonicalUrl, 308);
   }
   if (isRetiredInvestmentPath(url.pathname)) return retiredInvestmentGone();
+  if (host !== ADMIN_HOST && url.pathname === "/topics.css") {
+    return Response.redirect(new URL("/topics/topics.css", url.origin), 301);
+  }
   const topicsTarget = host !== ADMIN_HOST ? topicsRedirectPath(url.pathname) : null;
   if (topicsTarget) return Response.redirect(new URL(topicsTarget, url.origin), 301);
   if (url.pathname === "/about" || url.pathname === "/about/index.html") {
