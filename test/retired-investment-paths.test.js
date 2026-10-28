@@ -70,6 +70,13 @@ test("retired /topics pages redirect with 301 to the product pages", async () =>
   }
 });
 
+test("topics static assets are not redirected with retired topic HTML pages", async () => {
+  const current = context("https://climekr.com/topics/topics.css");
+  const response = await onRequest(current.value);
+  assert.equal(response.status, 200);
+  assert.equal(current.nextCalls, 1);
+});
+
 test("www and bare about URLs resolve to the canonical USIM introduction", async () => {
   const www = context("https://www.climekr.com/about");
   const wwwResponse = await onRequest(www.value);

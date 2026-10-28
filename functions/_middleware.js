@@ -11,6 +11,8 @@ const TOPICS_STRUCTURE_PATHS = new Set(["/topics/usim-benefit", "/topics/usim-be
 // Retired situational pages (급전·대출·직군) are replaced by the product pages.
 function topicsRedirectPath(pathname) {
   if (pathname !== "/topics" && !pathname.startsWith("/topics/")) return null;
+  // Static assets (e.g. topics.css for about/structure/disclosures) must not 301 to HTML pages.
+  if (/^\/topics\/[^/]+\.(css|js|png|jpe?g|svg|webp|woff2?|ico)$/i.test(pathname)) return null;
   return TOPICS_STRUCTURE_PATHS.has(pathname) ? "/structure/" : "/guide/";
 }
 
