@@ -177,6 +177,32 @@ test("renders preserved v3 copy into raw metadata and matches the public content
   }
 });
 
+test("migrates legacy loan-first CMS SEO into homepage HTML metadata at the edge", async () => {
+  const { onRequest } = await import("../functions/index.js");
+  const { DEFAULT_CONTENT } = await import("../functions/api/content.js");
+  const stored = structuredClone(DEFAULT_CONTENT);
+  stored.seo.description = "클라임유심(CLIME)은 대출이 아닌 유심 개통 혜택 서비스입니다. 고객 개통·통신 관련 비용은 회사 전액 부담. 3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상. 텔레그램·채널톡 상담.";
+  stored.seo.socialDescription = "고객 개통·통신 비용 회사 전액 부담. 대출이 아닌 유심 개통 혜택이며 회선 유지 조건 충족 시 최대 66만원 지급 대상. 텔레그램·채널톡 상담.";
+  const expectedDescription = DEFAULT_CONTENT.seo.description.replace("{{MAX_TOTAL}}", "66만원");
+  const expectedSocial = DEFAULT_CONTENT.seo.socialDescription.replace("{{MAX_TOTAL}}", "66만원");
+  const previous = globalThis.HTMLRewriter;
+  globalThis.HTMLRewriter = TestHTMLRewriter;
+  try {
+    const html = await (await onRequest({
+      request: new Request("https://climekr.com/"),
+      env: createEnv(stored),
+      next: async () => new Response(page, { headers: { "Content-Type": "text/html; charset=utf-8" } })
+    })).text();
+    assert.match(html, new RegExp(`name="description"[^>]*content="${escapeAttribute(expectedDescription).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"`));
+    assert.match(html, new RegExp(`property="og:description"[^>]*content="${escapeAttribute(expectedSocial).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"`));
+    assert.doesNotMatch(html, /대출이 아닌/);
+    assert.match(html, /몰랐던 유심 혜택/);
+  } finally {
+    if (previous === undefined) delete globalThis.HTMLRewriter;
+    else globalThis.HTMLRewriter = previous;
+  }
+});
+
 test("uses safe defaults when CMS content is unavailable", async () => {
   const { onRequest } = await import("../functions/index.js");
   const previous = globalThis.HTMLRewriter;
