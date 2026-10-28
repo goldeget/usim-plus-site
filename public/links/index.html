@@ -10,12 +10,18 @@
   <meta name="description" content="클라임유심(CLIME)은 서울평가정보㈜가 운영합니다. 몰랐던 유심 혜택으로 최대 66만원. 자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다.">
   <meta name="robots" content="noindex,follow">
   <style>
-  :root{color-scheme:dark}*{box-sizing:border-box}body{min-height:100vh;margin:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 3%,#2668a8,transparent 53%),linear-gradient(#081b3c,#071126);font-family:Pretendard,"Apple SD Gothic Neo",system-ui,-apple-system,sans-serif;color:#f5faff}
-  main{width:min(100%,500px);padding:35px 22px 48px;text-align:center}.logo{width:75px;height:75px;border-radius:23px;background:linear-gradient(135deg,#67eff8,#307dff);display:grid;place-items:center;font-size:46px;font-weight:900;color:#0b2c54;margin:0 auto 19px;box-shadow:0 10px 38px #087ddd60}
+  :root{color-scheme:dark}*{box-sizing:border-box}body{min-height:100vh;margin:0;display:flex;flex-direction:column;background:radial-gradient(circle at 50% 3%,#2668a8,transparent 53%),linear-gradient(#081b3c,#071126);font-family:Pretendard,"Apple SD Gothic Neo",system-ui,-apple-system,sans-serif;color:#f5faff}
+  main{flex:1;width:100%;display:flex;align-items:center;justify-content:center}
+  main>div{width:min(100%,500px);padding:35px 22px 48px;text-align:center}.logo{width:75px;height:75px;border-radius:23px;background:linear-gradient(135deg,#67eff8,#307dff);display:grid;place-items:center;font-size:46px;font-weight:900;color:#0b2c54;margin:0 auto 19px;box-shadow:0 10px 38px #087ddd60}
+  footer{border-top:1px solid #ffffff24;padding:22px 18px 32px;color:#a4b4ca;font-size:12px;line-height:1.8;text-align:center;max-width:520px;margin:0 auto;width:100%}
+  footer a{color:#c9daf0;text-decoration:underline;text-underline-offset:3px}
+  .footer-hook{margin:0 0 10px;color:#d8e8f8;font-size:13px;line-height:1.75}
+  .footer-nav{margin-top:8px}
+  .footer-nav a{text-decoration:none}.footer-nav a:hover{text-decoration:underline}
   h1{font-size:29px;margin:0 0 12px;letter-spacing:.18em}.subtitle{font-size:15px;color:#ccdef1;line-height:1.75;margin:0 0 26px}.disclosure{font-size:13px;color:#b5d2e8;background:#102f52;border:1px solid #548db2;border-radius:14px;text-align:left;padding:14px 17px;line-height:1.7;margin-bottom:23px}
   a{color:inherit}.link{display:flex;align-items:center;gap:14px;margin-bottom:12px;padding:20px;border:1px solid #4a8ed0;border-radius:17px;background:linear-gradient(120deg,#103865,#122850);text-decoration:none;text-align:left;min-height:78px;box-shadow:0 12px 27px #0004;transition:transform .2s}.link:hover{transform:translateY(-2px)}.icon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:#2b79bb;color:#fff;font-size:22px;font-weight:900;flex-shrink:0}.title{font-weight:850;font-size:17px}.detail{font-size:12px;line-height:1.7;color:#c9daf0}.arrow{margin-left:auto;color:#8ceafc;font-size:22px}
   .home{border-color:#425673;background:#0c213e}small{display:block;color:#b4c8db;font-size:12px;line-height:1.85;margin-top:22px}small a{text-underline-offset:3px}a:focus-visible{outline:3px solid #7bf8eb;outline-offset:4px}
-  @media(max-width:390px){main{padding:25px 18px}.link{padding:16px}.title{font-size:16px}}
+  @media(max-width:390px){main>div{padding:25px 18px}.link{padding:16px}.title{font-size:16px}}
   @media(prefers-reduced-motion:reduce){.link{transition:none}}
 
   /* Korean readability on narrow mobile screens. */
@@ -25,7 +31,7 @@
   </style>
   <link rel="stylesheet" href="/copy-typography.css?v=20261028-copy-1" />
 </head>
-<body><main>
+<body><main><div>
   <div class="logo" aria-hidden="true">C</div>
   <h1>CLIME</h1>
   <p class="subtitle copy-stack"><span class="copy-line">몰랐던 유심 혜택으로 최대 66만원</span><span class="copy-line">자세한 혜택·조건은 텔레그램·채널톡 상담</span></p>
@@ -36,7 +42,8 @@
     <span class="icon" aria-hidden="true">톡</span><span><span class="title">채널톡 상담</span><br><span class="detail">비용·지급 기준 확인</span></span><span class="arrow" aria-hidden="true">→</span></a>
   <a class="link home" href="/guide/"><span class="icon" aria-hidden="true">i</span><span><span class="title">혜택 조건 자세히 보기</span><br><span class="detail">유지 기간과 지급 시점</span></span><span class="arrow" aria-hidden="true">→</span></a>
   <small>주민등록번호·인증번호·비밀번호·신분증 전체 사진을 상담창으로 보내지 마세요.<br><a href="/">CLIME 공식 홈페이지</a></small>
-</main>
+</div></main>
+<footer><p class="footer-hook">몰랐던 유심 혜택 · 최대 66만원<br>자세한 혜택·조건은 텔레그램·채널톡 상담</p>서울평가정보㈜ · 클라임유심 CLIME · 사업자등록번호 114-81-47958 · <a href="mailto:help@climekr.com">help@climekr.com</a><br><nav class="footer-nav" aria-label="사이트 안내"><a href="/about/">CLIME 소개</a> · <a href="/structure/">사업 구조</a> · <a href="/guide/">혜택 조건</a> · <a href="/disclosures/">고지·안내</a></nav></footer>
 <script>
 (async function(){
  try{

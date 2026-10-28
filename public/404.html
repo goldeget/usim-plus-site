@@ -13,8 +13,14 @@
   <meta name="description" content="요청한 페이지는 존재하지 않거나 제공이 종료되었습니다. 현재 CLIME 유심 개통 혜택 및 상담 페이지를 확인하세요.">
   <style>
     :root{color-scheme:dark}*{box-sizing:border-box}
-    body{margin:0;min-height:100vh;background:radial-gradient(ellipse 65% 35% at 50% 0%,#1f487d,transparent),linear-gradient(#0a1b35,#060e1c);font-family:Pretendard,"Apple SD Gothic Neo",system-ui,-apple-system,sans-serif;color:#eff6ff;display:grid;place-items:center}
-    main{width:min(90%,520px);padding:48px 22px;text-align:center}
+    body{margin:0;min-height:100vh;background:radial-gradient(ellipse 65% 35% at 50% 0%,#1f487d,transparent),linear-gradient(#0a1b35,#060e1c);font-family:Pretendard,"Apple SD Gothic Neo",system-ui,-apple-system,sans-serif;color:#eff6ff;display:flex;flex-direction:column}
+    main{flex:1;width:100%;display:grid;place-items:center}
+    main>div{width:min(90%,520px);padding:48px 22px;text-align:center}
+    footer{border-top:1px solid #ffffff24;padding:22px 18px 32px;color:#a4b4ca;font-size:12px;line-height:1.8;text-align:center;max-width:520px;margin:0 auto;width:100%}
+    footer a{color:#c9daf0;text-decoration:underline;text-underline-offset:3px}
+    .footer-hook{margin:0 0 10px;color:#d8e8f8;font-size:13px;line-height:1.75}
+    .footer-nav{margin-top:8px}
+    .footer-nav a{text-decoration:none}.footer-nav a:hover{text-decoration:underline}
     .mark{width:80px;height:80px;border:1px solid #5178a5;border-radius:25px;background:#112d56;margin:0 auto 25px;display:grid;place-items:center;font-size:35px;font-weight:900;color:#83d6ff}
     .eyebrow{font-weight:800;color:#83d6ff;font-size:14px;letter-spacing:.16em}
     h1,p,a,small{word-break:keep-all;line-break:strict;overflow-wrap:break-word}
@@ -29,7 +35,7 @@
   <link rel="stylesheet" href="/copy-typography.css?v=20261028-copy-1" />
 </head>
 <body>
-<main>
+<main><div>
   <div class="mark" aria-hidden="true">404</div>
   <div class="eyebrow">CLIME · 페이지 안내</div>
   <h1>페이지를 찾을 수 없습니다</h1>
@@ -40,6 +46,7 @@
     <a href="/guide/" class="secondary">혜택 조건 살펴보기</a>
   </div>
   <small>CLIME · climekr.com</small>
-</main>
+</div></main>
+<footer><p class="footer-hook">몰랐던 유심 혜택 · 최대 66만원<br>자세한 혜택·조건은 텔레그램·채널톡 상담</p>서울평가정보㈜ · 클라임유심 CLIME · 사업자등록번호 114-81-47958 · <a href="mailto:help@climekr.com">help@climekr.com</a><br><nav class="footer-nav" aria-label="사이트 안내"><a href="/about/">CLIME 소개</a> · <a href="/structure/">사업 구조</a> · <a href="/guide/">혜택 조건</a> · <a href="/disclosures/">고지·안내</a></nav></footer>
 </body>
 </html>
