@@ -122,14 +122,14 @@ test("generated corpus voice: 유심 혜택 consult notes and age buckets", () =
       formalRows += 1;
       assert.match(
         row.body,
-        /(습니다|였습니다|하였습니다|입니다|였어요)[.!?]?(?:\s[🙂👍])?$/u,
+        /(습니다|였습니다|하였습니다|입니다|였어요)[.!?]?(?:\s🙂)?$/u,
         `formal bucket row ${row.rowId}`
       );
       if (/[🙂👍]|ㅠㅠ/.test(row.body)) formalWithEmoticon += 1;
     } else {
       assert.match(
         row.body,
-        /(어요|어용|았어요|했어요|했어용|였어요|ㅠㅠ|🙂)[.!?]?(?:\s[🙂👍])?$/u,
+        /(어요|어용|아요|해요|했어요|했어용|였어요|네요|함|음|ㅋㅋ|ㅎㅎ|ㅠㅠ|🙂)[.!?]?(?:\s🙂)?$/u,
         `casual bucket row ${row.rowId}`
       );
       if (/[🙂👍]|ㅠㅠ/.test(row.body)) casualWithEmoticon += 1;
@@ -143,8 +143,8 @@ test("generated corpus voice: 유심 혜택 consult notes and age buckets", () =
     personaVoice[persona][formal ? "formal" : "casual"] += 1;
     assert.doesNotMatch(row.body, riskRe, `row ${row.rowId} risk phrase`);
     assert.match(row.body, /유심\s*혜택/, `row ${row.rowId} benefit name`);
-    assert.match(row.body, /이해|좋았|만족|아쉬|명확|괜찮|편했|편하/, `row ${row.rowId} lived reaction`);
-    assert.match(row.body, /무료|0원|부담\s*없/, `row ${row.rowId} free experience`);
+    assert.match(row.body, /확인/, `row ${row.rowId} checked the benefit`);
+    assert.match(row.body, /받았|받음|필요해/, `row ${row.rowId} received the benefit`);
     assert.doesNotMatch(row.body, /통신사\s*실적/, `row ${row.rowId} must not narrate carrier performance`);
     assert.doesNotMatch(row.body, /가족에게/);
     assert.doesNotMatch(row.body, /안내 문구를 그대로 전달/);

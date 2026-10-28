@@ -410,6 +410,10 @@ function openingTemplate(persona, aClause, bNoun, cPredicate, variant) {
   return `${aClause} ${topic}${particle} 보고 ${cPredicate}`;
 }
 
+export function benefitNoun(persona, b) {
+  return OPEN_B[persona][b];
+}
+
 export function openingLine(persona, formal, a, b, c) {
   const aClause = OPEN_A[persona][a];
   const bNoun = OPEN_B[persona][b];
