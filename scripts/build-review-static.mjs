@@ -22,7 +22,8 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../publ
 const listDir = path.join(root, "list");
 const bodyDir = path.join(root, "bodies");
 
-const rows = generateReviewRows(REVIEW_SLOT_COUNT);
+const corpusEnd = process.env.REVIEW_CORPUS_END ? new Date(process.env.REVIEW_CORPUS_END) : new Date();
+const rows = generateReviewRows(REVIEW_SLOT_COUNT, corpusEnd);
 if (rows.length !== REVIEW_SLOT_COUNT) {
   throw new Error(`expected ${REVIEW_SLOT_COUNT} rows, got ${rows.length}`);
 }

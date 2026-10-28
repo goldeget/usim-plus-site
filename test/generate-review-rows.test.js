@@ -90,11 +90,12 @@ test("generated review corpus has unique dedup hashes and realistic bounds", asy
   assert.ok(new Date(newest.publishedAt) > new Date(oldest.publishedAt), "row 10000 is newer than row 1");
 });
 
-test("generated corpus voice: USIM PLUS 급전 platform theme and age buckets", () => {
+test("generated corpus voice: 유심 혜택 consult notes and age buckets", () => {
   const rows = generateReviewRows(10_000);
   const themeRe =
-    /급전|융통|유심\s*플랫폼|USIM|0원|담당자|지급|사진|캡처|회사|자금|대출|생활비|막힌|부담|무료|수수료|불법\s*대출|자격/;
-  const platformRe = /유심\s*플랫폼|USIM\s*PLUS|0원|담당자|사진|캡처/;
+    /유심\s*혜택|0원|담당자|사진|캡처|회사|부담|무료|수수료|안내|조건/;
+  const platformRe = /유심\s*혜택|사진|캡처/;
+  const riskRe = /대출|급전|보이스피싱|스미싱|내구제|대포폰|폰깡|선불폰|유심\s*개통|신용대출|당일\s*지급|카드론|기대출|사기/;
   const telecomOnlyLead = /^[^.]{0,80}(번호\s*이동|신규\s*개통)\s*관련으로만/;
   let themed = 0;
   let platformThemed = 0;
@@ -121,17 +122,17 @@ test("generated corpus voice: USIM PLUS 급전 platform theme and age buckets", 
       formalRows += 1;
       assert.match(
         row.body,
-        /(습니다|였습니다|하였습니다|입니다|였어요)[.!?]?(?:\s[🙂😅👍])?$/u,
+        /(습니다|였습니다|하였습니다|입니다|였어요)[.!?]?(?:\s[🙂👍])?$/u,
         `formal bucket row ${row.rowId}`
       );
-      if (/[🙂😅👍]|ㅠㅠ/.test(row.body)) formalWithEmoticon += 1;
+      if (/[🙂👍]|ㅠㅠ/.test(row.body)) formalWithEmoticon += 1;
     } else {
       assert.match(
         row.body,
-        /(어요|았어요|했어요|였어요|ㅠㅠ|🙂|😅)[.!?]?(?:\s[🙂😅👍])?$/u,
+        /(어요|어용|았어요|했어요|했어용|였어요|ㅠㅠ|🙂)[.!?]?(?:\s[🙂👍])?$/u,
         `casual bucket row ${row.rowId}`
       );
-      if (/[🙂😅👍]|ㅠㅠ/.test(row.body)) casualWithEmoticon += 1;
+      if (/[🙂👍]|ㅠㅠ/.test(row.body)) casualWithEmoticon += 1;
     }
     const persona = personaForIndex(idx);
     const found = personaLabels.filter(label => (
@@ -140,8 +141,9 @@ test("generated corpus voice: USIM PLUS 급전 platform theme and age buckets", 
     assert.deepEqual(found, [persona], `row ${row.rowId} persona`);
     personaCounts[persona] += 1;
     personaVoice[persona][formal ? "formal" : "casual"] += 1;
-    assert.match(row.body, /대출/, `row ${row.rowId} loan rejection`);
-    assert.match(row.body, /해결|풀렸|마련|급한 불|숨통|덕분|한숨|넘겼/, `row ${row.rowId} funds arranged`);
+    assert.doesNotMatch(row.body, riskRe, `row ${row.rowId} risk phrase`);
+    assert.match(row.body, /유심\s*혜택/, `row ${row.rowId} benefit name`);
+    assert.match(row.body, /이해|좋았|만족|아쉬|명확|괜찮|편했|편하/, `row ${row.rowId} lived reaction`);
     assert.match(row.body, /무료|0원|부담\s*없/, `row ${row.rowId} free experience`);
     assert.doesNotMatch(row.body, /통신사\s*실적/, `row ${row.rowId} must not narrate carrier performance`);
     assert.doesNotMatch(row.body, /가족에게/);
@@ -154,7 +156,7 @@ test("generated corpus voice: USIM PLUS 급전 platform theme and age buckets", 
     }
     if (persona === "사업자") assert.match(row.body, /사업자금/);
   }
-  assert.ok(themed >= 9_500, `expected most rows to mention 급전/platform theme, got ${themed}`);
+  assert.ok(themed >= 9_500, `expected most rows to mention the benefit consult, got ${themed}`);
   assert.ok(
     platformThemed >= 9_000,
     `expected most rows to mention USIM PLUS platform pillars, got ${platformThemed}`

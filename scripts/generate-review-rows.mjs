@@ -1,9 +1,8 @@
 /**
  * Deterministic Korean review corpus.
  * Each row is one person's situation: 주부, 직장인, 대학생, 사업자, 육아맘, 경단녀.
- * They needed money, a loan did not come through, and this USIM platform arranged it.
- * The company runs the procedure for carrier and company performance, the customer
- * sends photo captures, and the customer pays 0원.
+ * Each row is one person's note about 유심 혜택: a short consult, a photo step,
+ * the company handling the procedure, and a customer cost of 0원.
  *
  * Calendar: every 년/월/일 in a body is that row's publishedAt in Asia/Seoul.
  * Time of day follows the same instant. No "N분경" stamps.
@@ -59,7 +58,7 @@ function dedupHashesForBody(body) {
 }
 
 /** Bump when corpus voice changes so seed cache files regenerate. */
-export const REVIEW_CORPUS_VERSION = "usim-natural-voices-2026-10-27";
+export const REVIEW_CORPUS_VERSION = "usim-benefit-voices-2026-10-29";
 
 const CHANNELS = ["channeltalk", "telegram", "line"];
 const STAGES = ["3", "15", "30", "consult"];
@@ -219,7 +218,7 @@ function maybeEmoticon(i, bucket, rating) {
   if (isFormalAgeBucket(bucket) || rating < 4) return "";
   const gate = bucket === "20s" ? 5 : bucket === "30s" ? 4 : 3;
   if ((i * 13 + 5) % 11 >= gate) return "";
-  const set = rating === 5 ? ["🙂", "👍"] : ["😅", "🙂"];
+  const set = ["🙂", "👍"];
   return " " + set[(i * 7) % set.length];
 }
 
@@ -244,13 +243,13 @@ export function reviewSentenceSkeleton(text, displayName) {
 }
 
 const BEATS = [
-  [/유심\s*플랫폼|USIM\s*PLUS/, "platform"],
+  [/유심\s*혜택/, "platform"],
   [/사진|캡처/, "photo"],
   [/회사|그쪽|담당자/, "company"],
   [/절차|진행|처리/, "procedure"],
   [/0원/, "zero"],
-  [/무료|수수료|부담|공짜|한 푼|비용/, "free"],
-  [/해결|풀렸|마련|급한 불|숨통|덕분|한숨|넘겼/, "solved"]
+  [/무료|수수료|부담|한 푼|비용/, "free"],
+  [/이해|좋았|만족|아쉬|명확|괜찮|편했|편하/, "solved"]
 ];
 
 function missingBeats(body) {
@@ -334,7 +333,7 @@ export function publishedAtForIndex(i, count, end) {
   return new Date(start.getTime() + (span * (i - 1)) / (count - 1));
 }
 
-export function generateReviewRows(count = 10_000) {
+export function generateReviewRows(count = 10_000, end = new Date()) {
   if (count === 10_000) ensureOpenings();
   const rows = [];
   const bodySha = new Set();
@@ -342,7 +341,6 @@ export function generateReviewRows(count = 10_000) {
   const snippetSha = new Set();
   const snippetPrefix60 = new Set();
   const skeletons = new Set();
-  const end = new Date();
   for (let i = 1; i <= count; i += 1) {
     const channel = CHANNELS[(i * 7) % CHANNELS.length];
     const stage = STAGES[(i * 11) % STAGES.length];
@@ -352,7 +350,11 @@ export function generateReviewRows(count = 10_000) {
     const formal = isFormalAgeBucket(ageBucketForIndex(i));
     const displayName = displayNameFor(i, rng, formal);
     const publishedAt = publishedAtForIndex(i, count, end).toISOString();
-    const body = composeBody(i, rating, channel, publishedAt);
+    let body = composeBody(i, rating, channel, publishedAt);
+    if (!formal && i % 5 === 1 && body.endsWith("했어요.")) body = `${body.slice(0, -2)}용.`;
+    if (/대출|급전|보이스피싱|스미싱|내구제|대포폰|폰깡|선불폰|유심\s*개통|신용대출|당일\s*지급|카드론|기대출|사기/.test(body)) {
+      throw new Error(`row ${i} risk phrase: ${body}`);
+    }
     if (body.length < REVIEW_BODY_MIN || body.length > REVIEW_BODY_MAX) {
       throw new Error(`row ${i} length ${body.length}`);
     }
