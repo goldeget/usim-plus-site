@@ -224,6 +224,7 @@ export function withCurrentPublicSummary(content) {
   const seo = content.seo && typeof content.seo === "object" ? { ...content.seo } : content.seo;
   const next = { ...content, seo };
   if (next.headline === "유심 개통 가능하면\n최대 {{MAX_TOTAL}}" || next.headline === "유심 개통 가능하면\n최대 66만원") next.headline = DEFAULT_CONTENT.headline;
+  if (next.headline === "몰랐던 유심 혜택,\n유심 혜택 확인부터") next.headline = DEFAULT_CONTENT.headline;
   if (seo && LEGACY_SEO_TITLES.has(seo.title)) seo.title = DEFAULT_CONTENT.seo.title;
   if (seo && LEGACY_SEO_TITLES.has(seo.socialTitle)) seo.socialTitle = DEFAULT_CONTENT.seo.socialTitle;
   if (next.copy && next.copy.heroEyebrow === "고객 비용 회사 전액 부담 · 유심 혜택") next.copy = { ...next.copy, heroEyebrow: DEFAULT_CONTENT.copy.heroEyebrow };
