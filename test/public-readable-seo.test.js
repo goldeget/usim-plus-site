@@ -5,6 +5,8 @@ import test from "node:test";
 const read = path => readFileSync(new URL(path, import.meta.url), "utf8");
 const home = read("../public/index.html");
 const guide = read("../public/guide/index.html");
+const structure = read("../public/structure/index.html");
+const topicsCss = read("../public/topics/topics.css");
 const links = read("../public/links/index.html");
 const notFound = read("../public/404.html");
 const css = read("../public/user-flow.css");
@@ -38,8 +40,10 @@ test("public Korean multiline copy and mobile readable text use native line wrap
 test("visible FAQs are removed on main and guide, and not re-created by JavaScript or schema", () => {
   assert.doesNotMatch(home, /<section class="faq"|id="faq-title"|faqList|faqSchema|FAQPage/);
   assert.doesNotMatch(guide, /<section class="faq"|id="faq-title"|FAQPage/);
+  assert.doesNotMatch(structure, /<section class="faq"|id="faq-title"|FAQPage|<details|<summary/);
   assert.doesNotMatch(contentService, /FAQPage/);
   assert.doesNotMatch(css, /\.faq(?:\s|\{|\-|\.)/);
+  assert.doesNotMatch(topicsCss, /\.faq(?:\s|\{|\-|\.)/);
   assert.doesNotMatch(aiText, /홈페이지 접수 상태 조회 및 FAQ/);
 });
 

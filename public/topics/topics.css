@@ -85,17 +85,6 @@ h1 strong { background: linear-gradient(100deg, #8bf2ff, #a5bbff); color: transp
 .row strong { text-align: right; }
 .row em { font-style: normal; color: #96eef0; }
 
-.faq { border: 1px solid var(--line); border-radius: 18px; overflow: hidden; background: #091b34; }
-.faq details { border-bottom: 1px solid var(--line); }
-.faq details:last-child { border-bottom: 0; }
-.faq summary { cursor: pointer; list-style: none; padding: 19px 24px; font-weight: 750; font-size: 16px; display: flex; justify-content: space-between; gap: 14px; align-items: center; }
-.faq summary::-webkit-details-marker { display: none; }
-.faq summary::after { content: "+"; color: var(--cyan); font-size: 20px; font-weight: 900; flex-shrink: 0; }
-.faq details[open] summary::after { content: "–"; }
-.faq .answer { padding: 0 24px 20px; color: #bfd0e3; line-height: 1.8; font-size: 15px; }
-.faq .answer p { margin: 0 0 10px; }
-.faq .answer a { color: #8fd8ff; text-underline-offset: 3px; }
-
 .related { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
 .related a { display: block; border: 1px solid var(--line); border-radius: 16px; background: #0c1f3c; padding: 18px 19px; text-decoration: none; transition: transform .15s, border-color .15s; }
 .related a:hover { transform: translateY(-2px); border-color: #4a99cd; }
@@ -154,9 +143,9 @@ footer a { text-decoration: underline; text-underline-offset: 3px; }
 /* 한국어 가독성: 어절 단위 줄바꿈 */
 html { word-break: keep-all; line-break: strict; overflow-wrap: break-word; }
 :where(h1, h2, h3, h4, p, li, a, button, span, small, strong, em, summary, label) { word-break: keep-all; line-break: strict; overflow-wrap: break-word; }
-.lead, .notice, .section-head, .prose p, .prose li, .card p, .card li, .micro, .end p, .warn p, .warn li, .faq .answer, footer, .related .r-desc { word-break: keep-all; overflow-wrap: break-word; line-break: strict; }
+.lead, .notice, .section-head, .prose p, .prose li, .card p, .card li, .micro, .end p, .warn p, .warn li, footer, .related .r-desc { word-break: keep-all; overflow-wrap: break-word; line-break: strict; }
 @supports (text-wrap: pretty) {
-  .lead, .notice, .section-head, .prose p, .card p, .end p, .faq .answer, footer { text-wrap: pretty; }
+  .lead, .notice, .section-head, .prose p, .card p, .end p, footer { text-wrap: pretty; }
 }
 @supports (text-wrap: balance) {
   h1, h2, h3, .badge, .button { text-wrap: balance; }
