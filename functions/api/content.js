@@ -25,7 +25,7 @@ export const DEFAULT_CONTENT = {
   },
   "lookup": {
     "url": "https://www.credit.or.kr/credit/search",
-    "label": "개통 가능 여부 확인"
+    "label": "혜택 가능 여부 조회"
   },
   "payout": {
     "milestones": [
@@ -62,7 +62,7 @@ export const DEFAULT_CONTENT = {
     "contactTitle": "상담하기",
     "contactIntro": "편한 상담 채널을 선택해 주세요.\n혜택·조건 안내는 텔레그램·채널톡 같은 대화에서 이어집니다.",
     "contactLookupPrompt": "아직 조회하지 않으셨나요?",
-    "contactLookupLabel": "개통 가능 여부 확인",
+    "contactLookupLabel": "혜택 가능 여부 조회",
     "channelReady": "상담창이 새 창으로 열립니다. 사진을 보낸 상담창에서 답변을 확인해 주세요.",
     "channelMissing": "현재 연결된 상담 채널이 없습니다. {{EMAIL}}으로 문의해 주세요.",
     "channelStart": "상담 시작하기",
@@ -240,7 +240,7 @@ export function withCurrentPublicSummary(content) {
     const copy = { ...next.copy };
     if (copy.contactIntro === "편한 상담 채널을 선택해 주세요.\n조회 사진 전송부터 결과 안내까지, 같은 대화에서 이어집니다.") copy.contactIntro = DEFAULT_CONTENT.copy.contactIntro;
     if (!copy.contactLookupPrompt || copy.contactLookupPrompt === "참고용 조회") copy.contactLookupPrompt = DEFAULT_CONTENT.copy.contactLookupPrompt;
-    if (!copy.contactLookupLabel || copy.contactLookupLabel === "신용정보원 가입내역 조회") copy.contactLookupLabel = DEFAULT_CONTENT.copy.contactLookupLabel;
+    if (!copy.contactLookupLabel || copy.contactLookupLabel === "신용정보원 가입내역 조회" || copy.contactLookupLabel === "개통 가능 여부 확인") copy.contactLookupLabel = DEFAULT_CONTENT.copy.contactLookupLabel;
     if (copy.guideTitle === "신청 방법") {
       copy.guideSummary = DEFAULT_CONTENT.copy.guideSummary;
       copy.guideTitle = DEFAULT_CONTENT.copy.guideTitle;
@@ -264,7 +264,7 @@ function publishedLookup(lookup) {
   const label = typeof lookup?.label === "string" ? lookup.label.trim() : "";
   return {
     url: isSafeHttpsUrl(url) && !blockedHost ? url : OFFICIAL_LOOKUP_URL,
-    label: !label || label === "신용정보원 가입내역 조회" || label === "참고용 조회" ? "개통 가능 여부 확인" : label
+    label: !label || label === "신용정보원 가입내역 조회" || label === "참고용 조회" || label === "개통 가능 여부 확인" ? DEFAULT_CONTENT.lookup.label : label
   };
 }
 

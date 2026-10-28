@@ -74,7 +74,8 @@ test("preserves the original query destination separately from photo conversatio
   const links=[...html.matchAll(/<a\b[^>]*href="https:\/\/www\.credit\.or\.kr\/credit\/search"[^>]*>/g)];
   assert.equal(links.length,2,"lookup stays on the hero button and the contact panel");
   for(const link of links){assert.match(link[0],/target="_blank"/);assert.match(link[0],/rel="noopener noreferrer"/);}
-  assert.match(html, /id="eligibilityButton"[^>]*>개통 가능 여부 확인/);
+  assert.match(html, /id="eligibilityButton"[^>]*>혜택 가능 여부 조회/);
+  assert.match(html, /id="contactLookupLabel">혜택 가능 여부 조회/);
   assert.match(html, /id="contactLookupLink"/);
   assert.match(html, /id="heroApplyButton" href="#contact">텔레그램·채널톡 상담하기/);
   assert.match(html, /lookupButton\.href=content\.lookup\.url/);
