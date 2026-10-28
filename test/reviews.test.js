@@ -73,7 +73,10 @@ test("public reviews list and detail read the static corpus, not D1", async () =
   assert.equal(detail.id, list.items[0].id);
   assert.doesNotMatch(detail.body, REVIEW_INTERNAL_ID_PATTERN);
   assert.doesNotMatch(detail.body, /\d+\s*분경/);
-  assert.ok(detail.body.length > list.items[0].snippet.replace(/…$/, "").length);
+  const snippet = list.items[0].snippet;
+  const visible = snippet.replace(/…$/, "");
+  if (snippet.endsWith("…")) assert.ok(detail.body.length > visible.length);
+  else assert.equal(detail.body, snippet);
 });
 
 test("rejects duplicate reviews at insert time", async () => {

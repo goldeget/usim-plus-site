@@ -106,6 +106,7 @@ test("generated corpus voice: 유심 혜택 consult notes and age buckets", () =
   const personaLabels = ["경단녀", "육아맘", "대학생", "직장인", "사업자", "주부"];
   const personaCounts = Object.fromEntries(personaLabels.map(label => [label, 0]));
   const personaVoice = Object.fromEntries(personaLabels.map(label => [label, { casual: 0, formal: 0 }]));
+  const grams = new Map();
   for (let i = 1; i <= 10_000; i += 1) {
     const bucket = ageBucketForIndex(i);
     bucketCounts[bucket] += 1;
@@ -142,6 +143,11 @@ test("generated corpus voice: 유심 혜택 consult notes and age buckets", () =
     personaCounts[persona] += 1;
     personaVoice[persona][formal ? "formal" : "casual"] += 1;
     assert.doesNotMatch(row.body, riskRe, `row ${row.rowId} risk phrase`);
+    assert.doesNotMatch(row.body, /정리하고|천천히|옆에서|칸에서|표에서|맛집|음식점|식당|배달|배민|메뉴|맛있|포장|웨이팅|외식|교재비|병원비|경조사|잠자고/);
+    for (let index = 0; index + 20 <= row.body.length; index += 1) {
+      const gram = row.body.slice(index, index + 20);
+      grams.set(gram, (grams.get(gram) || 0) + 1);
+    }
     assert.match(row.body, /유심\s*혜택/, `row ${row.rowId} benefit name`);
     assert.match(row.body, /확인/, `row ${row.rowId} checked the benefit`);
     assert.match(row.body, /받았|받음|필요해/, `row ${row.rowId} received the benefit`);
@@ -156,6 +162,8 @@ test("generated corpus voice: 유심 혜택 consult notes and age buckets", () =
     }
     if (persona === "사업자") assert.match(row.body, /사업자금/);
   }
+  const hottest = [...grams.values()].reduce((max, count) => Math.max(max, count), 0);
+  assert.ok(hottest <= 5, `a 20-character sequence repeated ${hottest} times`);
   assert.ok(themed >= 9_500, `expected most rows to mention the benefit consult, got ${themed}`);
   assert.ok(
     platformThemed >= 9_000,
@@ -233,8 +241,9 @@ test("review body calendar dates match publishedAt in Asia/Seoul", () => {
     }
   }
   const lengths = rows.map(row => row.body.length);
-  assert.ok(Math.min(...lengths) < 220, "some reviews stay short");
-  assert.ok(Math.max(...lengths) > 420, "some reviews run long");
+  assert.ok(Math.min(...lengths) < 80, "some reviews stay short");
+  assert.ok(Math.max(...lengths) < 120, "reviews stay short notes");
+  assert.ok(lengths.filter((length) => length <= 90).length > 9000, "most reviews are one or two short sentences");
 });
 
 function displayedSkeleton(text, displayName) {

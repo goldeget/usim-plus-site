@@ -26,9 +26,9 @@ import {
   FAMILY_RELAY_RE,
   PERSONA_MARKERS,
   benefitNoun,
-  openingLine,
-  toFormal
+  openingLine
 } from "./review-voice-packs.mjs";
+import { bannedReviewPattern, humanReviewBody } from "./review-human-bodies.mjs";
 
 export { FAMILY_RELAY_RE, PERSONA_MARKERS };
 
@@ -48,7 +48,7 @@ function dedupHashesForBody(body) {
 }
 
 /** Bump when corpus voice changes so seed cache files regenerate. */
-export const REVIEW_CORPUS_VERSION = "usim-benefit-check-2026-10-29";
+export const REVIEW_CORPUS_VERSION = "usim-benefit-human-2026-10-29";
 
 const CHANNELS = ["channeltalk", "telegram", "line"];
 const STAGES = ["3", "15", "30", "consult"];
@@ -404,28 +404,6 @@ const DISCOVERY = {
   ]
 };
 
-const HINTS = [
-  "천천히", "다시", "잠깐", "찬찬히", "끝까지", "먼저", "그냥", "이어서",
-  "따로", "곧장", "나중에도", "메모하며", "비교하며", "읽어 보며", "저장하며",
-  "체크하며", "찾아보며", "적어 가며", "살펴보며", "넘겨 보며"
-];
-
-const FACTS = ["5만원", "7만원", "10만원", "22만원", "66만원", "3건"];
-
-const WAYS = [
-  "필요해서", "찾아서", "읽고", "적고", "비교하고", "살피고", "메모하고", "저장하고",
-  "체크하고", "넘기고", "닫고", "열고", "고치고", "정리하고", "덮고", "쓰며",
-  "보며", "세며", "모으며", "줄이며", "바꾸며", "확인하며", "따라가며", "맞춰 두고", "남겨 두고"
-];
-
-const TAGS = {
-  대학생: ["대학생이라", "대학생인데", "대학생은"],
-  직장인: ["직장인이라", "직장인인데", "직장인은"],
-  주부: ["주부라", "주부인데", "주부는"],
-  사업자: ["사업자라", "사업자인데", "사업자는"],
-  육아맘: ["육아맘이라", "육아맘인데", "육아맘은"],
-  경단녀: ["경단녀라", "경단녀인데", "경단녀는"]
-};
 
 function missingBeats(body) {
   return BEATS.filter(([re]) => !re.test(body)).map(([, name]) => name);
@@ -453,88 +431,21 @@ function ensureOpenings() {
   openingsReady = true;
 }
 
-function hasBatchim(word) {
-  const code = String(word).charCodeAt(String(word).length - 1);
-  return code >= 0xAC00 && code <= 0xD7A3 && (code - 0xAC00) % 28 !== 0;
-}
-
-function eul(word) {
-  return hasBatchim(word) ? "을" : "를";
-}
-
-function neun(word) {
-  return hasBatchim(word) ? "은" : "는";
-}
-
-function speak(text, formal, bucket) {
-  let value = formal ? toFormal(text) : text;
-  if (bucket === "70s") value = value.replace(/했습니다(?=\.?$)/, "하였습니다");
-  return value;
-}
-
-function restyleCasualEnding(text, style) {
-  if (style === 1) return text.replace(/받았어요\.$/, "받았네요.");
-  if (style === 2) return text.replace(/받았어요\.$/, "받음.");
-  if (style === 3) return text.replace(/받았어요\.$/, "받았어요 ㅋㅋ");
-  if (style === 4) return text.replace(/받았어요\.$/, "받았어요 ㅎㅎ");
-  if (style === 5) return text.replace(/받았어요\.$/, "받았어용.");
-  if (style === 6) return text.replace(/받았어요\.$/, "받았고 필요해요.");
-  return text;
-}
-
-function composeBody(i, rating, channelKey, publishedAt) {
+function composeBody(i, _rating, _channelKey, publishedAt) {
   const bucket = ageBucketForIndex(i);
   const formal = isFormalAgeBucket(bucket);
   const persona = personaForIndex(i);
-  const { a, b, c } = variantTriple(i);
-  const hook = DISCOVERY[persona][a];
-  const noun = benefitNoun(persona, b);
-  const hint = HINTS[c];
   const kst = kstCalendarParts(publishedAt instanceof Date ? publishedAt : new Date(publishedAt));
-  const when = whenPhrase(kst, i, 0);
-  const channelName = CHANNEL_PHRASE[channelKey].name;
-  const style = i % 8;
-  const fact = i % 4 === 0 ? "" : FACTS[(i + b) % FACTS.length];
-  const way = WAYS[a];
-  const tag = TAGS[persona][b % 3];
-  const spot = ["안내에서", "메모에서", "글에서", "표에서", "칸에서"][(a + c) % 5];
-  const needNote = persona === "대학생" && !hook.includes("용돈") && noun !== "용돈"
-    ? "용돈 옆에서 "
-    : persona === "사업자"
-      ? "사업자금과 별개로 "
-      : "";
-  const gotFact = fact ? `${fact}으로 ` : "필요한 만큼 ";
-  const check = `${hook} ${hint} ${noun} ${spot} 몰랐던 유심 혜택을 확인했어요.`;
-  const got = `${when} ${tag} ${needNote}${way} ${hint} ${noun} 유심 혜택을 ${gotFact}받았어요.`;
-  const gripe = rating >= 5
-    ? ""
-    : rating === 4
-      ? `${tag} ${way} ${noun} 안내가 ${hint} 조금 길었어요.`
-      : `${tag} ${way} ${hint} ${noun} 답장이 늦었어요.`;
-  const channelLine = i % 5 === 2
-    ? `${tag} ${way} ${noun} 상담은 ${channelName}에서 ${hint} 이어졌어요.`
-    : "";
-  const longNote = i % 6 === 0
-    ? `${tag} ${way} ${hint} ${noun} 안내를 처음부터 다시 읽었어요. 두 번째로 보니 ${tag} ${way} ${spot} 적힌 몰랐던 유심 혜택이 ${hint} 본 ${noun} 항목과 같았어요. ${channelName}에 남겨 둔 ${tag} ${way} 확인도 ${hint} ${noun} 기준이라 다시 묻지 않았어요. 저장해 둔 ${tag} ${way} ${noun} 문장도 ${hint} 안내와 같았고, 필요하던 내용이 그 안에 있었어요. ${tag} ${way} 읽어 본 ${noun} 유심 혜택은 ${hint} 확인한 내용과 같았고, ${channelName} 상담에서 다시 봐도 같은 안내였어요.`
-    : "";
-  const same = [
-    `${tag} ${way} ${hint} 본 ${noun} 유심 혜택이 안내문과 같았어요.`,
-    `${tag} ${way} ${noun}${neun(noun)} ${hint} 확인한 내용이 맞았어요.`,
-    `${hint} 읽어 둔 ${tag} ${way} ${noun} 혜택이 필요하던 것과 같았어요.`,
-    `${tag} ${noun} 안내를 ${way} ${hint} 보니 필요한 혜택이었어요.`,
-    `${way} ${hint} ${tag} ${noun} 쪽 혜택이 안내와 맞았어요.`,
-    `${tag} ${hint} ${noun}${eul(noun)} ${way} 확인하니 필요한 혜택이 적혀 있었어요.`
-  ][i % 6];
-  const order = i % 3;
-  const parts = [];
-  if (order === 0) parts.push(check, same, gripe, got, channelLine, longNote);
-  else if (order === 1) parts.push(got, same, check, gripe, channelLine, longNote);
-  else parts.push(check, same, channelLine, gripe, got, longNote);
-  let body = parts.filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
-  body = speak(body, formal, bucket);
-  if (!formal) body = restyleCasualEnding(body, style);
-  if (!formal && rating >= 4 && i % 7 === 1 && style !== 3 && style !== 4) body = `${body} 🙂`;
-  if (/잠자고\s*있던/.test(body)) throw new Error(`row ${i} reused the example phrase`);
+  const body = humanReviewBody({
+    i,
+    persona,
+    formal,
+    bucket,
+    year: kst.year,
+    month: kst.month,
+    day: kst.day
+  });
+  if (bannedReviewPattern().test(body)) throw new Error(`row ${i} banned phrasing: ${body}`);
   return body;
 }
 
