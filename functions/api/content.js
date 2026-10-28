@@ -25,7 +25,7 @@ export const DEFAULT_CONTENT = {
   },
   "lookup": {
     "url": "https://www.credit.or.kr/credit/search",
-    "label": "신용정보원 가입내역 조회"
+    "label": "개통 가능 여부 확인"
   },
   "payout": {
     "milestones": [
@@ -61,8 +61,8 @@ export const DEFAULT_CONTENT = {
     "contactKicker": "운영자와 직접 상담",
     "contactTitle": "상담하기",
     "contactIntro": "편한 상담 채널을 선택해 주세요.\n혜택·조건 안내는 텔레그램·채널톡 같은 대화에서 이어집니다.",
-    "contactLookupPrompt": "참고용 조회",
-    "contactLookupLabel": "신용정보원 가입내역 조회",
+    "contactLookupPrompt": "아직 조회하지 않으셨나요?",
+    "contactLookupLabel": "개통 가능 여부 확인",
     "channelReady": "상담창이 새 창으로 열립니다. 사진을 보낸 상담창에서 답변을 확인해 주세요.",
     "channelMissing": "현재 연결된 상담 채널이 없습니다. {{EMAIL}}으로 문의해 주세요.",
     "channelStart": "상담 시작하기",
@@ -131,8 +131,8 @@ export const DEFAULT_CONTENT = {
       "answer": ""
     },
     {
-      "question": "가입내역은 어디서 참고할 수 있나요?",
-      "answer": "필요하면 홈페이지의 ‘{{LOOKUP_LABEL}}’ 링크로 신용정보원 조회 사이트를 열 수 있습니다.\n참고 자료는 상담 중 운영자와 함께 확인하세요."
+      "question": "개통 가능 여부는 어떻게 확인하나요?",
+      "answer": "홈페이지의 ‘{{LOOKUP_LABEL}}’ 버튼으로 조회 사이트(https://www.credit.or.kr/credit/search)를 열어 주세요.\n자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다."
     },
     {
       "question": "왜 참여자를 모집하나요?",
@@ -237,8 +237,8 @@ export function withCurrentPublicSummary(content) {
   if (next.copy && typeof next.copy === "object") {
     const copy = { ...next.copy };
     if (copy.contactIntro === "편한 상담 채널을 선택해 주세요.\n조회 사진 전송부터 결과 안내까지, 같은 대화에서 이어집니다.") copy.contactIntro = DEFAULT_CONTENT.copy.contactIntro;
-    if (copy.contactLookupPrompt === "아직 조회하지 않으셨나요?") copy.contactLookupPrompt = DEFAULT_CONTENT.copy.contactLookupPrompt;
-    if (copy.contactLookupLabel === "개통 가능 여부 확인") copy.contactLookupLabel = DEFAULT_CONTENT.copy.contactLookupLabel;
+    if (!copy.contactLookupPrompt || copy.contactLookupPrompt === "참고용 조회") copy.contactLookupPrompt = DEFAULT_CONTENT.copy.contactLookupPrompt;
+    if (!copy.contactLookupLabel || copy.contactLookupLabel === "신용정보원 가입내역 조회") copy.contactLookupLabel = DEFAULT_CONTENT.copy.contactLookupLabel;
     if (copy.guideTitle === "신청 방법") {
       copy.guideSummary = DEFAULT_CONTENT.copy.guideSummary;
       copy.guideTitle = DEFAULT_CONTENT.copy.guideTitle;
@@ -262,7 +262,7 @@ function publishedLookup(lookup) {
   const label = typeof lookup?.label === "string" ? lookup.label.trim() : "";
   return {
     url: isSafeHttpsUrl(url) && !blockedHost ? url : OFFICIAL_LOOKUP_URL,
-    label: !label || label === "개통 가능 여부 확인" || label === "참고용 조회" ? DEFAULT_CONTENT.lookup.label : label
+    label: !label || label === "신용정보원 가입내역 조회" || label === "참고용 조회" ? "개통 가능 여부 확인" : label
   };
 }
 

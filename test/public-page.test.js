@@ -72,11 +72,14 @@ test("shows the operator registration details requested for the current footer",
 
 test("preserves the original query destination separately from photo conversations", () => {
   const links=[...html.matchAll(/<a\b[^>]*href="https:\/\/www\.credit\.or\.kr\/credit\/search"[^>]*>/g)];
-  assert.equal(links.length,1,"optional lookup link remains in hero only");
+  assert.equal(links.length,2,"lookup stays on the hero button and the contact panel");
   for(const link of links){assert.match(link[0],/target="_blank"/);assert.match(link[0],/rel="noopener noreferrer"/);}
-  assert.match(html, /id="eligibilityButton"/);
+  assert.match(html, /id="eligibilityButton"[^>]*>개통 가능 여부 확인/);
+  assert.match(html, /id="contactLookupLink"/);
   assert.match(html, /id="heroApplyButton" href="#contact">텔레그램·채널톡 상담하기/);
-  assert.doesNotMatch(html,/type="file"|id="contactLookupLink"/);
+  assert.match(html, /lookupButton\.href=content\.lookup\.url/);
+  assert.match(html, /contactLookupLink\.href=content\.lookup\.url/);
+  assert.doesNotMatch(html,/type="file"/);
 });
 
 test("topic pages keep the benefit lookup and the 66만 consult story", async () => {

@@ -685,8 +685,8 @@
           <p class="hero-intro" id="homeIntro">몰랐던 유심 혜택으로 최대 66만원.<br>3일·15일·30일 유지 확인 후 단계 지급 대상이 정해집니다.<br>자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다.</p>
           <div class="hero-payouts" id="payoutConditions" aria-label="혜택 안내" hidden></div>
           <div class="hero-actions">
-            <a class="cta-main" id="heroApplyButton" href="#contact">텔레그램·채널톡 상담하기</a>
-            <a class="cta-secondary" id="eligibilityButton" href="https://www.credit.or.kr/credit/search" target="_blank" rel="noopener noreferrer">신용정보원 가입내역 조회 <span aria-hidden="true">↗</span></a>
+            <a class="cta-main" id="eligibilityButton" href="https://www.credit.or.kr/credit/search" target="_blank" rel="noopener noreferrer">개통 가능 여부 확인 <span aria-hidden="true">↗</span></a>
+            <a class="cta-secondary" id="heroApplyButton" href="#contact">텔레그램·채널톡 상담하기</a>
           </div>
           <p class="payout-note" id="payoutNote">지급은 유지 조건 확인 후 결정됩니다. 상담·신청 즉시 지급이 아닙니다.</p>
           <p class="hero-trust" id="heroTrust">서울평가정보㈜ 공식 안내 · 사업자등록번호 114-81-47958</p>
@@ -720,6 +720,7 @@
           <h2 id="contact-title">상담하기</h2>
           <p class="consultation-intro" id="contactIntro">편한 상담 채널을 선택해 주세요.
 혜택·조건 안내는 텔레그램·채널톡 같은 대화에서 이어집니다.</p>
+          <a class="consultation-query-link" id="contactLookupLink" href="https://www.credit.or.kr/credit/search" target="_blank" rel="noopener noreferrer"><span id="contactLookupPrompt">아직 조회하지 않으셨나요?</span><strong id="contactLookupLabel">개통 가능 여부 확인 ↗</strong></a>
           <div class="channels">
             <a class="channel" data-contact="telegram" href="https://t.me/climeusim" target="_blank" rel="noopener noreferrer"><span class="channel-icon " aria-hidden="true">↗</span><span class="channel-copy"><strong>텔레그램</strong><small>지금 상담 가능</small></span><span class="channel-arrow" aria-hidden="true">↗</span></a>
             <a class="channel" data-contact="channeltalk" href="https://climeusim.channel.io" target="_blank" rel="noopener noreferrer"><span class="channel-icon talk" aria-hidden="true">톡</span><span class="channel-copy"><strong>채널톡</strong><small>지금 상담 가능</small></span><span class="channel-arrow" aria-hidden="true">↗</span></a>
@@ -920,6 +921,9 @@
         lookupButton.href=content.lookup.url;
         lookupButton.replaceChildren(document.createTextNode(content.lookup.label+' '));
         const lookupArrow=document.createElement('span');lookupArrow.setAttribute('aria-hidden','true');lookupArrow.textContent='↗';lookupButton.append(lookupArrow);
+        const contactLookupLink=document.getElementById('contactLookupLink');contactLookupLink.href=content.lookup.url;
+        document.getElementById('contactLookupPrompt').textContent=copy.contactLookupPrompt;
+        document.getElementById('contactLookupLabel').textContent=copy.contactLookupLabel+' ↗';
         document.getElementById('contactKicker').textContent=copy.contactKicker;
         document.getElementById('contact-title').textContent=copy.contactTitle;
         document.getElementById('contactIntro').textContent=copy.contactIntro;
