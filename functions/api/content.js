@@ -3,7 +3,7 @@ import { isAdminRequest, readBoundedRequestBody } from "../_lib/applications.js"
 export const DEFAULT_CONTENT = {
   "schemaVersion": 4,
   "headline": "몰랐던 유심 혜택,\n유심 혜택 확인부터",
-  "intro": "몰랐던 유심 혜택으로 최대 {{MAX_TOTAL}}.\n자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다.",
+  "intro": "몰랐던 유심 혜택으로 최대 {{MAX_TOTAL}}.\n3일·15일·30일 유지 확인 후 단계 지급 대상이 정해집니다.\n자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다.",
   "checklist": [
     {
       "title": "1. 개통 가능 여부 확인",
@@ -56,7 +56,7 @@ export const DEFAULT_CONTENT = {
     "heroEyebrow": "서울평가정보㈜ 공식 안내 · 유심 혜택",
     "heroApplyLabel": "사진 심사 신청하기",
     "heroChatNote": "이미 조회하셨다면 상담창에 사진을 보내 주세요.",
-    "payoutNote": "자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다.",
+    "payoutNote": "지급은 유지 조건 확인 후 결정됩니다. 상담·신청 즉시 지급이 아닙니다.",
     "payoutAriaLabel": "유지 기간별 지급 금액",
     "contactKicker": "운영자와 직접 상담",
     "contactTitle": "사진 보내고 상담하기",
@@ -224,7 +224,7 @@ export function withCurrentPublicSummary(content) {
   if (seo && LEGACY_SEO_TITLES.has(seo.socialTitle)) seo.socialTitle = DEFAULT_CONTENT.seo.socialTitle;
   if (next.copy && next.copy.heroEyebrow === "고객 비용 회사 전액 부담 · 유심 혜택") next.copy = { ...next.copy, heroEyebrow: DEFAULT_CONTENT.copy.heroEyebrow };
   if (next.copy && next.copy.footerTerms === "고객 개통·통신 비용 회사 전액 부담\n유지 조건 충족 시 최대 {{MAX_CASES}}건 · 최대 {{MAX_TOTAL}} 지급 대상") next.copy = { ...next.copy, footerTerms: DEFAULT_CONTENT.copy.footerTerms };
-  if (next.copy && next.copy.payoutNote === "지급은 유지 조건 확인 후 결정됩니다. 상담·신청 즉시 지급이 아닙니다.") next.copy = { ...next.copy, payoutNote: DEFAULT_CONTENT.copy.payoutNote };
+  if (next.copy && next.copy.payoutNote === "자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다.") next.copy = { ...next.copy, payoutNote: DEFAULT_CONTENT.copy.payoutNote };
   if (LEGACY_PUBLIC_INTROS.has(next.intro)) next.intro = DEFAULT_CONTENT.intro;
   if (seo && LEGACY_PUBLIC_DESCRIPTIONS.has(seo.description)) seo.description = DEFAULT_CONTENT.seo.description;
   if (seo && LEGACY_PUBLIC_SOCIAL_DESCRIPTIONS.has(seo.socialDescription)) seo.socialDescription = DEFAULT_CONTENT.seo.socialDescription;

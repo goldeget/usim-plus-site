@@ -368,7 +368,7 @@ test("replaces the published run-on intro, including a raw payout token, with th
   const response = await onRequest({ request: new Request("https://climekr.com/api/content"), env: createAdminEnvironment({ cloudflare }) });
   const data = await response.json();
   assert.equal(data.intro, DEFAULT_CONTENT.intro);
-  assert.equal(data.intro.split("\n").length, 2);
+  assert.equal(data.intro.split("\n").length, 3);
   assert.match(data.intro, /\{\{MAX_TOTAL\}\}/);
   assert.doesNotMatch(data.intro, /급전|폰깡|통신혜택/);
 });

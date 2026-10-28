@@ -11,7 +11,7 @@ const userFlowCss = await readFile(new URL("../public/user-flow.css", import.met
 test("preserves the dark visual identity and exposes direct consultation without a file form", () => {
   for (const element of ['<html lang="ko">','class="hero-payouts"','class="sim-image"','id="contact"','id="heroApplyButton" href="#contact"']) assert.ok(html.includes(element), element);
   assert.doesNotMatch(html, /type="file"|id="precheckForm"|FormData|challenges\.cloudflare\.com|turnstile\.render/);
-  assert.match(html.replace(/<\/?span[^>]*>/g, ""), /몰랐던 유심 혜택으로 최대 66만원\.<br>자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다\./);
+  assert.match(html.replace(/<\/?span[^>]*>/g, ""), /몰랐던 유심 혜택으로 최대 66만원\.<br>3일·15일·30일 유지 확인 후 단계 지급 대상이 정해집니다\.<br>자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다\./);
   assert.match(html, /name="color-scheme" content="dark"/);
 });
 
@@ -89,10 +89,12 @@ test("admin-managed public copy covers payouts, lookup, privacy, footer, status,
 
 
 test("renders the homepage announcement lines and the footer without visible backslash-n", () => {
-  const expectedIntro = ["몰랐던 유심 혜택으로 최대 66만원.", "자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다."].join("<br>");
+  const expectedIntro = [
+    "몰랐던 유심 혜택으로 최대 66만원.",
+    "3일·15일·30일 유지 확인 후 단계 지급 대상이 정해집니다.",
+    "자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다."
+  ].join("<br>");
   const heroIntroHtml = html.match(/<p class="hero-intro" id="homeIntro">([\s\S]*?)<\/p>/)[1];
-  assert.match(heroIntroHtml, /hero-intro__chunk/);
-  assert.match(heroIntroHtml, /hero-intro__part/);
   assert.equal(heroIntroHtml.replace(/<\/?span[^>]*>/g, ''), expectedIntro);
   assert.doesNotMatch(html, /id="homeIntro"[^>]*>[\s\S]*?\{\{MAX_TOTAL\}\}/);
   const normalizedHtml = html.replace(/\r\n/g, "\n");

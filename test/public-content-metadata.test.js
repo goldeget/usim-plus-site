@@ -132,8 +132,8 @@ test("serves edited title, social metadata and matching Organization/Service gra
     }
     assert.match(html, /id="operatorEmailLink" href="mailto:contact@example\.com"><span id="operatorEmail">contact@example\.com<\/span>/);
     const intro = html.match(/id="homeIntro">([\s\S]*?)<\/p>/)?.[1].replace(/<\/?span[^>]*>/g, "") || "";
-    assert.equal(intro.split("<br>").length, 2);
-    assert.match(intro, /몰랐던 유심 혜택으로 최대 18만원\.<br>자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다\.$/);
+    assert.equal(intro.split("<br>").length, 3);
+    assert.match(intro, /^몰랐던 유심 혜택으로 최대 18만원\.<br>3일·15일·30일 유지 확인 후 단계 지급 대상이 정해집니다\.<br>자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다\.$/);
     assert.doesNotMatch(intro, /\{\{MAX_TOTAL\}\}/);
   } finally {
     if (previous === undefined) delete globalThis.HTMLRewriter;

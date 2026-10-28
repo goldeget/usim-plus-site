@@ -20,7 +20,7 @@ test("all public pages use Korean language metadata and preserve meaningful text
   const visible = home.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
     .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, "");
   assert.doesNotMatch(visible, /\\n/, "No literal backslash-n text in main visible markup");
-  assert.match(visible.replace(/<\/?span[^>]*>/g, ""), /몰랐던 유심 혜택으로 최대 66만원\.<br>자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다\./);
+  assert.match(visible.replace(/<\/?span[^>]*>/g, ""), /몰랐던 유심 혜택으로 최대 66만원\.<br>3일·15일·30일 유지 확인 후 단계 지급 대상이 정해집니다\.<br>자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다\./);
   assert.doesNotMatch(visible, /통신혜택|통신 혜택|급전|폰깡|폰테크|\/topics\/|trust-bar|data-live/);
   assert.doesNotMatch(visible, /\{\{MAX_TOTAL\}\}/);
 });
