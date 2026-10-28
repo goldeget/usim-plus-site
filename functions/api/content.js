@@ -56,7 +56,7 @@ export const DEFAULT_CONTENT = {
     "heroEyebrow": "서울평가정보㈜ 공식 안내 · 유심 혜택",
     "heroApplyLabel": "사진 심사 신청하기",
     "heroChatNote": "이미 조회하셨다면 상담창에 사진을 보내 주세요.",
-    "payoutNote": "지급은 유지 조건 확인 후 결정됩니다. 상담·신청 즉시 지급이 아닙니다.",
+    "payoutNote": "자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다.",
     "payoutAriaLabel": "유지 기간별 지급 금액",
     "contactKicker": "운영자와 직접 상담",
     "contactTitle": "사진 보내고 상담하기",
@@ -110,7 +110,7 @@ export const DEFAULT_CONTENT = {
     "privacyProvider": "사이트 운영과 기존 신청 사진 보관에 Cloudflare의 클라우드 서비스를 이용합니다.",
     "privacyProviderLabel": "처리 서비스",
     "footerBrand": "클라임유심 · climekr.com",
-    "footerTerms": "고객 개통·통신 비용 회사 전액 부담\n유지 조건 충족 시 최대 {{MAX_CASES}}건 · 최대 {{MAX_TOTAL}} 지급 대상",
+    "footerTerms": "몰랐던 유심 혜택 · 최대 {{MAX_TOTAL}}\n자세한 혜택·조건은 텔레그램·채널톡 상담",
     "operatorSummary": "사업자 정보 · 사업자등록번호 114-81-47958",
     "operatorCompanyLabel": "법인명",
     "operatorRepresentativeLabel": "대표이사",
@@ -182,6 +182,8 @@ const PREVIOUS_PUBLIC_SUMMARY = {
 // Older published intros omitted who keeps the USIM. Replace those exact copies
 // on read so the public page shows the current lead without rewriting stored content.
 const LEGACY_PUBLIC_INTROS = new Set([
+  "몰랐던 유심 혜택으로 최대 {{MAX_TOTAL}}.\n자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다.",
+  "몰랐던 유심 혜택으로 최대 66만원.\n자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다.",
   "클라임유심(CLIME)은 서울평가정보㈜가 운영하는 정식 사업자 등록 업체입니다.\n폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.\n고객이 본인 명의로 회선을 개통해 유심과 휴대폰을 계속 보유·사용합니다. 회사는 유심을 수거하지 않으며, 다른 사람에게 회선을 넘기는 절차는 없습니다.\n급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다.\n개통·통신 비용은 회사가 전액 부담합니다.\n3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.\n상담은 텔레그램·채널톡입니다.",
   "클라임유심(CLIME)은 서울평가정보㈜가 운영하는 정식 사업자 등록 업체입니다.\n폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.\n고객이 본인 명의로 회선을 개통해 유심과 휴대폰을 계속 보유·사용합니다. 회사는 유심을 수거하지 않으며, 다른 사람에게 회선을 넘기는 절차는 없습니다.\n급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다.\n개통·통신 비용은 회사가 전액 부담합니다.\n3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상입니다.\n상담은 텔레그램·채널톡입니다.",
   PREVIOUS_PUBLIC_SUMMARY.intro,
@@ -194,6 +196,8 @@ const LEGACY_PUBLIC_INTROS = new Set([
 ].flatMap(intro => [intro, intro.replace("에스씨아이평가정보(주)", "서울평가정보㈜")]));
 
 const LEGACY_PUBLIC_DESCRIPTIONS = new Set([
+  "클라임유심(CLIME)은 서울평가정보㈜가 운영합니다. 몰랐던 유심 혜택으로 최대 {{MAX_TOTAL}}. 자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다.",
+  "클라임유심(CLIME)은 서울평가정보㈜가 운영합니다. 몰랐던 유심 혜택으로 최대 66만원. 자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다.",
   "클라임유심(CLIME)은 서울평가정보㈜가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다. 고객이 본인 명의로 회선을 개통해 유심과 휴대폰을 계속 보유·사용합니다. 회사는 유심을 수거하지 않으며, 다른 사람에게 회선을 넘기는 절차는 없습니다. 급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다. 상담은 텔레그램·채널톡입니다.",
   "클라임유심(CLIME)은 서울평가정보㈜가 운영하는 정식 사업자 등록 업체입니다. 폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다. 고객이 본인 명의로 회선을 개통해 유심과 휴대폰을 계속 보유·사용합니다. 회사는 유심을 수거하지 않으며, 다른 사람에게 회선을 넘기는 절차는 없습니다. 급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다. 개통·통신 비용은 회사가 전액 부담합니다. 3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상입니다. 상담은 텔레그램·채널톡입니다.",
   PREVIOUS_PUBLIC_SUMMARY.description,
@@ -219,6 +223,8 @@ export function withCurrentPublicSummary(content) {
   if (seo && LEGACY_SEO_TITLES.has(seo.title)) seo.title = DEFAULT_CONTENT.seo.title;
   if (seo && LEGACY_SEO_TITLES.has(seo.socialTitle)) seo.socialTitle = DEFAULT_CONTENT.seo.socialTitle;
   if (next.copy && next.copy.heroEyebrow === "고객 비용 회사 전액 부담 · 유심 혜택") next.copy = { ...next.copy, heroEyebrow: DEFAULT_CONTENT.copy.heroEyebrow };
+  if (next.copy && next.copy.footerTerms === "고객 개통·통신 비용 회사 전액 부담\n유지 조건 충족 시 최대 {{MAX_CASES}}건 · 최대 {{MAX_TOTAL}} 지급 대상") next.copy = { ...next.copy, footerTerms: DEFAULT_CONTENT.copy.footerTerms };
+  if (next.copy && next.copy.payoutNote === "지급은 유지 조건 확인 후 결정됩니다. 상담·신청 즉시 지급이 아닙니다.") next.copy = { ...next.copy, payoutNote: DEFAULT_CONTENT.copy.payoutNote };
   if (LEGACY_PUBLIC_INTROS.has(next.intro)) next.intro = DEFAULT_CONTENT.intro;
   if (seo && LEGACY_PUBLIC_DESCRIPTIONS.has(seo.description)) seo.description = DEFAULT_CONTENT.seo.description;
   if (seo && LEGACY_PUBLIC_SOCIAL_DESCRIPTIONS.has(seo.socialDescription)) seo.socialDescription = DEFAULT_CONTENT.seo.socialDescription;

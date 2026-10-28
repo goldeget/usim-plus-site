@@ -368,7 +368,7 @@ test("replaces the published run-on intro, including a raw payout token, with th
   const response = await onRequest({ request: new Request("https://climekr.com/api/content"), env: createAdminEnvironment({ cloudflare }) });
   const data = await response.json();
   assert.equal(data.intro, DEFAULT_CONTENT.intro);
-  assert.equal(data.intro.split("\n").length, 5);
+  assert.equal(data.intro.split("\n").length, 2);
   assert.match(data.intro, /\{\{MAX_TOTAL\}\}/);
   assert.doesNotMatch(data.intro, /급전|폰깡|통신혜택/);
 });
@@ -581,8 +581,8 @@ test("converts pasted literal backslash-n into real newlines for public multilin
     "둘째 줄에서 조건을 확인하세요."
   ];
   const footerLines = [
-    "고객 개통·통신 비용 회사 전액 부담",
-    "유지 조건 충족 시 최대 {{MAX_CASES}}건 · 최대 {{MAX_TOTAL}} 지급 대상"
+    "맞춤 푸터 첫 줄입니다.",
+    "둘째 줄 안내는 {{MAX_TOTAL}} 기준입니다."
   ];
   const contactLines = ["편한 상담 채널을 선택해 주세요.", "상담창에서 안내받을 수 있습니다."];
   content.intro = introLines.join(slashN);

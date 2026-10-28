@@ -20,7 +20,7 @@ test("all public pages use Korean language metadata and preserve meaningful text
   const visible = home.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
     .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, "");
   assert.doesNotMatch(visible, /\\n/, "No literal backslash-n text in main visible markup");
-  assert.match(visible.replace(/<\/?span[^>]*>/g, ""), /클라임유심\(CLIME, climekr\.com\)은 서울평가정보㈜가 운영합니다\. 사업자등록번호 114-81-47958\.<br>몰랐던 유심 혜택을 서울평가정보㈜ 공식 안내로 유심 혜택 확인 후 조건에 따라 안내합니다\.<br>유심과 휴대폰은 고객이 계속 보유·사용하며, 회사는 수거하지 않습니다\.<br>3일·15일·30일 유지 확인 후 단계 지급 대상이 정해지며, 최대 66만원입니다\. 상담·신청 즉시 지급이 아닙니다\.<br>상담은 텔레그램·채널톡입니다/);
+  assert.match(visible.replace(/<\/?span[^>]*>/g, ""), /몰랐던 유심 혜택으로 최대 66만원\.<br>자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다\./);
   assert.doesNotMatch(visible, /통신혜택|통신 혜택|급전|폰깡|폰테크|\/topics\/|trust-bar|data-live/);
   assert.doesNotMatch(visible, /\{\{MAX_TOTAL\}\}/);
 });
@@ -48,8 +48,9 @@ test("SEO retains original service information without fabricated ratings or bot
   assert.ok(json);
   const graph=JSON.parse(json)["@graph"];
   assert.deepEqual(graph.map(x=>x["@type"]), ["Organization","WebSite","WebPage","Service"]);
-  assert.match(graph.find(x=>x["@type"]==="WebPage").description, /3일·15일·30일/);
-  assert.match(graph.find(x=>x["@type"]==="Service").description, /서울평가정보㈜가 운영하는 유심 혜택 안내/);
+  assert.match(graph.find(x=>x["@type"]==="WebPage").description, /몰랐던 유심 혜택으로 최대 66만원/);
+  assert.doesNotMatch(graph.find(x=>x["@type"]==="WebPage").description, /3일|15일|30일/);
+  assert.match(graph.find(x=>x["@type"]==="Service").description, /서울평가정보㈜가 운영합니다/);
   assert.doesNotMatch(graph.find(x=>x["@type"]==="Service").description, /통신혜택|급전|폰깡/);
   assert.doesNotMatch(json, /AggregateRating|"@type"\s*:\s*"Review"/);
   assert.match(guide, /rel="canonical" href="https:\/\/climekr\.com\/guide\/"/);

@@ -11,7 +11,7 @@ const userFlowCss = await readFile(new URL("../public/user-flow.css", import.met
 test("preserves the dark visual identity and exposes direct consultation without a file form", () => {
   for (const element of ['<html lang="ko">','class="hero-payouts"','class="sim-image"','id="contact"','id="heroApplyButton" href="#contact"']) assert.ok(html.includes(element), element);
   assert.doesNotMatch(html, /type="file"|id="precheckForm"|FormData|challenges\.cloudflare\.com|turnstile\.render/);
-  assert.match(html.replace(/<\/?span[^>]*>/g, ""), /서울평가정보㈜가 운영합니다\. 사업자등록번호 114-81-47958\.<br>몰랐던 유심 혜택을/);
+  assert.match(html.replace(/<\/?span[^>]*>/g, ""), /몰랐던 유심 혜택으로 최대 66만원\.<br>자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다\./);
   assert.match(html, /name="color-scheme" content="dark"/);
 });
 
@@ -73,9 +73,8 @@ test("admin-managed public copy covers payouts, lookup, privacy, footer, status,
   assert.match(adminContentEditor, /lookup:\s*\{/);
   assert.match(adminContentEditor, /payout:\s*\{/);
   assert.match(adminContentEditor, /copy:\s*readCopy\(\)/);
-  for (const id of ["termsHint", "statusDisclosure", "privacyCollection", "privacyPurpose", "privacyStorage", "footerTerms", "seoDescription", "ogTitle", "twitterDescription"]) assert.ok(html.includes(`id="${id}"`), id);
+  for (const id of ["statusDisclosure", "privacyCollection", "privacyPurpose", "privacyStorage", "footerTerms", "seoDescription", "ogTitle", "twitterDescription"]) assert.ok(html.includes(`id="${id}"`), id);
   assert.match(html, /content\.schemaVersion===4/);
-  assert.match(html, /content\.payout\.milestones\.reduce/);
   assert.doesNotMatch(html, /faqList|faqSchema|payoutFaq\(content\)/);
   assert.match(html, /lookupButton\.href=content\.lookup\.url/);
   assert.match(html, /textContent=/);
@@ -90,19 +89,13 @@ test("admin-managed public copy covers payouts, lookup, privacy, footer, status,
 
 
 test("renders the homepage announcement lines and the footer without visible backslash-n", () => {
-  const expectedIntro = [
-    "클라임유심(CLIME, climekr.com)은 서울평가정보㈜가 운영합니다. 사업자등록번호 114-81-47958.",
-    "몰랐던 유심 혜택을 서울평가정보㈜ 공식 안내로 유심 혜택 확인 후 조건에 따라 안내합니다.",
-    "유심과 휴대폰은 고객이 계속 보유·사용하며, 회사는 수거하지 않습니다.",
-    "3일·15일·30일 유지 확인 후 단계 지급 대상이 정해지며, 최대 66만원입니다. 상담·신청 즉시 지급이 아닙니다.",
-    "상담은 텔레그램·채널톡입니다."
-  ].join("<br>");
+  const expectedIntro = ["몰랐던 유심 혜택으로 최대 66만원.", "자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다."].join("<br>");
   const heroIntroHtml = html.match(/<p class="hero-intro" id="homeIntro">([\s\S]*?)<\/p>/)[1];
   assert.match(heroIntroHtml, /hero-intro__chunk/);
   assert.match(heroIntroHtml, /hero-intro__part/);
   assert.equal(heroIntroHtml.replace(/<\/?span[^>]*>/g, ''), expectedIntro);
   assert.doesNotMatch(html, /id="homeIntro"[^>]*>[\s\S]*?\{\{MAX_TOTAL\}\}/);
-  assert.ok(html.includes('<p class="site-footer__terms" id="footerTerms">고객 개통·통신 비용 회사 전액 부담\n유지 조건 충족 시 최대 3건\u00A0· 최대 66만원 지급 대상</p>'));
+  assert.ok(html.includes('<p class="site-footer__terms" id="footerTerms">몰랐던 유심 혜택 · 최대 66만원\n자세한 혜택·조건은 텔레그램·채널톡 상담</p>'));
   assert.match(html, /renderHeroIntro\(document\.getElementById\('homeIntro'\),content\.intro,content\)/);
   assert.match(html, /normalizeDisplayedLineBreaks\(expandTokens\(value,content\)\)/);
   assert.match(html, /normalizeDisplayedLineBreaks\(expandTokens\(copy\.footerTerms,content\)\)/);
