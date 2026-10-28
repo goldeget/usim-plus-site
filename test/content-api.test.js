@@ -373,6 +373,20 @@ test("replaces the published run-on intro, including a raw payout token, with th
   assert.doesNotMatch(data.intro, /급전|폰깡|통신혜택/);
 });
 
+test("migrates stored homepage SEO still using loan-first search and social descriptions", async () => {
+  const { onRequest, DEFAULT_CONTENT } = await import("../functions/api/content.js");
+  const cloudflare = createMemoryCloudflare();
+  const stored = structuredClone(DEFAULT_CONTENT);
+  stored.seo.description = "클라임유심(CLIME)은 대출이 아닌 유심 개통 혜택 서비스입니다. 고객 개통·통신 관련 비용은 회사 전액 부담. 3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상. 텔레그램·채널톡 상담.";
+  stored.seo.socialDescription = "고객 개통·통신 비용 회사 전액 부담. 대출이 아닌 유심 개통 혜택이며 회선 유지 조건 충족 시 최대 66만원 지급 대상. 텔레그램·채널톡 상담.";
+  cloudflare.siteContent.set("home", { id: "home", content: JSON.stringify(stored), updated_at: "2026-10-28T00:00:00.000Z" });
+  const data = await (await onRequest({ request: new Request("https://climekr.com/api/content"), env: createAdminEnvironment({ cloudflare }) })).json();
+  assert.equal(data.seo.description, DEFAULT_CONTENT.seo.description);
+  assert.equal(data.seo.socialDescription, DEFAULT_CONTENT.seo.socialDescription);
+  assert.match(data.seo.description, /몰랐던 유심 혜택/);
+  assert.doesNotMatch(data.seo.description, /대출이 아닌|3일·15일·30일/);
+});
+
 test("keeps legacy editor content out of the current homepage while showing versioned defaults", async () => {
   const { onRequest } = await import("../functions/api/content.js");
   const cloudflare = createMemoryCloudflare();
