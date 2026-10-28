@@ -6,6 +6,7 @@ const read = path => readFileSync(new URL(path, import.meta.url), "utf8");
 const home = read("../public/index.html");
 const guide = read("../public/guide/index.html");
 const structure = read("../public/structure/index.html");
+const about = read("../public/about/index.html");
 const topicsCss = read("../public/topics/topics.css");
 const links = read("../public/links/index.html");
 const notFound = read("../public/404.html");
@@ -44,6 +45,17 @@ test("structure page stays short: unified hook, payout rows, no legacy explainer
   assert.match(structure, /id="operator-title"/);
   assert.match(structure, /김중근/);
   assert.doesNotMatch(structure, /개통 대상 회선|사업 구조 한눈에 보기|CLIME 이용 원칙|돈은 어디서 나오는가|혜택의 재원|유심의 귀속/);
+});
+
+test("about page stays short: unified hero hook, operator table, guide link, no card explainer blocks", () => {
+  assert.match(about, /몰랐던 유심 혜택으로 최대 66만원/);
+  assert.match(about, /id="operator-title"/);
+  assert.match(about, /href="\/guide\/">혜택 조건/);
+  assert.match(about, /114-81-47958/);
+  assert.match(about, /footer-hook/);
+  assert.match(about, /href="\/about\/">CLIME 소개<\/a>[\s\S]*href="\/disclosures\/">고지·안내/);
+  assert.doesNotMatch(about, /지금 하는 일|card-number|참여는 세 단계|01<\/span>/);
+  assert.doesNotMatch(about, /3일·15일·30일 유지 조건을 충족|비용은 회사 부담/);
 });
 
 test("visible FAQs are removed on main and guide, and not re-created by JavaScript or schema", () => {
