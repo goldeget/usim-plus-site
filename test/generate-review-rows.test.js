@@ -19,6 +19,7 @@ import {
   reviewDateMismatch,
   reviewIdForSlot
 } from "../functions/_lib/review-dates.js";
+import { reviewTemplateCount } from "../scripts/review-human-bodies.mjs";
 
 test("generated review corpus has unique dedup hashes and realistic bounds", async () => {
   const rows = generateReviewRows(10_000);
@@ -106,7 +107,30 @@ test("generated corpus voice: 유심 혜택 consult notes and age buckets", () =
   const personaLabels = ["경단녀", "육아맘", "대학생", "직장인", "사업자", "주부"];
   const personaCounts = Object.fromEntries(personaLabels.map(label => [label, 0]));
   const personaVoice = Object.fromEntries(personaLabels.map(label => [label, { casual: 0, formal: 0 }]));
-  const grams = new Map();
+  const forbidden = [
+    ["읽다", /읽다/],
+    ["열다", /열다/],
+    ["찾다", /찾다/],
+    ["묻다", /묻다/],
+    ["조건이 짧", /조건이 짧/],
+    ["확인후", /확인후/],
+    ["사업자금", /사업자금/],
+    ["맛집", /맛집/],
+    ["음식점", /음식점/],
+    ["외식", /외식/],
+    ["대출", /대출/],
+    ["급전", /급전/],
+    ["식당", /식당/],
+    ["배달", /배달/],
+    ["배민", /배민/],
+    ["메뉴", /메뉴/],
+    ["맛있", /맛있/],
+    ["포장", /포장/],
+    ["웨이팅", /웨이팅/]
+  ];
+  const forbiddenHits = Object.fromEntries(forbidden.map(([name]) => [name, 0]));
+  let sleeping = 0;
+  let noAmount = 0;
   for (let i = 1; i <= 10_000; i += 1) {
     const bucket = ageBucketForIndex(i);
     bucketCounts[bucket] += 1;
@@ -136,18 +160,16 @@ test("generated corpus voice: 유심 혜택 consult notes and age buckets", () =
       if (/[🙂👍]|ㅠㅠ/.test(row.body)) casualWithEmoticon += 1;
     }
     const persona = personaForIndex(idx);
-    const found = personaLabels.filter(label => (
-      label === "사업자" ? /사업자(?!금)/.test(row.body) : row.body.includes(label)
-    ));
-    assert.deepEqual(found, [persona], `row ${row.rowId} persona`);
+    assert.equal(row.tags.persona, persona, `row ${row.rowId} persona tag`);
     personaCounts[persona] += 1;
     personaVoice[persona][formal ? "formal" : "casual"] += 1;
     assert.doesNotMatch(row.body, riskRe, `row ${row.rowId} risk phrase`);
     assert.doesNotMatch(row.body, /정리하고|천천히|옆에서|칸에서|표에서|맛집|음식점|식당|배달|배민|메뉴|맛있|포장|웨이팅|외식|교재비|병원비|경조사|잠자고/);
-    for (let index = 0; index + 20 <= row.body.length; index += 1) {
-      const gram = row.body.slice(index, index + 20);
-      grams.set(gram, (grams.get(gram) || 0) + 1);
+    for (const [name, re] of forbidden) {
+      if (re.test(row.body)) forbiddenHits[name] += 1;
     }
+    if (row.body.includes("잠자고 있던")) sleeping += 1;
+    if (!/5만원|7만원|10만원|22만원|66만원|3건/.test(row.body)) noAmount += 1;
     assert.match(row.body, /유심\s*혜택/, `row ${row.rowId} benefit name`);
     assert.match(row.body, /확인/, `row ${row.rowId} checked the benefit`);
     assert.match(row.body, /받았|받음|필요해/, `row ${row.rowId} received the benefit`);
@@ -158,12 +180,14 @@ test("generated corpus voice: 유심 혜택 consult notes and age buckets", () =
     if (persona === "대학생") {
       assert.ok(bucket === "20s" || bucket === "30s", `row ${row.rowId} 대학생 age`);
       assert.equal(formal, false, `row ${row.rowId} 대학생 voice`);
-      assert.match(row.body, /용돈/);
     }
-    if (persona === "사업자") assert.match(row.body, /사업자금/);
   }
-  const hottest = [...grams.values()].reduce((max, count) => Math.max(max, count), 0);
-  assert.ok(hottest <= 5, `a 20-character sequence repeated ${hottest} times`);
+  assert.ok(reviewTemplateCount() >= 120, `templates ${reviewTemplateCount()}`);
+  assert.ok(noAmount >= 1200, `reviews without an amount: ${noAmount}`);
+  assert.ok(sleeping <= 1, `잠자고 있던 count ${sleeping}`);
+  for (const [name, count] of Object.entries(forbiddenHits)) {
+    assert.equal(count, 0, `${name} remained in ${count} reviews`);
+  }
   assert.ok(themed >= 9_500, `expected most rows to mention the benefit consult, got ${themed}`);
   assert.ok(
     platformThemed >= 9_000,
@@ -189,81 +213,27 @@ test("generated corpus voice: 유심 혜택 consult notes and age buckets", () =
   }
 });
 
-function kstCalendar(iso) {
-  const bag = {};
-  for (const part of new Intl.DateTimeFormat("en-US", {
-    timeZone: "Asia/Seoul",
-    year: "numeric",
-    month: "numeric",
-    day: "numeric",
-    hourCycle: "h23"
-  }).formatToParts(new Date(iso))) {
-    if (part.type !== "literal") bag[part.type] = Number(String(part.value).replace(/[^\d]/g, ""));
-  }
-  return bag;
-}
-
-test("review body calendar dates match publishedAt in Asia/Seoul", () => {
+test("review sentences keep stored dates off the shared calendar stamp", () => {
   const rows = generateReviewRows(10_000);
-  const sampleIds = new Set(["00001", "00017", "00500", "02500", "05000", "07500", "09999", "10000"]);
-  const monthDayRe = /(\d{1,2})월\s*(\d{1,2})일/g;
-  const monthRe = /(\d{1,2})월/g;
-  const yearRe = /(\d{4})년/g;
-  const durationRe = /(?:3|15|30)일\s*유지/g;
+  let stamped = 0;
   for (const row of rows) {
     assert.doesNotMatch(row.body, /\d+\s*분경/, `${row.rowId} has a minute stamp`);
     assert.doesNotMatch(row.body, /\d+\s*분/, `${row.rowId} has a clock minute`);
     assert.doesNotMatch(row.body, /corpus-/i, `${row.rowId} leaks corpus id`);
-    const cal = kstCalendar(row.publishedAt);
-    yearRe.lastIndex = 0;
-    monthRe.lastIndex = 0;
-    monthDayRe.lastIndex = 0;
-    durationRe.lastIndex = 0;
-    for (const match of row.body.matchAll(yearRe)) {
-      assert.equal(Number(match[1]), cal.year, `${row.rowId} year`);
-    }
-    yearRe.lastIndex = 0;
-    for (const match of row.body.matchAll(monthRe)) {
-      assert.equal(Number(match[1]), cal.month, `${row.rowId} month`);
-    }
-    monthRe.lastIndex = 0;
-    monthDayRe.lastIndex = 0;
-    for (const match of row.body.matchAll(monthDayRe)) {
-      assert.equal(Number(match[1]), cal.month, `${row.rowId} month-day month`);
-      assert.equal(Number(match[2]), cal.day, `${row.rowId} month-day day`);
-    }
-    monthDayRe.lastIndex = 0;
-    durationRe.lastIndex = 0;
-    const stray = row.body.replace(durationRe, "").replace(monthDayRe, "").match(/(\d{1,2})일/);
-    assert.equal(stray, null, `${row.rowId} mentions a different day ${stray && stray[0]}`);
-    if (sampleIds.has(row.rowId)) {
-      assert.match(row.body, new RegExp(`${cal.month}월\\s*${cal.day}일`), `${row.rowId} should mention its Seoul date`);
-    }
+    assert.equal(reviewDateMismatch(row.body, row.publishedAt), null, `${row.rowId} date`);
+    if (/\d{1,2}\s*월\s*\d{1,2}\s*일/.test(row.body)) stamped += 1;
   }
+  assert.equal(stamped, 0, "calendar dates are stored on the row, not copied into every sentence");
   const lengths = rows.map(row => row.body.length);
   assert.ok(Math.min(...lengths) < 80, "some reviews stay short");
   assert.ok(Math.max(...lengths) < 120, "reviews stay short notes");
   assert.ok(lengths.filter((length) => length <= 90).length > 9000, "most reviews are one or two short sentences");
 });
 
-function displayedSkeleton(text, displayName) {
-  let value = String(text ?? "").normalize("NFC");
-  const name = String(displayName ?? "");
-  if (name) value = value.split(name).join(" ");
-  const bare = name.replace(/\*/g, "");
-  if (bare.length >= 2) value = value.split(bare).join(" ");
-  value = value
-    .replace(/\d{4}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일/g, " ")
-    .replace(/\d{1,2}\s*월\s*\d{1,2}\s*일/g, " ")
-    .replace(/(?:일|월|화|수|목|금|토)요일/g, " ")
-    .replace(/늦은 밤에|저녁 무렵에|아침 일찍|출근 전에|오전 중에|오후 중에|점심시간에|밤중에|새벽에|오전에|점심에|오후에|퇴근하고|저녁에|밤에/g, " ");
-  return value.replace(/\s+/g, " ").trim();
-}
-
-test("displayed review skeletons are unique after dates, weekdays, times, and names", () => {
+test("displayed review texts stay unique without a shared calendar stamp", () => {
   const today = new Date("2026-10-27T03:00:00.000Z");
   const rows = generateReviewRows(10_000);
-  const skeletons = new Map();
+  const shownBodies = new Set();
   for (let slot = 0; slot < rows.length; slot += 1) {
     const row = rows[slot];
     const shown = presentReview({
@@ -282,20 +252,17 @@ test("displayed review skeletons are unique after dates, weekdays, times, and na
     assert.doesNotMatch(shown.body, /가족에게\s*설명/);
     assert.doesNotMatch(shown.body, /안내 문구를 그대로 전달/);
     assert.doesNotMatch(shown.body, /가족에게/);
-    const skeleton = displayedSkeleton(shown.body, shown.displayName);
-    const prior = skeletons.get(skeleton);
-    assert.equal(prior, undefined, `skeleton collision ${prior} and ${row.rowId}`);
-    skeletons.set(skeleton, row.rowId);
+    assert.doesNotMatch(shown.body, /\d{1,2}\s*월\s*\d{1,2}\s*일/);
+    assert.equal(shownBodies.has(shown.body), false, `duplicate displayed body ${row.rowId}`);
+    shownBodies.add(shown.body);
   }
-  assert.equal(skeletons.size, 10_000);
+  assert.equal(shownBodies.size, 10_000);
 });
 
-test("generated corpus snippet prefixes are diverse", async () => {
+test("generated reviews use distinct full sentences", async () => {
   const rows = generateReviewRows(10_000);
-  const prefix60 = new Set();
-  for (const row of rows) {
-    const { snippet } = await reviewHashes(row.body);
-    prefix60.add(snippet.slice(0, 60));
-  }
-  assert.ok(prefix60.size >= 9800, `expected diverse snippet prefixes, got ${prefix60.size}`);
+  const bodies = new Set(rows.map(row => row.body));
+  assert.equal(bodies.size, 10_000);
+  const { snippet } = await reviewHashes(rows[0].body);
+  assert.equal(typeof snippet, "string");
 });

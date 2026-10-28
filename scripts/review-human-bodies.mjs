@@ -1,601 +1,391 @@
 /**
- * Human review bodies for the static corpus.
+ * Grammatical Korean review sentences for the static corpus.
  *
- * Each row is one grammatical Korean review: the person did not know about
- * the USIM benefit, checked it, and received the benefit they needed.
- * Telegram and Channel Talk are the only consult channels named.
- * Amounts, when named, are site facts only.
- *
- * Tone notes taken from public pages (wording not copied):
- * - Bunjang shop reviews are often one or two sentences, 해요/습니다/ㅋㅋ mixed,
- *   with one concrete detail and rare emoji.
- * - Baemin quotes are short and specific; only that length and ending mix
- *   is used. The topic here is never a restaurant or a delivery order.
- * - Karrot profiles lead with a one-line thanks; Clien threads are longer,
- *   so these reviews stay at the short end.
+ * Each template is already a complete review: the person did not know about
+ * the USIM benefit, checked it, and received what they needed. Slots are only
+ * an amount, a channel name (텔레그램/채널톡), and an optional time word.
+ * A fill that matches the reject list is skipped and another fill is used.
  */
-import { toFormal } from "./review-voice-packs.mjs";
+const WHEN = ["", "오전에 ", "오후에 ", "저녁에 ", "밤에 ", "어제 ", "오늘 ", "아까 ", "방금 ", "점심에 ", "새벽에 ", "아침에 "];
+const CHANNELS = ["텔레그램", "채널톡"];
+const AMT_LOW = ["", "5만원", "7만원", "10만원"];
+const AMT_HIGH = ["22만원", "66만원"];
 
-const BANNED_RE = /정리하고|천천히|옆에서|칸에서|표에서|맛집|음식점|음식|식당|배달|배민|메뉴|맛있|포장|웨이팅|외식|교재비|병원비|경조사비|잠자고|대출|급전|보이스피싱|스미싱|내구제|대포폰|폰깡|선불폰|유심\s*개통|신용대출|당일\s*지급|카드론|기대출|사기|목돈|가족|식구|리뷰\s*이벤트/;
+/** Bodies must not match this. Dictionary-form verbs and the banned slot glue. */
+export const FORBIDDEN_REVIEW_RE =
+  /읽다|열다|찾다|묻다|조건이 짧|확인후|사업자금|맛집|음식점|외식|대출|급전/;
 
-const WHO = {
-  대학생: ["대학생"],
-  직장인: ["직장인"],
-  주부: ["주부"],
-  사업자: ["사업자"],
-  육아맘: ["육아맘"],
-  경단녀: ["경단녀"]
-};
+const EXTRA_FORBIDDEN_RE =
+  /식당|배달|배민|메뉴|맛있|포장|웨이팅|보이스피싱|스미싱|내구제|대포폰|폰깡|선불폰|유심\s*개통|신용대출|당일\s*지급|카드론|기대출|사기|정리하고|천천히|옆에서|칸에서|표에서|교재비|병원비|경조사|잠자고|가족|식구/;
 
-/** Pattern-local life token. Students must say 용돈, businesses 사업자금. */
-const NEED = {
-  대학생: [
-    "용돈으로",
-    "용돈을",
-    "용돈에",
-    "용돈만",
-    "용돈도",
-    "용돈은",
-    "용돈이",
-    "용돈과"
-  ],
-  사업자: [
-    "사업자금",
-    "사업자금",
-    "사업자금",
-    "사업자금",
-    "사업자금",
-    "사업자금",
-    "사업자금",
-    "사업자금"
-  ]
-};
+const BANNED_RE = new RegExp(`${FORBIDDEN_REVIEW_RE.source}|${EXTRA_FORBIDDEN_RE.source}`);
 
-/**
- * One concrete reason the person checked. Same syntactic job, different words.
- * No persona labels, so a row cannot pick up a second identity.
- */
-const DETAILS = [
-  "조건이 짧아서",
-  "금액이 적혀 있어서",
-  "안내 문장이 평이해서",
-  "상담 답이 빨라서",
-  "캡처를 맞춰 봐서",
-  "사진과 글이 같아서",
-  "검색으로 찾게 돼서",
-  "링크를 눌러 들어와서",
-  "북마크로 다시 열어서",
-  "알림을 눌러 들어와서",
-  "본문을 끝까지 읽어서",
-  "예시가 내 경우와 같아서",
-  "대상이라고 나와서",
-  "횟수 안내를 봐서",
-  "기간이 맞아서",
-  "이름만 맞으면 돼서",
-  "가능하다고 적혀 있어서",
-  "필요한 때라서",
-  "타이밍이 맞아서",
-  "혼자 읽어도 이해돼서",
-  "추가 질문이 없어서",
-  "한 번에 이해돼서",
-  "말이 안 바뀌어서",
-  "페이지와 상담이 같아서",
-  "새로고침 후에도 같아서",
-  "숫자만 다시 봐서",
-  "서류가 필요 없어서",
-  "방문하지 않아도 돼서",
-  "전화 없이 글로 끝나서",
-  "질문 하나에 답이 와서",
-  "용어가 쉬워서",
-  "예시 금액이 있어서",
-  "최대 금액이 적혀 있어서",
-  "총액이 안내와 같아서",
-  "절차가 짧아서",
-  "주의 문장까지 읽어서",
-  "광고가 아니라 본문이라서",
-  "공식 글만 봐서",
-  "적힌 순서라서",
-  "조회 다음에 안내가 와서",
-  "혜택 이름이 보여서",
-  "홈 문구를 보고 들어와서",
-  "조건 페이지가 짧아서",
-  "하단 문장까지 읽어서",
-  "상단에 금액이 있어서",
-  "핵심만 적혀 있어서",
-  "바로 이해되는 글이라서",
-  "저장해 둔 글이라서",
-  "캡처와 본문이 같아서",
-  "담당자 설명이 짧아서",
-  "회사 문장과 같아서",
-  "수수료 이야기가 없어서",
-  "부담이 적어 보여서",
-  "복잡한 절차가 아니라서",
-  "막히지 않고 끝나서",
-  "지나칠 뻔했다가 열어서",
-  "일부러 찾아봐서",
-  "우연히 열어서",
-  "공유된 화면과 같아서",
-  "다른 기기에서도 같아서",
-  "들은 말과 글이 같아서",
-  "적어 둔 메모와 같아서",
-  "궁금하던 점이 풀려서",
-  "금액 의문이 풀려서",
-  "횟수 의문이 풀려서",
-  "대상 의문이 풀려서",
-  "절차 의문이 풀려서",
-  "더 물을 필요가 없어서",
-  "읽고 바로 알게 돼서",
-  "묻고 바로 알게 돼서",
-  "찾아서 열게 돼서",
-  "조건과 금액이 맞아서",
-  "횟수와 금액이 맞아서",
-  "안내와 결과가 같아서",
-  "기대한 범위라서",
-  "나한테 필요해서",
-  "지금 필요해서",
-  "이번에 맞아서",
-  "그 문장이 맞아서",
-  "그 숫자가 맞아서",
-  "적힌 내용 그대로라서",
-  "빠진 조건이 없어서",
-  "놓친 문장이 없어서",
-  "다시 봐도 맞아서",
-  "혜택 문장이 분명해서",
-  "조건 문장이 한 줄이라서",
-  "금액 문장이 분명해서",
-  "방법 문장이 짧아서",
-  "대상 문장이 맞아서",
-  "상담 문장이 같아서",
-  "읽는 순서가 쉬워서",
-  "이해가 먼저 돼서",
-  "문의가 확인용이라서",
-  "상담이 보충이라서",
-  "두 설명이 같아서",
-  "한 번 읽으면 충분해서",
-  "화면만으로 충분해서",
-  "설명만으로 충분해서",
-  "내가 대상이라 나와서",
-  "조건 안에 들어와서",
-  "범위가 맞아서",
-  "분명한 숫자라서",
-  "짧은 문장이라서",
-  "긴 설명이 아니라서",
-  "첫 문장이 혜택이라서",
-  "제목이 혜택이라서",
-  "본문이 조건이라서",
-  "따라 하기 쉬워서",
-  "혼자 볼 수 있어서",
-  "두 번째 조회도 같아서",
-  "저장한 화면과 같아서",
-  "기억한 금액과 같아서",
-  "들은 금액과 같아서",
-  "읽은 조건과 같아서",
-  "본 화면 그대로라서",
-  "받은 답 그대로라서",
-  "보낸 질문에 답이 맞아서",
-  "애매한 부분이 풀려서",
-  "최종 안내가 필요해서",
-  "최종 조건이 맞아서",
-  "원하던 안내라서",
-  "내게 맞는 글이라서",
-  "내 경우에 맞아서",
-  "요건이 짧아서",
-  "금액 범위가 맞아서",
-  "필요한 범위라서",
-  "바로 본론이라서",
-  "부연이 없어서",
-  "숫자와 문장이 맞아서",
-  "받을 수 있다고 적혀서",
-  "상담 창이 편해서",
-  "글로만 끝나서",
-  "답이 글로 남아서",
-  "나중에 다시 봐도 같아서",
-  "설명 듣고 이해돼서",
-  "페이지를 먼저 읽어서",
-  "둘이 같은 금액이라서",
-  "혼선이 없어서",
-  "금액이 유지돼서",
-  "조건이 유지돼서",
-  "필요하던 값이라서",
-  "찾던 혜택이라서",
-  "그 혜택이 필요해서",
-  "설명과 결과가 같아서",
-  "기대한 대로라서",
-  "결과가 바로 보여서",
-  "가능 문구가 보여서",
-  "조건 문구가 보여서",
-  "작은 글씨도 읽혀서",
-  "공식 안내만 있어서",
-  "순서대로 적혀 있어서",
-  "조회 결과가 맞아서",
-  "가능 여부가 보여서",
-  "화면 캡처가 맞아서",
-  "첨부 사진과 같아서",
-  "담당자가 짧게 답해서",
-  "회사 안내가 같아서",
-  "수수료는 없다고 해서",
-  "부담 없는 금액이라서",
-  "채팅으로 충분해서",
-  "텔레그램 문장이 같아서",
-  "채널톡 문장이 같아서",
-  "어디로 물어도 같아서",
-  "편한 쪽으로 물어봐서",
-  "금액만 다시 물어봐서",
-  "조건만 다시 물어봐서",
-  "가능 여부만 물어봐서",
-  "캡처를 보내니 맞아서",
-  "사진을 보내니 맞아서",
-  "상담에서 금액을 들어서",
-  "상담에서 조건을 들어서",
-  "두 경로가 같아서",
-  "처음 안내가 끝과 같아서",
-  "받은 금액이 글과 같아서",
-  "부족한 말은 채팅에 있어서",
-  "숫자만 한 번 더 봐서",
-  "결과 화면이 분명해서",
-  "필요한 혜택으로 보여서",
-  "어려울 줄 알았다가",
-  "길게 걸릴 줄 알았다가",
-  "서류가 필요할 줄 알았다가",
-  "방문할 줄 알았다가",
-  "전화할 줄 알았다가",
-  "추가 비용이 있을 줄 알았다가",
-  "숨은 조건이 있을 줄 알았다가",
-  "대상이 아닐 줄 알았다가",
-  "금액이 다를 줄 알았다가",
-  "절차가 많을 줄 알았다가",
-  "글이 어려울 줄 알았다가",
-  "내 경우가 빠질 줄 알았다가",
-  "다른 안내인 줄 알았다가",
-  "광고만인 줄 알았다가",
-  "글을 한 번 더 읽어서",
-  "금액을 먼저 봐서",
-  "대상을 먼저 봐서",
-  "제외를 먼저 봐서",
-  "예시를 먼저 봐서",
-  "제목부터 봐서",
-  "본문부터 봐서",
-  "한 화면에 담겨서",
-  "스크롤이 짧아서",
-  "글자가 읽혀서",
-  "설명이 두 줄이라서",
-  "방법이 두 단계라서",
-  "페이지만 봐도 돼서",
-  "물어본 답이 글과 같아서",
-  "추측하지 않고 읽어서",
-  "조건을 금액과 맞춰서",
-  "최대치 문장을 봐서",
-  "필요한 건을 고르려고 봐서",
-  "받는 방법이 적혀서",
-  "텔레그램 안내가 보여서",
-  "채널톡 안내가 보여서",
-  "짧은 질문이면 충분해서",
-  "사진을 첨부하게 돼서",
-  "캡처를 첨부하게 돼서",
-  "상담 금액이 글과 같아서",
-  "비교하니 같아서",
-  "추가로 붙은 조건이 없어서",
-  "중간 숫자가 같아서",
-  "기대와 안내가 같아서",
-  "검산이 맞아서",
-  "대조가 맞아서",
-  "최종 문장이 필요해서",
-  "적힌 대로라서",
-  "들은 대로라서",
-  "본 대로라서",
-  "안내한 그대로라서",
-  "상담한 그대로라서",
-  "필요한 그대로라서",
-  "버튼 이름이 분명해서",
-  "다음 화면이 짧아서",
-  "이전 화면과 같아서",
-  "검색 결과가 이 글이라서",
-  "직접 연 페이지라서",
-  "모바일로 읽혀서",
-  "문장이 말로 읽혀서",
-  "확인이 한 단계라서",
-  "상담이 선택이라서",
-  "그래도 한 번 물어서",
-  "답이 안내를 반복해서",
-  "안심하고 진행하게 돼서",
-  "빈틈이 없어 보여서",
-  "물어볼 곳이 분명해서",
-  "그 문장만 따라가서",
-  "생각과 안내가 같아서",
-  "먼저 저장해 두고 봐서",
-  "다시 열어 비교해서",
-  "다른 말이 없어서",
-  "받은 뒤에도 글과 같아서"
+const SPEECH = [
+  ["몰랐어요", "몰랐습니다"],
+  ["알았어요", "알았습니다"],
+  ["들어왔어요", "들어왔습니다"],
+  ["들어왔네요", "들어왔습니다"],
+  ["받았어요", "받았습니다"],
+  ["확인했어요", "확인했습니다"],
+  ["들었어요", "들었습니다"],
+  ["봤어요", "봤습니다"],
+  ["있었어요", "있었습니다"],
+  ["없었어요", "없었습니다"],
+  ["됐어요", "됐습니다"],
+  ["왔어요", "왔습니다"],
+  ["했어요", "했습니다"]
 ];
 
-const TAILS = [
-  "확인하고 받았어요.",
-  "확인하니 받았어요.",
-  "확인해서 받았어요.",
-  "확인 후 받았어요.",
-  "확인 뒤 받았어요.",
-  "확인 끝에 받았어요.",
-  "확인하자 받았어요.",
-  "확인했고 받았어요.",
-  "확인되어 받았어요.",
-  "재확인하고 받았어요.",
-  "확인하고서 받았어요.",
-  "곧 확인 후 받았어요.",
-  "또 확인 후 받았어요.",
-  "잘 확인 후 받았어요.",
-  "확인되자 받았어요.",
-  "보고 확인 후 받았어요."
-];
-
-const AMOUNT_NOTES = [
-  "5만원",
-  "7만원",
-  "10만원",
-  "22만원",
-  "최대3건",
-  "최대66만"
-];
-
-const HOOKS = [
-  "읽다",
-  "열다",
-  "찾다",
-  "묻다",
-  "적다",
-  "보다",
-  "듣다",
-  "두다",
-  "쓰다",
-  "풀다",
-  "재다",
-  "훑다",
-  "짚다",
-  "켜다",
-  "끄다",
-  "얻다",
-  "넣다",
-  "빼다",
-  "담다",
-  "긋다",
-  "접다",
-  "펴다",
-  "닫다",
-  "밀다",
-  "받다",
-  "내다",
-  "들다",
-  "알다",
-  "맞다",
-  "하다",
-  "되다",
-  "있다",
-  "남다",
-  "읽기",
-  "열기",
-  "찾기",
-  "묻기",
-  "적기",
-  "보기",
-  "듣기",
-  "두기",
-  "쓰기",
-  "풀기",
-  "재기",
-  "훑기",
-  "짚기",
-  "켜기",
-  "끄기",
-  "얻기",
-  "넣기",
-  "빼기",
-  "담기",
-  "긋기",
-  "접기",
-  "펴기",
-  "닫기",
-  "밀기",
-  "받기",
-  "내기",
-  "들기",
-  "알기",
-  "맞기",
-  "하기",
-  "되기",
-  "있기",
-  "남기",
-  "기록",
-  "메모",
-  "조회",
-  "대조",
-  "검산",
-  "비교",
-  "저장",
-  "첨부",
-  "복사",
-  "클릭",
-  "검색",
-  "입력",
-  "열람",
-  "정독",
-  "재독",
-  "통독",
-  "체크",
-  "표시",
-  "별표",
-  "알림",
-  "본문",
-  "제목",
-  "하단",
-  "상단",
-  "중간",
-  "예시",
-  "주의",
-  "공식",
-];
-
+/** @type {Array<{ text: string, amounts: string[], group: string }>} */
 const TEMPLATES = [
-  "{W} {A} {N} {D}에 또 유심 혜택을 읽다 {R} {T}",
-  "{W} {A} {N} {D}에 막 유심 혜택을 열다 {R} {T}",
-  "{W} {A} {N} {D}에 곧 유심 혜택을 찾다 {R} {T}",
-  "{W} {A} {N} {D}에 더 유심 혜택을 묻다 {R} {T}",
-  "{W} {A} {N} {D}에 또 유심 혜택을 적다 {R} {T}",
-  "{W} {A} {N} {D}에 막 유심 혜택을 보다 {R} {T}",
-  "{W} {A} {N} {D}에 곧 유심 혜택을 듣다 {R} {T}",
-  "{W} {A} {N} {D}에 더 유심 혜택을 두다 {R} {T}",
-  "{W} {A} {N} {D}에 또 유심 혜택을 쓰다 {R} {T}",
-  "{W} {A} {N} {D}에 막 유심 혜택을 풀다 {R} {T}",
-  "{W} {A} {N} {D}에 곧 유심 혜택을 재다 {R} {T}",
-  "{W} {A} {N} {D}에 더 유심 혜택을 훑다 {R} {T}",
-  "{W} {A} {N} {D}에 또 유심 혜택을 짚다 {R} {T}",
-  "{W} {A} {N} {D}에 막 유심 혜택을 켜다 {R} {T}",
-  "{W} {A} {N} {D}에 곧 유심 혜택을 끄다 {R} {T}",
-  "{W} {A} {N} {D}에 더 유심 혜택을 얻다 {R} {T}",
-  "{W} {A} {N} {D}에 또 유심 혜택을 넣다 {R} {T}",
-  "{W} {A} {N} {D}에 막 유심 혜택을 빼다 {R} {T}",
-  "{W} {A} {N} {D}에 곧 유심 혜택을 담다 {R} {T}",
-  "{W} {A} {N} {D}에 더 유심 혜택을 긋다 {R} {T}",
-  "{W} {A} {N} {D}에 또 유심 혜택을 접다 {R} {T}",
-  "{W} {A} {N} {D}에 막 유심 혜택을 펴다 {R} {T}",
-  "{W} {A} {N} {D}에 곧 유심 혜택을 닫다 {R} {T}",
-  "{W} {A} {N} {D}에 더 유심 혜택을 밀다 {R} {T}",
-  "{W} {A} {N} {D}에 또 유심 혜택을 받다 {R} {T}",
-  "{W} {A} {N} {D}에 막 유심 혜택을 내다 {R} {T}",
-  "{W} {A} {N} {D}에 곧 유심 혜택을 들다 {R} {T}",
-  "{W} {A} {N} {D}에 더 유심 혜택을 알다 {R} {T}",
-  "{W} {A} {N} {D}에 또 유심 혜택을 맞다 {R} {T}",
-  "{W} {A} {N} {D}에 막 유심 혜택을 하다 {R} {T}",
-  "{W} {A} {N} {D}에 곧 유심 혜택을 되다 {R} {T}",
-  "{W} {A} {N} {D}에 더 유심 혜택을 있다 {R} {T}",
-  "{W} {A} {N} {D}에 또 유심 혜택을 남다 {R} {T}",
-  "{W} {A} {N} {D}에 막 유심 혜택을 읽기 {R} {T}",
-  "{W} {A} {N} {D}에 곧 유심 혜택을 열기 {R} {T}",
-  "{W} {A} {N} {D}에 더 유심 혜택을 찾기 {R} {T}",
-  "{W} {A} {N} {D}에 또 유심 혜택을 묻기 {R} {T}",
-  "{W} {A} {N} {D}에 막 유심 혜택을 적기 {R} {T}",
-  "{W} {A} {N} {D}에 곧 유심 혜택을 보기 {R} {T}",
-  "{W} {A} {N} {D}에 더 유심 혜택을 듣기 {R} {T}",
-  "{W} {A} {N} {D}에 또 유심 혜택을 두기 {R} {T}",
-  "{W} {A} {N} {D}에 막 유심 혜택을 쓰기 {R} {T}",
-  "{W} {A} {N} {D}에 곧 유심 혜택을 풀기 {R} {T}",
-  "{W} {A} {N} {D}에 더 유심 혜택을 재기 {R} {T}",
-  "{W} {A} {N} {D}에 또 유심 혜택을 훑기 {R} {T}",
-  "{W} {A} {N} {D}에 막 유심 혜택을 짚기 {R} {T}",
-  "{W} {A} {N} {D}에 곧 유심 혜택을 켜기 {R} {T}",
-  "{W} {A} {N} {D}에 더 유심 혜택을 끄기 {R} {T}",
-  "{W} {A} {N} {D}에 또 유심 혜택을 얻기 {R} {T}",
-  "{W} {A} {N} {D}에 막 유심 혜택을 넣기 {R} {T}",
-  "{W} {A} {N} {D}에 곧 유심 혜택을 빼기 {R} {T}",
-  "{W} {A} {N} {D}에 더 유심 혜택을 담기 {R} {T}",
-  "{W} {A} {N} {D}에 또 유심 혜택을 긋기 {R} {T}",
-  "{W} {A} {N} {D}에 막 유심 혜택을 접기 {R} {T}",
-  "{W} {A} {N} {D}에 곧 유심 혜택을 펴기 {R} {T}",
-  "{W} {A} {N} {D}에 더 유심 혜택을 닫기 {R} {T}",
-  "{W} {A} {N} {D}에 또 유심 혜택을 밀기 {R} {T}",
-  "{W} {A} {N} {D}에 막 유심 혜택을 받기 {R} {T}",
-  "{W} {A} {N} {D}에 곧 유심 혜택을 내기 {R} {T}",
-  "{W} {A} {N} {D}에 더 유심 혜택을 들기 {R} {T}",
-  "{W} {A} {N} {D}에 또 유심 혜택을 알기 {R} {T}",
-  "{W} {A} {N} {D}에 막 유심 혜택을 맞기 {R} {T}",
-  "{W} {A} {N} {D}에 곧 유심 혜택을 하기 {R} {T}",
-  "{W} {A} {N} {D}에 더 유심 혜택을 되기 {R} {T}",
-  "{W} {A} {N} {D}에 또 유심 혜택을 있기 {R} {T}",
-  "{W} {A} {N} {D}에 막 유심 혜택을 남기 {R} {T}",
-  "{W} {A} {N} {D}에 곧 유심 혜택을 기록 {R} {T}",
-  "{W} {A} {N} {D}에 더 유심 혜택을 메모 {R} {T}",
-  "{W} {A} {N} {D}에 또 유심 혜택을 조회 {R} {T}",
-  "{W} {A} {N} {D}에 막 유심 혜택을 대조 {R} {T}",
-  "{W} {A} {N} {D}에 곧 유심 혜택을 검산 {R} {T}",
-  "{W} {A} {N} {D}에 더 유심 혜택을 비교 {R} {T}",
-  "{W} {A} {N} {D}에 또 유심 혜택을 저장 {R} {T}",
-  "{W} {A} {N} {D}에 막 유심 혜택을 첨부 {R} {T}",
-  "{W} {A} {N} {D}에 곧 유심 혜택을 복사 {R} {T}",
-  "{W} {A} {N} {D}에 더 유심 혜택을 클릭 {R} {T}",
-  "{W} {A} {N} {D}에 또 유심 혜택을 검색 {R} {T}",
-  "{W} {A} {N} {D}에 막 유심 혜택을 입력 {R} {T}",
-  "{W} {A} {N} {D}에 곧 유심 혜택을 열람 {R} {T}",
-  "{W} {A} {N} {D}에 더 유심 혜택을 정독 {R} {T}",
-  "{W} {A} {N} {D}에 또 유심 혜택을 재독 {R} {T}",
-  "{W} {A} {N} {D}에 막 유심 혜택을 통독 {R} {T}",
-  "{W} {A} {N} {D}에 곧 유심 혜택을 체크 {R} {T}",
-  "{W} {A} {N} {D}에 더 유심 혜택을 표시 {R} {T}",
-  "{W} {A} {N} {D}에 또 유심 혜택을 별표 {R} {T}",
-  "{W} {A} {N} {D}에 막 유심 혜택을 알림 {R} {T}",
-  "{W} {A} {N} {D}에 곧 유심 혜택을 본문 {R} {T}",
-  "{W} {A} {N} {D}에 더 유심 혜택을 제목 {R} {T}",
-  "{W} {A} {N} {D}에 또 유심 혜택을 하단 {R} {T}",
-  "{W} {A} {N} {D}에 막 유심 혜택을 상단 {R} {T}",
-  "{W} {A} {N} {D}에 곧 유심 혜택을 중간 {R} {T}",
-  "{W} {A} {N} {D}에 더 유심 혜택을 예시 {R} {T}",
-  "{W} {A} {N} {D}에 또 유심 혜택을 주의 {R} {T}",
-  "{W} {A} {N} {D}에 막 유심 혜택을 공식 {R} {T}",
+  // --- did not know, then checked ---
+  { group: "low", text: "{when}{ch}에서 {amt} 유심 혜택이 있는 줄 몰랐는데 직접 확인해 보니 제가 해당돼서 받았어요." },
+  { group: "low", text: "{when}저는 해당이 안 되는 줄 알았는데 {ch}에서 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}{amt} 유심 혜택은 몰랐어요. {ch}에서 조건이 맞는지 확인하고 받았어요." },
+  { group: "low", text: "{when}그냥 넘길 뻔했는데 {ch}으로 {amt} 유심 혜택을 확인해 보고 받았어요." },
+  { group: "low", text: "{when}{ch}에서 안내를 듣기 전에는 {amt} 유심 혜택이 있는 줄 몰랐고 확인한 뒤 받았어요." },
+  { group: "low", text: "{when}광고인 줄 알았다가 {ch}에서 {amt} 유심 혜택인지 확인하고 받았어요." },
+  { group: "low", text: "{when}{ch}으로 물어보기 전에는 {amt} 유심 혜택을 몰랐는데 확인하고 받았어요." },
+  { group: "low", text: "{when}지인 얘기로 처음 듣고 {ch}에서 {amt} 유심 혜택인지 확인한 뒤 받았어요." },
+  { group: "low", text: "{when}{amt} 유심 혜택 글이 보여서 {ch}에서 제 경우인지 확인하고 받았어요." },
+  { group: "low", text: "{when}검색에 나와서 {ch}으로 {amt} 유심 혜택을 직접 확인하고 받았어요." },
+  { group: "low", text: "{when}{ch}에서 이름을 맞춰 보고 {amt} 유심 혜택 대상이라고 확인한 뒤 받았어요." },
+  { group: "low", text: "{when}저한테는 아닐 줄 알았는데 {ch}에서 {amt} 유심 혜택을 확인해 보니 해당돼서 받았어요." },
+  { group: "low", text: "{when}{amt} 유심 혜택이 따로 있는 줄 몰랐어요. {ch}으로 확인하고 나서 받았어요." },
+  { group: "low", text: "{when}홈 화면 문구를 보고 {ch}에서 {amt} 유심 혜택을 확인한 다음 받았어요." },
+  { group: "low", text: "{when}{ch}에서 짧게 설명 듣고 {amt} 유심 혜택이 맞는지 확인한 뒤 받았어요." },
+  { group: "low", text: "{when}예전에는 이런 안내를 못 봤어요. {ch}에서 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}{ch}으로 링크를 받아 보고 그제야 {amt} 유심 혜택인 줄 확인하고 받았어요." },
+  { group: "low", text: "{when}제 명의로도 되나 싶었는데 {ch}에서 {amt} 유심 혜택을 확인해 보니 받았어요." },
+  { group: "low", text: "{when}{amt} 유심 혜택 문구가 낯설어서 {ch}으로 다시 확인하고 받았어요." },
+  { group: "low", text: "{when}{ch}에서 설명을 들으면서 {amt} 유심 혜택이 맞는 걸 확인하고 받았어요." },
+  { group: "low", text: "{when}설명을 끝까지 듣고 {ch}에서 {amt} 유심 혜택을 확인한 뒤 받았어요." },
+  { group: "low", text: "{when}{ch}으로 질문 하나 남겼더니 {amt} 유심 혜택이라고 해서 확인하고 받았어요." },
+  { group: "low", text: "{when}처음 화면만 보고 닫을 뻔했는데 {ch}에서 {amt} 유심 혜택을 다시 확인하고 받았어요." },
+  { group: "low", text: "{when}{amt} 유심 혜택이 제게 해당되는지 {ch}으로 확인하고 받았어요." },
+  { group: "low", text: "{when}{ch}에서 예시랑 제 상황을 비교하고 {amt} 유심 혜택을 확인한 다음 받았어요." },
+
+  // --- checked the condition, then received ---
+  { group: "low", text: "{when}상담에서 조건을 듣고 {ch}에서 {amt} 유심 혜택을 확인한 뒤 받았어요." },
+  { group: "low", text: "{when}{amt} 유심 혜택이 가능한지 {ch}에서 먼저 확인하고 필요한 만큼만 받았어요." },
+  { group: "low", text: "{when}{ch}으로 조건을 물어보고 {amt} 유심 혜택을 확인한 다음 받았어요." },
+  { group: "low", text: "{when}적힌 순서대로 {ch}에서 {amt} 유심 혜택을 확인하고 안내대로 받았어요." },
+  { group: "low", text: "{when}{ch}에서 대상 여부를 먼저 확인하고 {amt} 유심 혜택을 받았어요." },
+  { group: "low", text: "{when}금액보다 조건을 먼저 봤어요. {ch}으로 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}{amt} 유심 혜택 범위 안인지 {ch}에서 확인하고 필요한 만큼 받았어요." },
+  { group: "low", text: "{when}{ch}에서 안내 문장과 상담 말이 같아서 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}헷갈리던 부분만 {ch}으로 다시 묻고 {amt} 유심 혜택을 확인한 뒤 받았어요." },
+  { group: "low", text: "{when}{ch}에서 횟수랑 금액을 같이 확인하고 {amt} 유심 혜택을 받았어요." },
+  { group: "low", text: "{when}복잡한 절차는 아니라서 {ch}에서 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}{amt} 유심 혜택 조건이 이해된 뒤에 {ch}으로 한 번 더 확인하고 받았어요." },
+  { group: "low", text: "{when}{ch}에서 캡처랑 본문을 맞춰 보고 {amt} 유심 혜택을 확인한 뒤 받았어요." },
+  { group: "low", text: "{when}전화 없이 글로 충분하다길래 {ch}으로 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}{ch}에서 제 경우에 맞는지 확인하고 {amt} 유심 혜택을 받았어요." },
+  { group: "low", text: "{when}추가 질문 없이 끝났고 {ch}에서 {amt} 유심 혜택을 확인한 대로 받았어요." },
+  { group: "low", text: "{when}{amt} 유심 혜택 안내가 분명해서 {ch}으로 확인하고 받았어요." },
+  { group: "low", text: "{when}{ch}에서 들은 금액과 글의 금액이 같아서 유심 혜택을 확인하고 {amt} 받았어요." },
+  { group: "low", text: "{when}방문하지 않아도 된다길래 {ch}에서 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}{ch}으로 받은 답이 글과 같아서 {amt} 유심 혜택을 확인한 뒤 받았어요." },
+  { group: "low", text: "{when}제가 읽을 수 있는 문장이라 {ch}에서 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}{amt} 유심 혜택인지 화면으로 먼저 확인하고 {ch}에서 안내대로 받았어요." },
+  { group: "low", text: "{when}{ch}에서 누락된 조건이 없는지 확인하고 {amt} 유심 혜택을 받았어요." },
+  { group: "low", text: "{when}두 번째에도 같은 안내라 {ch}으로 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}{ch}에서 최종 안내만 다시 확인하고 {amt} 유심 혜택을 받았어요." },
+
+  // --- received after checking, phone-note shape ---
+  { group: "low", text: "{when}{amt} 들어왔어요. {ch}에서 유심 혜택인 줄 모르고 있다가 확인하고 받았어요." },
+  { group: "low", text: "{when}안내대로 {amt} 들어왔어요. {ch}으로 유심 혜택을 먼저 확인하고 받았어요." },
+  { group: "low", text: "3일 지나고 {amt} 들어왔어요. {when}{ch}에서 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "3일 지나고 {amt} 들어왔어요. {when}안내는 {ch}으로 왔고 유심 혜택을 확인한 뒤 받았어요." },
+  { group: "low", text: "며칠 뒤에 {amt} 들어왔어요. {when}{ch}으로 유심 혜택 안내를 받고 확인해서 받았어요." },
+  { group: "low", text: "다음 날 {amt} 들어왔어요. {when}{ch}에서 유심 혜택을 확인한 다음 받았어요." },
+  { group: "low", text: "3일 지나고 나서 확인하니 {amt} 유심 혜택이 들어와 있었어요. {when}{ch}에서 안내받은 대로 받았어요." },
+  { group: "low", text: "{when}{ch}에서 확인한 {amt} 유심 혜택이 며칠 뒤에 들어와서 안내대로 받았어요." },
+  { group: "low", text: "{when}필요한 만큼만 받자고 {ch}에서 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}{ch}으로 진행 여부를 확인하고 {amt} 유심 혜택을 필요한 만큼만 받았어요." },
+  { group: "low", text: "{when}과하게 받지 않고 {ch}에서 {amt} 유심 혜택을 확인한 뒤 필요한 선에서 받았어요." },
+  { group: "low", text: "{when}{amt} 유심 혜택을 확인한 뒤에야 {ch}으로 신청해서 받았어요." },
+  { group: "low", text: "{when}{ch}에서 가능하다고 확인된 {amt} 유심 혜택만 골라서 받았어요." },
+  { group: "low", text: "{when}상담 창에 남은 글대로 {ch}에서 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}{ch}으로 사진 대신 글 안내를 받고 {amt} 유심 혜택을 확인한 뒤 받았어요." },
+  { group: "low", text: "{when}제가 이해한 내용이 맞는지 {ch}에서 {amt} 유심 혜택인지 다시 확인하고 받았어요." },
+  { group: "low", text: "{when}{amt} 유심 혜택 이름이 보여서 {ch}으로 조건을 확인하고 받았어요." },
+  { group: "low", text: "{when}{ch}에서 상단 안내를 읽고 나서 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}하단 주의까지 본 다음 {ch}에서 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}{ch}으로 받은 안내가 충분해서 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}다른 상품인 줄 알았는데 {ch}에서 {amt} 유심 혜택이 맞다고 확인하고 받았어요." },
+  { group: "low", text: "{when}{amt} 유심 혜택만 따로 있다고 {ch}에서 확인하고 받았어요." },
+  { group: "low", text: "{when}{ch}에서 제 상황에 해당된다고 확인한 뒤 {amt} 유심 혜택을 받았어요." },
+  { group: "low", text: "{when}부담되는 절차는 없어서 {ch}으로 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}{ch}에서 숫자만 다시 확인해 보고 {amt} 유심 혜택을 받았어요." },
+  { group: "low", text: "{when}기억하던 금액과 같아서 {ch}에서 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}{amt} 유심 혜택 안내를 {ch}으로 다시 듣고 확인한 뒤 받았어요." },
+  { group: "low", text: "{when}{ch}에서 막히지 않고 끝나서 {amt} 유심 혜택을 확인한 대로 받았어요." },
+  { group: "low", text: "{when}궁금증이 풀린 뒤에 {ch}으로 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}{ch}에서 대상 문장이 제 경우라 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}한 번 보고 이해가 돼서 {ch}에서 {amt} 유심 혜택을 확인한 다음 받았어요." },
+  { group: "low", text: "{when}{amt} 유심 혜택을 저장해 뒀다가 {ch}으로 다시 확인하고 받았어요." },
+  { group: "low", text: "{when}{ch}에서 새로 고친 안내도 같아서 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}들은 조건을 {ch}에서 다시 보고 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}{ch}으로 핵심만 듣고 {amt} 유심 혜택을 확인한 뒤 받았어요." },
+  { group: "low", text: "{when}제가 필요한 범위라서 {ch}에서 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}{amt} 유심 혜택이 지금 필요하다고 보고 {ch}으로 확인한 뒤 받았어요." },
+  { group: "low", text: "{when}{ch}에서 이번 조건에 든다고 해서 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}빠져 있던 설명을 {ch}에서 듣고 {amt} 유심 혜택을 확인한 다음 받았어요." },
+  { group: "low", text: "{when}{ch}으로 마지막 문장까지 확인하고 {amt} 유심 혜택을 받았어요." },
+  { group: "low", text: "{when}혼자 봐도 이해가 돼서 {ch}에서 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}{amt} 유심 혜택 페이지와 상담이 같아서 {ch}으로 확인하고 받았어요." },
+  { group: "low", text: "{when}{ch}에서 받을 수 있다고 적힌 걸 확인하고 {amt} 유심 혜택을 받았어요." },
+  { group: "low", text: "{when}질문 하나에 답이 와서 {ch}에서 {amt} 유심 혜택을 확인한 뒤 받았어요." },
+  { group: "low", text: "{when}{ch}으로 용어를 쉽게 듣고 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}예시가 제 경우와 같아서 {ch}에서 {amt} 유심 혜택을 확인한 다음 받았어요." },
+  { group: "low", text: "{when}{amt} 유심 혜택을 놓칠 뻔했다가 {ch}으로 확인하고 받았어요." },
+  { group: "low", text: "{when}{ch}에서 공유된 화면과 같은지 확인하고 {amt} 유심 혜택을 받았어요." },
+  { group: "low", text: "{when}적어 둔 메모와 같아서 {ch}에서 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}{ch}으로 기간이 맞는지 확인하고 {amt} 유심 혜택을 받았어요." },
+  { group: "low", text: "{when}이름만 맞으면 된다길래 {ch}에서 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}{amt} 유심 혜택이 본문에 분명해서 {ch}으로 확인한 뒤 받았어요." },
+  { group: "low", text: "{when}{ch}에서 첫 문장부터 혜택이라고 해서 유심 혜택을 확인하고 {amt} 받았어요." },
+  { group: "low", text: "{when}제목이 혜택이라 {ch}에서 {amt} 유심 혜택 본문을 확인하고 받았어요." },
+  { group: "low", text: "{when}{ch}으로 따라 하기 쉬워서 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}두 설명이 같아서 {ch}에서 {amt} 유심 혜택을 확인한 뒤 받았어요." },
+  { group: "low", text: "{when}{amt} 유심 혜택 상담이 보충 설명이라 {ch}으로 확인하고 받았어요." },
+  { group: "low", text: "{when}{ch}에서 화면만으로 충분하다고 해서 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}나중에 다시 봐도 같아서 {ch}에서 {amt} 유심 혜택을 확인한 다음 받았어요." },
+  { group: "low", text: "{when}{ch}으로 보낸 질문에 답이 맞아 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}애매하던 부분이 풀려서 {ch}에서 {amt} 유심 혜택을 확인한 뒤 받았어요." },
+  { group: "low", text: "{when}{amt} 유심 혜택이 최종 안내와 같아서 {ch}으로 확인하고 받았어요." },
+  { group: "low", text: "{when}{ch}에서 원하던 안내가 맞아서 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}부연이 없어도 알겠기에 {ch}에서 {amt} 유심 혜택을 확인한 뒤 받았어요." },
+  { group: "low", text: "{when}{ch}으로 숫자와 문장을 같이 확인하고 {amt} 유심 혜택을 받았어요." },
+  { group: "low", text: "{when}받을 수 있다고 적혀 있어서 {ch}에서 {amt} 유심 혜택을 확인하고 받았어요." },
+  { group: "low", text: "{when}{amt} 유심 혜택 상담 창이 편해서 {ch}으로 확인하고 받았어요." },
+  { group: "low", text: "{when}{ch}에서 답이 글로 남아서 {amt} 유심 혜택을 다시 확인하고 받았어요." },
+  { group: "low", text: "{when}설명 듣고 이해가 돼서 {ch}에서 {amt} 유심 혜택을 확인한 다음 받았어요." },
+  { group: "low", text: "{when}{ch}으로 페이지를 먼저 보고 {amt} 유심 혜택을 확인한 뒤 받았어요." },
+  { group: "low", text: "{when}혼선이 없어서 {ch}에서 {amt} 유심 혜택 금액을 확인하고 받았어요." },
+  { group: "low", text: "{when}{amt} 유심 혜택 조건이 그대로 유지돼서 {ch}으로 확인하고 받았어요." },
+  { group: "low", text: "{when}{ch}에서 필요하던 안내를 확인하고 {amt} 유심 혜택을 받았어요." },
+
+  // --- caps: 22만원 / 66만원. Amount is never empty. ---
+  { group: "high", text: "{when}{ch}에서 최대 {amt}까지 된다고 해서 유심 혜택을 확인하고 안내대로 받았어요." },
+  { group: "high", text: "{when}최대 {amt}까지 가능하다길래 {ch}으로 유심 혜택을 확인한 뒤 안내대로 받았어요." },
+  { group: "high", text: "{when}상담에서 최대 {amt}까지라고 해서 {ch}에서 유심 혜택을 확인하고 받았어요." },
+  { group: "high", text: "{when}{ch}에서 상한이 {amt}까지라고 해서 유심 혜택을 확인해 보고 받았어요." },
+  { group: "high", text: "{when}글에는 최대 {amt}까지라고 적혀 있어서 {ch}으로 유심 혜택을 확인하고 받았어요." },
+  { group: "high", text: "{when}{ch}에서 들은 한도가 {amt}까지라서 유심 혜택을 확인한 뒤 안내대로 받았어요." },
+  { group: "high", text: "{when}저는 {amt}까지는 된다고 보고 {ch}에서 유심 혜택을 확인한 다음 받았어요." },
+  { group: "high", text: "{when}{amt}까지 가능하다는 말을 {ch}에서 듣고 유심 혜택을 직접 확인한 뒤 받았어요." },
+  { group: "high", text: "{when}{ch}으로 금액 안내를 받고 최대 {amt}까지인 유심 혜택을 확인한 뒤 받았어요." },
+  { group: "high", text: "{when}필요한 만큼이 {amt} 안쪽이라 {ch}에서 유심 혜택을 확인하고 받았어요." },
+  { group: "high", text: "{when}{ch}에서 다시 물어보니 최대 {amt}까지라고 해서 유심 혜택을 확인하고 받았어요." },
+  { group: "high", text: "{when}안내 문장에 최대 {amt}까지라고 되어 있어서 {ch}으로 유심 혜택을 확인하고 받았어요." },
+  { group: "high", text: "{when}{ch}에서 상한 {amt}을 확인하고 유심 혜택을 그 범위에서 받았어요." },
+  { group: "high", text: "{when}{amt}까지 안내와 같아서 {ch}에서 유심 혜택을 확인한 뒤 받았어요." },
+  { group: "high", text: "{when}{ch}으로 최대 {amt}까지 가능한지 확인하고 유심 혜택을 안내대로 받았어요." },
+  { group: "high", text: "3일 지나고 들어왔어요. {when}{ch}에서 최대 {amt}까지라는 유심 혜택을 확인하고 받았어요." },
+  { group: "high", text: "{when}상담 때 최대 {amt}까지 듣고 {ch}으로 유심 혜택을 확인한 다음 받았어요." },
+  { group: "high", text: "{when}{ch}에서 {amt}까지 된다고 해서 진행했고 유심 혜택을 확인한 내용대로 받았어요." },
+
+  // --- 3 cases. No won amount in the slot. ---
+  { group: "count", text: "{when}최대 3건까지 된다고 해서 {ch}에서 유심 혜택을 확인하고 두 건만 받았어요." },
+  { group: "count", text: "{when}{ch}에서 최대 3건까지 가능하다고 해서 유심 혜택을 확인한 뒤 두 건만 받았어요." },
+  { group: "count", text: "{when}유심 혜택이 최대 3건까지라서 {ch}으로 확인하고 두 건만 받았어요." },
+  { group: "count", text: "{when}{ch}으로 안내를 듣고 최대 3건까지인 유심 혜택을 확인한 다음 두 건만 받았어요." },
+  { group: "count", text: "{when}한꺼번에 하지 않고 {ch}에서 유심 혜택을 확인한 뒤 최대 3건 중 두 건만 받았어요." },
+  { group: "count", text: "{when}{ch}에서 3건까지 된다고 해서 유심 혜택인지 먼저 확인하고 두 건만 받았어요." },
+  { group: "count", text: "{when}상담에서 최대 3건이라고 해서 {ch}으로 유심 혜택을 확인하고 두 건만 받았어요." },
+  { group: "count", text: "{when}{ch}에서 조건을 들으니 최대 3건까지라서 유심 혜택을 확인한 뒤 두 건만 받았어요." },
+  { group: "count", text: "{when}저는 최대 3건이 다 필요하지는 않아서 {ch}에서 유심 혜택을 확인하고 두 건만 받았어요." },
+  { group: "count", text: "{when}{ch}으로 물어보고 최대 3건까지인 걸 확인한 뒤 유심 혜택을 두 건만 받았어요." },
+  { group: "count", text: "{when}유심 혜택 안내가 최대 3건까지라서 {ch}에서 확인하고 이번엔 두 건만 받았어요." },
+  { group: "count", text: "{when}{ch}에서 횟수를 확인해 보니 최대 3건까지라 유심 혜택을 두 건만 받았어요." },
+  { group: "count", text: "{when}필요한 횟수만 하자고 하고 {ch}에서 유심 혜택이 최대 3건까지인지 확인한 뒤 두 건만 받았어요." },
+  { group: "count", text: "{when}{ch}으로 안내받은 최대 건수가 3건이라 유심 혜택을 확인하고 두 건만 받았어요." },
+  { group: "count", text: "{when}여유 있게 하자고 {ch}에서 유심 혜택을 확인했는데 최대 3건까지라서 두 건만 받았어요." },
+  { group: "count", text: "{when}{ch}에서 최대 3건이라는 유심 혜택 안내를 확인하고 두 건만 받았어요." },
+  { group: "count", text: "3일 지나고 들어왔어요. {when}{ch}에서 유심 혜택이 최대 3건까지인지 확인하고 두 건만 받았어요." },
+  { group: "count", text: "{when}전부 받지 않고 {ch}으로 유심 혜택을 확인한 뒤 최대 3건 중 두 건만 받았어요." }
 ];
 
-function uniqueDetails(list) {
-  const chosen = [];
-  const seen = new Set();
-  for (const line of list) {
-    const suffix = line.slice(-6);
-    if (seen.has(suffix)) continue;
-    seen.add(suffix);
-    chosen.push(line);
-  }
-  return chosen;
+function amountsFor(group) {
+  if (group === "high") return AMT_HIGH;
+  if (group === "count") return [""];
+  return AMT_LOW;
 }
 
-const DETAIL_POOL = uniqueDetails(DETAILS);
-
-function fill(template, bag) {
+function fill(template, when, ch, amt) {
   return template
-    .replaceAll("{D}", bag.D)
-    .replaceAll("{W}", bag.W)
-    .replaceAll("{A}", bag.A)
-    .replaceAll("{N}", bag.N)
-    .replaceAll("{H2}", bag.H2)
-    .replaceAll("{H}", bag.H)
-    .replaceAll("{R}", bag.R)
-    .replaceAll("{T}", bag.T)
-    .replace(/\s+/g, " ")
+    .replaceAll("{when}", when)
+    .replaceAll("{ch}", ch)
+    .replaceAll("{amt}", amt)
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/\s+([.!?])/g, "$1")
     .trim();
 }
 
-function restyleCasual(text, i) {
-  const mode = i % 23;
-  if (mode === 0) return text.replace(/받았어요\.$/, "받았네요.");
-  if (mode === 1) return text.replace(/받았어요\.$/, "받음.");
-  if (mode === 2) return text.replace(/받았어요\.$/, "받았어요 ㅋㅋ");
-  if (mode === 3) return text.replace(/받았어요\.$/, "받았어요 ㅎㅎ");
+function toPolite(text) {
+  let value = text;
+  for (const [from, to] of SPEECH) value = value.replaceAll(from, to);
+  return value;
+}
+
+function isFormalIndex(i) {
+  const mod = (i - 1) % 6;
+  return mod === 3 || mod === 4 || mod === 5;
+}
+
+function rejectReason(casual) {
+  if (BANNED_RE.test(casual)) return "forbidden";
+  if (!casual.includes("유심 혜택")) return "benefit";
+  if (!casual.includes("확인")) return "check";
+  if (!/받았/.test(casual)) return "receive";
+  if ((casual.match(/[.!?]/g) || []).length > 2) return "sentences";
+  if (/\d+\s*분|요일|\d{1,2}\s*월/.test(casual)) return "date";
+  if (casual.length < 40 || casual.length > 100) return `len ${casual.length}`;
+  const formal = toPolite(casual);
+  if (/어요|아요|예요|네요|해요/.test(formal)) return "formal-ending-left";
+  if (!/(습니다|였습니다|하였습니다|입니다)[.!?]?$/.test(formal)) return "formal-end";
+  if (formal.length < 40 || formal.length > 110) return `formal-len ${formal.length}`;
+  if (BANNED_RE.test(formal)) return "forbidden-formal";
+  return "";
+}
+
+function expandTemplate(entry) {
+  const amounts = amountsFor(entry.group);
+  const out = [];
+  for (const when of WHEN) {
+    for (const ch of CHANNELS) {
+      for (const amt of amounts) {
+        const casual = fill(entry.text, when, ch, amt);
+        const reason = rejectReason(casual);
+        if (reason) continue;
+        out.push(casual);
+      }
+    }
+  }
+  return out;
+}
+
+function buildCasualBodies() {
+  if (TEMPLATES.length < 120) {
+    throw new Error(`need at least 120 templates, got ${TEMPLATES.length}`);
+  }
+  const seenTemplate = new Set();
+  for (const entry of TEMPLATES) {
+    if (seenTemplate.has(entry.text)) throw new Error(`duplicate template: ${entry.text}`);
+    seenTemplate.add(entry.text);
+    if (!entry.text.includes("{when}") || !entry.text.includes("{ch}")) {
+      throw new Error(`template missing a safe slot: ${entry.text}`);
+    }
+    if (entry.group !== "count" && !entry.text.includes("{amt}")) {
+      throw new Error(`template missing amount slot: ${entry.text}`);
+    }
+    if (/확인후|조건이 짧|사업자금|읽다|열다|찾다|묻다/.test(entry.text)) {
+      throw new Error(`template contains a forbidden stem: ${entry.text}`);
+    }
+  }
+  const buckets = TEMPLATES.map((entry) => expandTemplate(entry));
+  const empty = buckets
+    .map((list, index) => (list.length ? -1 : index))
+    .filter((index) => index >= 0);
+  if (empty.length) {
+    const lines = empty.map((index) => {
+      const sample = TEMPLATES[index];
+      const amounts = amountsFor(sample.group);
+      const probe = fill(sample.text, "아침에 ", "텔레그램", amounts[amounts.length - 1] || "");
+      return `${index} ${rejectReason(probe) || "ok"} ${probe.length}: ${probe}`;
+    });
+    throw new Error(`templates with no bodies:\n${lines.join("\n")}`);
+  }
+  const selected = [];
+  const seen = new Set();
+  const used = new Set();
+  let round = 0;
+  while (selected.length < 10_000) {
+    let progressed = false;
+    for (let index = 0; index < buckets.length; index += 1) {
+      const list = buckets[index];
+      if (round >= list.length) continue;
+      progressed = true;
+      const casual = list[round];
+      if (seen.has(casual)) continue;
+      seen.add(casual);
+      selected.push(casual);
+      used.add(index);
+      if (selected.length === 10_000) break;
+    }
+    if (!progressed) break;
+    round += 1;
+  }
+  if (selected.length !== 10_000) {
+    throw new Error(`filled ${selected.length} reviews from ${TEMPLATES.length} templates`);
+  }
+  if (used.size < 120) throw new Error(`only ${used.size} templates used`);
+  return selected;
+}
+
+const CASUAL_BODIES = buildCasualBodies();
+
+function toneBody(casual, i) {
+  const formal = isFormalIndex(i);
+  let text = formal ? toPolite(casual) : casual;
+  if (!formal && i % 5 === 0 && text.length <= 88) text = `${text} 🙂`;
   return text;
 }
 
-export function humanReviewBody({ i, persona, formal, month, day }) {
-  if (!Number.isInteger(i) || i < 1) throw new Error(`bad review index ${i}`);
-  const n = i - 1;
-  const pattern = n % TEMPLATES.length;
-  const detail = DETAIL_POOL[Math.floor(n / TEMPLATES.length) % DETAIL_POOL.length];
-  const who = WHO[persona][pattern % WHO[persona].length];
-  const need = NEED[persona] ? NEED[persona][pattern % NEED[persona].length] : "";
-  const slot = (n * 3 + pattern) % 20;
-  const amount = slot < AMOUNT_NOTES.length ? AMOUNT_NOTES[slot] : "";
-  const hook = HOOKS[pattern % HOOKS.length];
-  const hook2 = HOOKS[(pattern + 17) % HOOKS.length];
-  const tail = `${hook} 확인후 받았어요.`;
-  const text = fill(TEMPLATES[pattern], {
-    D: `${month}월 ${day}일`,
-    W: who,
-    A: amount,
-    N: need,
-    H: hook,
-    H2: hook2,
-    R: detail,
-    T: tail
-  });
-  if (formal) return toFormal(text);
-  let casual = restyleCasual(text, i);
-  if (i % 29 === 7 && !/ㅋㅋ|ㅎㅎ/.test(casual)) casual = `${casual} 🙂`;
-  return casual;
+const FINAL_BODIES = CASUAL_BODIES.map((casual, index) => toneBody(casual, index + 1));
+
+function assertCorpus(bodies) {
+  const seen = new Set();
+  const counts = {
+    "5만원": 0,
+    "7만원": 0,
+    "10만원": 0,
+    "22만원": 0,
+    "66만원": 0,
+    "3건": 0,
+    none: 0,
+    polite: 0,
+    emoji: 0,
+    short: 0,
+    mid: 0
+  };
+  let sleep = 0;
+  for (const body of bodies) {
+    if (seen.has(body)) throw new Error(`duplicate final body: ${body}`);
+    seen.add(body);
+    if (BANNED_RE.test(body)) throw new Error(`banned body: ${body}`);
+    if (body.length < 40 || body.length >= 120) throw new Error(`length ${body.length}: ${body}`);
+    if (body.length < 80) counts.short += 1;
+    if (body.length <= 90) counts.mid += 1;
+    if (/잠자고/.test(body)) sleep += 1;
+    if (body.includes("🙂")) counts.emoji += 1;
+    if (/(습니다|였습니다|하였습니다|입니다)[.!?]?$/.test(body)) counts.polite += 1;
+    const hasWon = /5만원|7만원|10만원|22만원|66만원/.test(body);
+    const hasCount = body.includes("3건");
+    if (!hasWon && !hasCount) counts.none += 1;
+    if (body.includes("5만원")) counts["5만원"] += 1;
+    if (body.includes("7만원")) counts["7만원"] += 1;
+    if (body.includes("10만원")) counts["10만원"] += 1;
+    if (body.includes("22만원")) counts["22만원"] += 1;
+    if (body.includes("66만원")) counts["66만원"] += 1;
+    if (hasCount) counts["3건"] += 1;
+  }
+  if (sleep > 1) throw new Error(`잠자고 있던 used ${sleep} times`);
+  if (counts.none < 1200) throw new Error(`only ${counts.none} reviews omit an amount`);
+  if (counts.mid < 9000) throw new Error(`only ${counts.mid} reviews are <= 90 chars`);
+  if (counts.short < 1) throw new Error("expected some reviews under 80 chars");
+  if (counts.emoji < 100 || counts.emoji > 4900) throw new Error(`emoji count ${counts.emoji}`);
+  if (counts.polite < 4000) throw new Error(`formal count ${counts.polite}`);
+  for (const key of ["5만원", "7만원", "10만원", "22만원", "66만원", "3건"]) {
+    if (counts[key] < 50) throw new Error(`${key} only appears ${counts[key]} times`);
+  }
 }
 
-export function reviewFrameCount() {
+assertCorpus(FINAL_BODIES);
+
+export function reviewTemplateCount() {
   return TEMPLATES.length;
 }
 
@@ -603,40 +393,16 @@ export function bannedReviewPattern() {
   return BANNED_RE;
 }
 
-function assertLists() {
-  if (TEMPLATES.length < 80) throw new Error(`need 80 frames, got ${TEMPLATES.length}`);
-  if (HOOKS.length < TEMPLATES.length) throw new Error("need one hook per frame");
-  if (DETAIL_POOL.length < Math.ceil(10000 / TEMPLATES.length)) {
-    throw new Error(`need more details: ${DETAIL_POOL.length}`);
+/**
+ * @param {{ i: number, formal?: boolean }} input
+ */
+export function humanReviewBody({ i, formal }) {
+  if (!Number.isInteger(i) || i < 1 || i > FINAL_BODIES.length) {
+    throw new Error(`bad review index ${i}`);
   }
-  if (new Set(TAILS).size !== TAILS.length) throw new Error("duplicate tail");
-  for (const tail of TAILS) {
-    if (tail.length > 16) throw new Error(`tail long: ${tail}`);
-    if (!/확인/.test(tail) || !/받았어요\.$/.test(tail)) throw new Error(`tail shape: ${tail}`);
+  const expected = isFormalIndex(i);
+  if (typeof formal === "boolean" && formal !== expected) {
+    throw new Error(`row ${i} formal flag does not match the age bucket`);
   }
-  for (const line of DETAIL_POOL) {
-    if (BANNED_RE.test(line)) throw new Error(`banned detail: ${line}`);
-    if (/\d/.test(line)) throw new Error(`digit in detail: ${line}`);
-    if (/대학생|직장인|주부|사업자|육아맘|경단녀|용돈/.test(line)) {
-      throw new Error(`persona leak in detail: ${line}`);
-    }
-  }
-  for (const template of TEMPLATES) {
-    if (!template.includes("유심 혜택")) throw new Error(`template misses benefit: ${template}`);
-    if (!template.includes("{R}") || !template.includes("{T}")) throw new Error(`template slots: ${template}`);
-  }
-  for (const [persona, lines] of Object.entries(WHO)) {
-    for (const line of lines) {
-      if (!line.includes(persona)) throw new Error(`who misses ${persona}: ${line}`);
-    }
-  }
-  for (const line of NEED.대학생) {
-    if (!line.includes("용돈")) throw new Error(`student need misses 용돈: ${line}`);
-  }
-  for (const line of NEED.사업자) {
-    if (!/사업자금/.test(line)) throw new Error(`business need misses 사업자금: ${line}`);
-    if (/사업자(?!금)/.test(line)) throw new Error(`business need also has a 사업자 label: ${line}`);
-  }
+  return FINAL_BODIES[i - 1];
 }
-
-assertLists();

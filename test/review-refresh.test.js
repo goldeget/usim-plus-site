@@ -194,7 +194,8 @@ test("date phrase rewrite matches the KST calendar date and drops minute stamps"
 
   const [row] = generateReviewRows(1);
   const corpus = rewriteReviewDatePhrase(row.body, when);
-  assertBodyMatchesKst(corpus, when);
+  assert.equal(corpus, row.body);
+  assert.doesNotMatch(corpus, /\d{1,2}\s*월\s*\d{1,2}\s*일/);
   assert.equal(stripCalendar(corpus), stripCalendar(row.body));
   assert.equal(DAILY_REVIEW_REFRESH_LIMIT, 50);
 });

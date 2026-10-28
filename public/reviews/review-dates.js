@@ -2,8 +2,8 @@
  * Reader-side review dates. The public site does not write to D1.
  *
  * Each stored row has a stable slot (0 = oldest base, 9999 = newest base)
- * and a base instant baked into the static JSON. The body keeps that base
- * calendar phrase. At read time, 50 slots are shown as "today":
+ * and a base instant baked into the static JSON. The sentence usually does
+ * not repeat that calendar date. At read time, 50 slots are shown as "today":
  *
  *   dayIndex = Seoul civil days since 1970-01-01
  *   cycle    = 10000
@@ -16,8 +16,8 @@
  *
  * The same Seoul calendar day always yields the same slots. The next Seoul
  * day shifts the window by one slot (49 stay, one leaves, one enters).
- * Card `publishedAt` and the 년/월/일 words in the text are both the display
- * instant, so they match. Time-of-day words ("오전에") stay with the base clock.
+ * Card `publishedAt` is the display instant. A 년/월/일 phrase in the text, when
+ * one is present, must match that instant. Time-of-day words ("오전에") stay.
  */
 
 const WEEKDAY_KO = { Sun: "일", Mon: "월", Tue: "화", Wed: "수", Thu: "목", Fri: "금", Sat: "토" };
@@ -25,7 +25,7 @@ const MINUTE_STAMP_RE = /\s*\d{1,2}\s*분경\s*/g;
 const YEAR_MONTH_DAY_RE = /\d{4}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일/g;
 const MONTH_DAY_RE = /\d{1,2}\s*월\s*\d{1,2}\s*일/g;
 const WEEKDAY_RE = /(?:일|월|화|수|목|금|토)요일/g;
-const DURATION_RE = /(?:3|15|30)일\s*유지/g;
+const DURATION_RE = /(?<!\d)(?:3|15|30)일(?:\s*(?:유지|지나고|뒤에|만에|되고))?/g;
 const SEOUL_OFFSET_MS = 9 * 60 * 60 * 1000;
 
 export const REVIEW_SLOT_COUNT = 10_000;
@@ -204,7 +204,8 @@ export function rewriteReviewDatePhrase(body, when) {
 }
 
 /**
- * Full-body check: the text's calendar words are `date` in Asia/Seoul.
+ * Full-body check: calendar words, if any, are `date` in Asia/Seoul.
+ * A review may omit the date; the stored instant still carries it.
  * @returns {string|null} mismatch code
  */
 export function reviewDateMismatch(text, date) {
@@ -223,7 +224,6 @@ export function reviewDateMismatch(text, date) {
   }
   const stripped = body.replace(DURATION_RE, "").replace(MONTH_DAY_RE, "");
   if (/(\d{1,2})일/.test(stripped)) return "stray_day";
-  if (!new RegExp(`${parts.month}월\\s*${parts.day}일`).test(body)) return "missing_date";
   return null;
 }
 
