@@ -1,0 +1,108 @@
+[
+  {
+    "key": "google-ai",
+    "url": "https://developers.google.com/search/docs/appearance/ai-features",
+    "final": "https://developers.google.com/search/docs/appearance/ai-features",
+    "status": 200,
+    "bytes": 180007,
+    "headers": {
+      "content-type": "text/html; charset=utf-8",
+      "cache-control": "no-cache, must-revalidate",
+      "date": "Sat, 31 Oct 2026 21:13:30 GMT",
+      "server": "envoy"
+    },
+    "checked_at_utc": "2026-10-31T21:14:07.851794+00:00"
+  },
+  {
+    "key": "google-schema",
+    "url": "https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data",
+    "final": "https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data",
+    "status": 200,
+    "bytes": 186624,
+    "headers": {
+      "content-type": "text/html; charset=utf-8",
+      "cache-control": "no-cache, must-revalidate",
+      "date": "Sat, 31 Oct 2026 21:13:30 GMT",
+      "server": "envoy"
+    },
+    "checked_at_utc": "2026-10-31T21:14:07.851808+00:00"
+  },
+  {
+    "key": "gemini",
+    "url": "https://support.google.com/gemini/answer/14143489?hl=en",
+    "final": "https://support.google.com/gemini/answer/14143489?hl=en",
+    "status": 200,
+    "bytes": 1620566,
+    "headers": {
+      "content-type": "text/html; charset=UTF-8",
+      "date": "Sat, 31 Oct 2026 21:13:29 GMT",
+      "cache-control": "private, max-age=0",
+      "server": "envoy"
+    },
+    "checked_at_utc": "2026-10-31T21:14:07.851811+00:00"
+  },
+  {
+    "key": "chatgpt",
+    "url": "https://help.openai.com/en/articles/9237897-chatgpt-search",
+    "error": "HTTP Error 403: Forbidden",
+    "checked_at_utc": "2026-10-31T21:14:07.851814+00:00"
+  },
+  {
+    "key": "openai-bots",
+    "url": "https://platform.openai.com/docs/bots",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "checked_at_utc": "2026-10-31T21:14:07.851815+00:00"
+  },
+  {
+    "key": "xai-search",
+    "url": "https://docs.x.ai/developers/tools/web-search",
+    "final": "https://docs.x.ai/developers/tools/web-search",
+    "status": 200,
+    "bytes": 519486,
+    "headers": {
+      "date": "Sat, 31 Oct 2026 21:13:29 GMT",
+      "content-type": "text/html; charset=utf-8",
+      "cache-control": "s-maxage=10, stale-while-revalidate=290",
+      "server": "envoy"
+    },
+    "checked_at_utc": "2026-10-31T21:14:07.851815+00:00"
+  },
+  {
+    "key": "xai-citations",
+    "url": "https://docs.x.ai/developers/tools/citations",
+    "final": "https://docs.x.ai/developers/tools/citations",
+    "status": 200,
+    "bytes": 619128,
+    "headers": {
+      "date": "Sat, 31 Oct 2026 21:13:29 GMT",
+      "content-type": "text/html; charset=utf-8",
+      "cache-control": "s-maxage=10, stale-while-revalidate=290",
+      "server": "envoy"
+    },
+    "checked_at_utc": "2026-10-31T21:14:07.851818+00:00"
+  },
+  {
+    "key": "site",
+    "url": "https://climekr.com/",
+    "error": "HTTP Error 403: Forbidden",
+    "checked_at_utc": "2026-10-31T21:14:07.851820+00:00"
+  },
+  {
+    "key": "robots",
+    "url": "https://climekr.com/robots.txt",
+    "error": "HTTP Error 403: Forbidden",
+    "checked_at_utc": "2026-10-31T21:14:07.851820+00:00"
+  },
+  {
+    "key": "sitemap",
+    "url": "https://climekr.com/sitemap.xml",
+    "error": "HTTP Error 403: Forbidden",
+    "checked_at_utc": "2026-10-31T21:14:07.851821+00:00"
+  },
+  {
+    "key": "llms",
+    "url": "https://climekr.com/llms.txt",
+    "error": "HTTP Error 403: Forbidden",
+    "checked_at_utc": "2026-10-31T21:14:07.851822+00:00"
+  }
+]
