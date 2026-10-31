@@ -115,7 +115,7 @@ test("serves edited title, social metadata and matching Organization/Service gra
     assert.equal(graph.some(item => item["@type"] === "FAQPage"), false);
     assert.equal(graph.find(item => item["@type"] === "WebPage").name, "18만원 지급 안내 | climekr");
     assert.equal(graph.find(item => item["@type"] === "WebPage").description, "검색 설명 18만원");
-    assert.equal(graph.find(item => item["@type"] === "Service").description, "검색 설명 18만원");
+    assert.equal(graph.find(item => item["@type"] === "Service").description, "클라임유심은 유심으로 받을 수 있는 혜택을 확인해주는 플랫폼입니다.");
     const organization = graph.find(item => item["@type"] === "Organization");
     assert.equal(organization.legalName, content.operator.company);
     assert.equal(organization.email, content.operator.email);
@@ -133,7 +133,7 @@ test("serves edited title, social metadata and matching Organization/Service gra
     assert.match(html, /id="operatorEmailLink" href="mailto:contact@example\.com"><span id="operatorEmail">contact@example\.com<\/span>/);
     const intro = html.match(/id="homeIntro">([\s\S]*?)<\/p>/)?.[1].replace(/<\/?span[^>]*>/g, "") || "";
     assert.equal(intro.split("<br>").length, 3);
-    assert.match(intro, /^몰랐던 유심 혜택으로 최대 18만원\.<br>3일·15일·30일 유지 확인 후 단계 지급 대상이 정해집니다\.<br>자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다\.$/);
+    assert.match(intro, /^<p>유심으로 받을 수 있는 혜택을 확인하고, 희망하면 진행을 도와드립니다\.<br>3일·15일·30일 유지 조건 충족 시 최대 18만원 지급 대상입니다\.<br>자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다\.$/);
     assert.doesNotMatch(intro, /\{\{MAX_TOTAL\}\}/);
   } finally {
     if (previous === undefined) delete globalThis.HTMLRewriter;
@@ -170,7 +170,7 @@ test("renders preserved v3 copy into raw metadata and matches the public content
     const graph = JSON.parse(json)["@graph"];
     assert.equal(graph.some(item => item["@type"] === "FAQPage"), false);
     assert.equal(graph.find(item => item["@type"] === "Organization").email, migrated.operator.email);
-    assert.equal(graph.find(item => item["@type"] === "Service").serviceType, "본인 명의 회선(알뜰·선불) 조건부 혜택 안내");
+    assert.equal(graph.find(item => item["@type"] === "Service").serviceType, "유심 혜택 확인·진행 지원 플랫폼");
   } finally {
     if (previous === undefined) delete globalThis.HTMLRewriter;
     else globalThis.HTMLRewriter = previous;

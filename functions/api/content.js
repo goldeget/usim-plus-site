@@ -3,7 +3,7 @@ import { isAdminRequest, readBoundedRequestBody } from "../_lib/applications.js"
 export const DEFAULT_CONTENT = {
   "schemaVersion": 4,
   "headline": "몰랐던 유심 혜택\n최대 {{MAX_TOTAL}}",
-  "intro": "몰랐던 유심 혜택으로 최대 {{MAX_TOTAL}}.\n3일·15일·30일 유지 확인 후 단계 지급 대상이 정해집니다.\n자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다.",
+  "intro": "유심으로 받을 수 있는 혜택을 확인하고, 희망하면 진행을 도와드립니다.\n3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.\n자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다.",
   "checklist": [
     {
       "title": "상담 채널 연결",
@@ -136,11 +136,11 @@ export const DEFAULT_CONTENT = {
     },
     {
       "question": "왜 참여자를 모집하나요?",
-      "answer": "회사의 고객 유치와 유심 개통 혜택 홍보를 위한 참여 안내입니다. 회사에서 고객의 개통·통신 관련 비용을 부담한다고 안내하고 있으며, 지급 대상과 금액은 조회 결과와 유지 조건 확인 후 결정됩니다."
+      "answer": "유심으로 받을 수 있는 혜택을 확인하고 희망 시 진행을 돕는 플랫폼입니다. 지급 대상과 금액은 적용 대상과 유지 조건 확인 후 결정됩니다."
     },
     {
-      "question": "유심 개통·통신요금은 누가 부담하나요?",
-      "answer": "CLIME 운영사 안내 기준 고객의 개통·통신·회선 유지 관련 비용은 회사가 전액 부담합니다. 지급 혜택은 별도의 유지 조건이 충족되어야 받을 수 있습니다. 신청 전 본인 명의 회선 계약의 청구·납부 주체 및 회사 부담 범위를 확인하세요."
+      "question": "이용 비용과 별도 통신요금이 있나요?",
+      "answer": "이용 비용은 0원이며 별도 계약서 작성이나 별도 통신요금 납부가 없습니다. 보상금은 개통·유지 등 안내된 조건을 충족해야 받을 수 있습니다."
     },
     {
       "question": "상담하거나 사진을 보내면 바로 지급되나요?",
@@ -182,6 +182,7 @@ const PREVIOUS_PUBLIC_SUMMARY = {
 // Older published intros omitted who keeps the USIM. Replace those exact copies
 // on read so the public page shows the current lead without rewriting stored content.
 const LEGACY_PUBLIC_INTROS = new Set([
+  "몰랐던 유심 혜택으로 최대 {{MAX_TOTAL}}.\n3일·15일·30일 유지 확인 후 단계 지급 대상이 정해집니다.\n자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다.",
   "몰랐던 유심 혜택으로 최대 {{MAX_TOTAL}}.\n자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다.",
   "몰랐던 유심 혜택으로 최대 66만원.\n자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다.",
   "클라임유심(CLIME)은 서울평가정보㈜가 운영하는 정식 사업자 등록 업체입니다.\n폰깡이 아니며, 대출 상품이 아닌 유심 개통 혜택입니다.\n고객이 본인 명의로 회선을 개통해 유심과 휴대폰을 계속 보유·사용합니다. 회사는 유심을 수거하지 않으며, 다른 사람에게 회선을 넘기는 절차는 없습니다.\n급전이 필요한 이용자가 유심 개통 혜택으로 필요한 자금을 해결할 수 있게 돕습니다.\n개통·통신 비용은 회사가 전액 부담합니다.\n3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.\n상담은 텔레그램·채널톡입니다.",
@@ -362,6 +363,8 @@ function payoutCopyIssue(content) {
 }
 
 function payoutTextIssue(text, payout) {
+  // A stated zero service cost is not a payout promise. Keep every other amount validated.
+  text = text.replace(/이용 비용(?:은|는)?\s*0원/g, "이용 비용 없음");
   const milestones = payout.milestones;
   const allowedDays = new Set(milestones.map(item => item.days));
   const perCase = milestones.reduce((sum, item) => sum + item.amount, 0);

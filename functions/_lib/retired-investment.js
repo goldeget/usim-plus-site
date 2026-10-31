@@ -116,6 +116,7 @@ export function retiredInvestmentGone() {
   <title>종료된 페이지 | 클라임유심 CLIME</title>
   <meta name="description" content="이 주소의 이전 페이지는 종료되었습니다. 현재 climekr.com의 CLIME은 서울평가정보㈜가 운영하는 유심 개통 혜택 안내입니다.">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/copy-typography.css">
   <style>
     :root{color-scheme:dark}*{box-sizing:border-box}
     body{margin:0;min-height:100vh;display:grid;place-items:center;background:radial-gradient(ellipse 65% 35% at 50% 0%,#1f487d,transparent),linear-gradient(#0a1b35,#060e1c);color:#eff6ff;font-family:Pretendard,"Apple SD Gothic Neo",system-ui,sans-serif}

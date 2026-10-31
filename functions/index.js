@@ -1,4 +1,6 @@
-import { DEFAULT_CONTENT, fixedPrivacyCopy, normalizeOperator, upgradedV3, validateContent, validateV3, withCurrentPublicSummary } from "./api/content.js";
+import { loadPublicContent } from "./api/content.js";
+import { renderParagraphs } from "./_lib/copy-renderer.js";
+import { SERVICE_FACTS } from "./_lib/service-facts.js";
 
 const jsonLdEscape = value => JSON.stringify(value)
   .replaceAll("<", "\\u003c")
@@ -36,36 +38,7 @@ function escapeHtml(value) {
 }
 
 // Splits a sentence into phrase parts at ", " (outside parentheses) so mobile CSS can break there.
-function splitIntroParts(sentence) {
-  const parts = [];
-  let depth = 0, start = 0;
-  for (let i = 0; i < sentence.length; i++) {
-    const ch = sentence[i];
-    if (ch === "(") depth++;
-    else if (ch === ")") depth = Math.max(0, depth - 1);
-    else if (ch === "," && depth === 0 && /\s/.test(sentence[i + 1] || "")) {
-      parts.push(sentence.slice(start, i + 1).trim());
-      start = i + 1;
-    }
-  }
-  parts.push(sentence.slice(start).trim());
-  return parts.filter(Boolean);
-}
-
-// Structured, escaped hero intro: lines (<br>) > sentence chunks > phrase parts.
-// Desktop keeps it inline; mobile CSS turns chunks/parts into semantic block lines.
-function structuredIntroHtml(value, content) {
-  return expandTokens(value, content)
-    .replaceAll("\\n", "\n")
-    .split(/\r?\n/)
-    .map(line => line.trim())
-    .filter(Boolean)
-    .map(line => line.replace(/([.!?])\s+/g, "$1\u0000").split("\u0000")
-      .map(sentence => `<span class="hero-intro__chunk">${splitIntroParts(sentence)
-        .map(part => `<span class="hero-intro__part">${escapeHtml(part)}</span>`).join(" ")}</span>`)
-      .join(" "))
-    .join("<br>");
-}
+function structuredIntroHtml(value, content) { return renderParagraphs(expandTokens(value, content)); }
 
 function multilineHtml(value, content) {
   return expandTokens(value, content)
@@ -98,7 +71,6 @@ function buildStructuredData(content, meta) {
           propertyID: "통신판매업신고",
           value: content.operator.salesRegistration
         },
-        founder: { "@type": "Person", name: content.operator.representative },
         address: {
           "@type": "PostalAddress",
           streetAddress: content.operator.address,
@@ -144,11 +116,11 @@ function buildStructuredData(content, meta) {
         "@type": "Service",
         "@id": serviceId,
         name: "클라임유심 유심 혜택 확인",
-        serviceType: "본인 명의 회선(알뜰·선불) 조건부 혜택 안내",
+        serviceType: "유심 혜택 확인·진행 지원 플랫폼",
         provider: { "@id": organizationId },
         areaServed: { "@type": "Country", name: "대한민국" },
         availableLanguage: "Korean",
-        description: meta.description
+        description: SERVICE_FACTS.definition
       }
     ]
   };
@@ -168,21 +140,7 @@ export function buildPublicMetadata(content) {
   };
 }
 
-async function currentContent(env) {
-  if (!env.CONTENT_DB) return DEFAULT_CONTENT;
-  try {
-    const row = await env.CONTENT_DB.prepare("SELECT content FROM site_content WHERE id = ?").bind("home").first();
-    if (!row) return DEFAULT_CONTENT;
-    const stored = JSON.parse(row.content);
-    if (stored.schemaVersion === 4 && !validateContent(stored)) {
-      return withCurrentPublicSummary({ ...DEFAULT_CONTENT, ...stored, operator: normalizeOperator(stored.operator), copy: { ...stored.copy, ...fixedPrivacyCopy() } });
-    }
-    if (stored.schemaVersion === 3 && !validateV3(stored)) return withCurrentPublicSummary(upgradedV3(stored));
-    return DEFAULT_CONTENT;
-  } catch {
-    return DEFAULT_CONTENT;
-  }
-}
+async function currentContent(env) { return (await loadPublicContent(env)).content; }
 
 function cacheable(response) {
   const headers = new Headers(response.headers);
@@ -224,6 +182,7 @@ export async function onRequest(context) {
     .on('meta[name="twitter:title"]', { element(element) { element.setAttribute("content", metadata.socialTitle); } })
     .on('meta[name="twitter:description"]', { element(element) { element.setAttribute("content", metadata.socialDescription); } })
     .on('script[type="application/ld+json"]', { element(element) { element.setInnerContent(jsonLdEscape(metadata.structuredData), { html: true }); } })
+    .on("[data-service-definition]", { element(element) { element.setInnerContent(SERVICE_FACTS.definition); } })
     .on("#homeIntro", { element(element) { element.setInnerContent(structuredIntroHtml(content.intro, content), { html: true }); } })
     .on("#operatorCompany", { element(element) { element.setInnerContent(content.operator.company); } })
     .on("#operatorRepresentative", { element(element) { element.setInnerContent(content.operator.representative); } })

@@ -1,4 +1,4 @@
-﻿import assert from "node:assert/strict";
+import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
@@ -64,13 +64,11 @@ test("public Korean multiline copy and mobile readable text use native line wrap
   assert.match(links, /\.subtitle,\.disclosure,\.detail,small\{word-break:keep-all/);
 });
 
-test("structure page stays short: unified hook, payout rows, no legacy explainer blocks", () => {
-  assert.match(structure, /몰랐던 유심 혜택으로 최대 66만원/);
-  assert.match(structure, /3일 유지 확인[\s\S]*5만원 지급 대상/);
-  assert.match(structure, /총 최대 66만원/);
-  assert.match(structure, /id="operator-title"/);
-  assert.match(structure, /김중근/);
-  assert.doesNotMatch(structure, /개통 대상 회선|사업 구조 한눈에 보기|CLIME 이용 원칙|돈은 어디서 나오는가|혜택의 재원|유심의 귀속/);
+test("structure explains the actual seven-stage process without speculative funding claims", () => {
+  assert.match(structure, /<h1>이용 절차<\/h1>/);
+  for (const stage of ['유심 혜택 확인','적용 대상 확인','조건·보상금 안내','진행 희망 확인','희망 시 진행 지원','조건 충족 확인','조건에 맞는 보상금 지급']) assert.ok(structure.includes(stage),stage);
+  assert.match(structure, /href="\/guide\/"/);
+  assert.doesNotMatch(structure, /가입 유치 수수료|혜택의 재원|유심의 귀속/);
 });
 
 test("guide page stays short: unified hero hook, milestone rows, no card explainer blocks", () => {
@@ -83,15 +81,14 @@ test("guide page stays short: unified hero hook, milestone rows, no card explain
   assert.doesNotMatch(guide, /현재 지급 기준은 어떻게 확인하나요/);
 });
 
-test("about page stays short: unified hero hook, operator table, guide link, no card explainer blocks", () => {
-  assert.match(about, /몰랐던 유심 혜택으로 최대 66만원/);
-  assert.match(about, /id="operator-title"/);
-  assert.match(about, /href="\/guide\/">혜택 조건/);
+test("about explains the platform and exposes the current operator details", () => {
+  assert.match(about, /data-service-definition/);
+  assert.match(about, /플랫폼이 돕는 일/);
+  for (const field of ['company','representative','registrationNumber','address','email']) assert.ok(about.includes(`data-operator="${field}"`),field);
   assert.match(about, /114-81-47958/);
-  assert.match(about, /footer-hook/);
-  assert.match(about, /href="\/about\/">CLIME 소개<\/a>[\s\S]*href="\/disclosures\/">고지·안내/);
-  assert.doesNotMatch(about, /지금 하는 일|card-number|참여는 세 단계|01<\/span>/);
-  assert.doesNotMatch(about, /3일·15일·30일 유지 조건을 충족|비용은 회사 부담/);
+  assert.match(about, /href="\/guide\/"/);
+  assert.match(about, /href="\/service-facts\/"/);
+  assert.doesNotMatch(about, /비용은 회사 부담|가입 유치 수수료/);
 });
 
 test("visible FAQs are removed on main and guide, and not re-created by JavaScript or schema", () => {
@@ -127,18 +124,12 @@ test("phrase breaks keep operator lines and milestone numbers intact", () => {
   assert.match(typography, /@media \(max-width: 760px\) \{\s*br\.pc, \.only-pc \{ display: none; \}/);
   assert.match(typography, /word-break:\s*keep-all/);
   assert.doesNotMatch(typography, /word-break:\s*break-all/);
-  for (const [name, html] of [["about", about], ["guide", guide], ["structure", structure], ["links", links], ["404", notFound]]) {
-    assert.match(html, /class="copy-footer-lines"/, name);
-    assert.match(html, /사업자등록번호 <span class="copy-nowrap">114-81-47958<\/span>/, name);
-    assert.match(html, /<br class="mo">/, name);
+  for (const [name, html] of [["about",about],["guide",guide],["structure",structure]]) {
+    assert.match(html, /data-operator="address"/,name);
+    assert.match(html, /114-81-47958/,name);
   }
   assert.match(home, /id="eligibilityButton"[^>]*href="https:\/\/www\.credit\.or\.kr\/credit\/search"/);
   assert.match(home, /id="contactLookupLink"/);
-  assert.match(structure, /3일 유지 확인[\s\S]*5만원/);
-  assert.match(structure, /15일 유지 확인[\s\S]*7만원/);
-  assert.match(structure, /30일 유지 확인[\s\S]*10만원/);
-  assert.match(structure, /22만원 \/ 건/);
-  assert.match(structure, /총 최대 66만원/);
   assert.match(guide, /3일 유지 확인[\s\S]*5만원 지급 대상/);
   assert.match(guide, /최대 66만원/);
 });

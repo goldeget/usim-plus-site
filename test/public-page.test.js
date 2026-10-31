@@ -1,4 +1,4 @@
-﻿import assert from "node:assert/strict";
+import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 
@@ -122,7 +122,7 @@ test("renders the homepage announcement lines and the footer without visible bac
     "3일·15일·30일 유지 확인 후 단계 지급 대상이 정해집니다.",
     "자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다."
   ].join("<br>");
-  const heroIntroHtml = html.match(/<p class="hero-intro" id="homeIntro">([\s\S]*?)<\/p>/)[1];
+  const heroIntroHtml = html.match(/<div class="hero-intro copy-prose" id="homeIntro">([\s\S]*?)<\/div>/)[1];
   assert.equal(heroIntroHtml.replace(/<\/?span[^>]*>/g, ''), expectedIntro);
   assert.doesNotMatch(html, /id="homeIntro"[^>]*>[\s\S]*?\{\{MAX_TOTAL\}\}/);
   const normalizedHtml = html.replace(/\r\n/g, "\n");

@@ -48,10 +48,6 @@
         "name": "CLIME 소개 | 클라임유심 · 유심 개통 혜택"
       },
       "legalName": "서울평가정보㈜",
-      "founder": {
-        "@type": "Person",
-        "name": "김중근"
-      },
       "sameAs": ["https://blog.naver.com/climeusimguide"],
       "url": "https://climekr.com/",
       "email": "help@climekr.com",
@@ -95,7 +91,7 @@
       "@type": "Service",
       "@id": "https://climekr.com/#service",
       "name": "클라임유심 유심 혜택 확인",
-      "serviceType": "본인 명의 회선(알뜰·선불) 조건부 혜택 안내",
+      "serviceType": "유심 혜택 확인·진행 지원 플랫폼",
       "provider": {
         "@id": "https://climekr.com/#organization"
       },
@@ -119,7 +115,7 @@
     }
     *, *::before,*::after {box-sizing:border-box}
     html {scroll-behavior:smooth}
-    body {margin:0;min-width:320px;color:var(--white);background:#040a11;line-height:1.5;overflow-x:hidden}
+    body {margin:0;min-width:320px;color:var(--white);background:#040a11;line-height:1.5;overflow-x:visible}
     body::before {content:"";z-index:-2;position:fixed;inset:-10%;background:
       radial-gradient(ellipse 31% 44% at 10% 26%,#1641597a,transparent 85%),
       radial-gradient(ellipse 35% 28% at 91% 8%,#5c415144,transparent 75%),
@@ -670,6 +666,7 @@
   <link rel="stylesheet" href="/premium.css?v=20261027-premium-1" />
   <link rel="stylesheet" href="/copy-typography.css?v=20261029-phrase-1" />
   <script>document.documentElement.classList.add('js');</script>
+<script src="/copy-text.js"></script>
 </head>
 <body>
   <div class="site-shell">
@@ -682,7 +679,8 @@
         <div class="hero-copy">
           <div class="eyebrow"><span class="point" aria-hidden="true"></span><span id="heroEyebrow">서울평가정보㈜ 공식 안내<span class="only-pc"> · </span><br class="mo">유심 혜택</span></div>
           <h1 id="hero-title">몰랐던 유심 혜택<br>최대 66만원</h1>
-          <p class="hero-intro" id="homeIntro">몰랐던 유심 혜택으로 최대 66만원.<br>3일·15일·30일 유지 확인 후 단계 지급 대상이 정해집니다.<br>자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다.</p>
+          <p class="service-definition" data-service-definition>클라임유심은 유심으로 받을 수 있는 혜택을 확인해주는 플랫폼입니다.</p><div class="service-facts-summary copy-prose"><p>이용 비용 0원 · 별도 계약서 작성 없음 · 별도 통신요금 납부 없음</p><p>혜택 확인 → 적용 대상 확인 → 조건·보상금 안내 → 진행 희망 확인 → 희망 시 진행 지원 → 조건 충족 확인 → 조건에 맞는 보상금 지급</p><p><a href="/service-facts/">공식 정보와 이용 절차 확인</a></p></div>
+          <div class="hero-intro copy-prose" id="homeIntro">몰랐던 유심 혜택으로 최대 66만원.<br>3일·15일·30일 유지 확인 후 단계 지급 대상이 정해집니다.<br>자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다.</div>
           <div class="hero-payouts" id="payoutConditions" aria-label="혜택 안내" hidden></div>
           <div class="hero-actions">
             <a class="cta-main" id="eligibilityButton" href="https://www.credit.or.kr/credit/search" target="_blank" rel="noopener noreferrer">혜택 가능 여부 조회 <span aria-hidden="true">↗</span></a>
@@ -769,9 +767,9 @@
       <div class="site-footer__brand"><strong class="footer-mark">USIM+</strong><span id="footerBrand">클라임유심 · climekr.com</span><span>© <span id="footerYear">2026</span></span></div>
       <nav aria-label="유심 혜택과 상담 바로가기" style="display:flex;gap:14px;flex-wrap:wrap;margin:12px 0;font-size:14px">
         <a href="/about/">CLIME 소개</a>
-        <a href="/structure/">사업 구조</a>
+        <a href="/structure/">이용 절차</a>
         <a href="/guide/">혜택 조건</a>
-        <a href="/disclosures/">고지·안내</a>
+        <a href="/disclosures/">고지·안내</a> · <a href="/service-facts/">공식 정보</a>
       </nav>
       <p class="site-footer__terms" id="footerTerms">몰랐던 유심 혜택 · 최대 66만원
 자세한 혜택·조건은 텔레그램·채널톡 상담</p>
@@ -908,20 +906,7 @@
         lines.forEach((line,index)=>{if(index)element.append(document.createElement('br'));element.append(document.createTextNode(line))});
       }
       function renderHeroIntro(element,value,content){
-        const lines=normalizeDisplayedLineBreaks(expandTokens(value,content)).split(/\r?\n/).map(line=>line.trim()).filter(Boolean);
-        const splitParts=sentence=>{const parts=[];let depth=0,start=0;for(let i=0;i<sentence.length;i++){const ch=sentence[i];if(ch==='(')depth++;else if(ch===')')depth=Math.max(0,depth-1);else if(ch===','&&depth===0&&/\s/.test(sentence[i+1]||'')){parts.push(sentence.slice(start,i+1).trim());start=i+1}}parts.push(sentence.slice(start).trim());return parts.filter(Boolean)};
-        const make=(text,className)=>{const span=document.createElement('span');span.className=className;span.textContent=text;return span};
-        element.replaceChildren();
-        element.style.whiteSpace='normal';
-        lines.forEach((line,index)=>{
-          if(index)element.append(document.createElement('br'));
-          line.replace(/([.!?])\s+/g,'$1\u0000').split('\u0000').forEach((sentence,chunkIndex)=>{
-            if(chunkIndex)element.append(' ');
-            const chunk=document.createElement('span');chunk.className='hero-intro__chunk';
-            splitParts(sentence).forEach((part,partIndex)=>{if(partIndex)chunk.append(' ');chunk.append(make(part,'hero-intro__part'))});
-            element.append(chunk);
-          });
-        });
+        ClimeCopy.render(element,expandTokens(value,content));
       }
       function applyPublishedContent(content){
         currentContent=content;

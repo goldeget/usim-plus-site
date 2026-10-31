@@ -1,4 +1,4 @@
-﻿import assert from "node:assert/strict";
+import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 
@@ -34,7 +34,7 @@ test("describes the real public service without inventing hidden FAQ or review s
   assert.equal(org.taxID, "114-81-47958");
   assert.equal(org.address.streetAddress, "서울시 영등포구 국회대로70길 23(여의도동, 용산빌딩)");
   assert.deepEqual(org.sameAs, ["https://blog.naver.com/climeusimguide"]);
-  assert.equal(graph.find(item => item["@type"] === "Service").serviceType, "본인 명의 회선(알뜰·선불) 조건부 혜택 안내");
+  assert.equal(graph.find(item => item["@type"] === "Service").serviceType, "유심 혜택 확인·진행 지원 플랫폼");
   assert.doesNotMatch(graph.find(item => item["@type"] === "Service").description, /3일|15일|30일/);
   assert.ok(!types.includes("FAQPage"), "Do not describe removed FAQ as visible");
   assert.doesNotMatch(page, /<section class="faq"|id="faq-title"|class="faq-list"/);
@@ -47,10 +47,10 @@ test("covers the requested climekr spellings and gives review searches useful, a
   const graph = JSON.parse(json)["@graph"];
   const organization = graph.find(item => item["@type"] === "Organization");
   assert.ok(organization.alternateName.includes("climekr 유심"));
-  assert.match(llms, /서울평가정보㈜가 운영합니다/);
-  assert.match(llms, /사업자등록번호 114-81-47958/);
-  assert.match(llms, /몰랐던 유심 혜택으로 최대 66만원/);
-  assert.match(llms, /자세한 혜택·조건은 텔레그램/);
+  assert.match(llms, /company: 서울평가정보㈜/);
+  assert.match(llms, /registrationNumber: 114-81-47958/);
+  assert.match(llms, /유심으로 받을 수 있는 혜택을 확인해주는 플랫폼/);
+  assert.match(llms, /텔레그램: https:\/\/t.me\/climeusim/);
   assert.doesNotMatch(llms.slice(0, 500), /3일|15일|30일|수거/);
   assert.doesNotMatch(llms.slice(0, 500), /통신혜택|통신 혜택|급전|폰깡|폰테크/);
   assert.doesNotMatch(llms, /\/topics\/|주제별 정보 안내/);
@@ -65,7 +65,7 @@ test("keeps private routes out of the public sitemap and gives AI readers accura
   assert.doesNotMatch(sitemap, /admin|api/);
   assert.doesNotMatch(sitemap, /topics/);
   assert.match(sitemap, /<loc>https:\/\/climekr\.com\/disclosures\/<\/loc>/);
-  assert.match(llms, /자세한 혜택·조건은/);
+  assert.match(llms, /조건 충족 확인/);
   assert.match(llms, /help@climekr\.com/);
 });
 

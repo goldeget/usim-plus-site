@@ -154,6 +154,7 @@ function renderPayoutFields(payout) {
     container.append(block);
   });
   updatePayoutSummary();
+  refreshIntroPreview();
 }
 
 function readPayout() {
@@ -213,6 +214,7 @@ function refreshDerivedPreviews() {
   });
   previousPreviewModel = next;
   updatePayoutSummary();
+  refreshIntroPreview();
 }
 
 function payoutFaqText(model) {
@@ -293,6 +295,7 @@ function fill(data) {
   document.getElementById("headline").value = expandText(data.headline, data);
   document.getElementById("headline").dataset.sourceText = data.headline;
   document.getElementById("introText").value = expandText(data.intro, data);
+  refreshIntroPreview();
   document.getElementById("telegramLink").value = data.supportLinks?.telegram || "";
   document.getElementById("lineLink").value = data.supportLinks?.line || "";
   document.getElementById("channeltalkLink").value = data.supportLinks?.channeltalk || "";
@@ -321,6 +324,7 @@ function fill(data) {
   document.getElementById("retentionNote").textContent = `보관 기간은 자동 삭제 기준과 연결되어 고정됩니다. 사진: 검토 결정 후 ${retentionDays.photoAfterDecision}일, 미검토 접수 후 ${retentionDays.photoIfUnreviewed}일 · 기존 접수 상태 정보: ${retentionDays.statusMetadata}일.`;
   updateChannelStatus();
   updatePayoutSummary();
+  refreshIntroPreview();
 }
 
 function readCopy() {
@@ -417,3 +421,9 @@ document.getElementById("editor").addEventListener("submit", async event => {
     button.disabled = false;
   }
 });
+
+function refreshIntroPreview() {
+  const preview = document.getElementById("introPreview");
+  if (preview) ClimeCopy.render(preview, document.getElementById("introText").value);
+}
+document.getElementById("introText").addEventListener("input", refreshIntroPreview);

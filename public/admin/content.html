@@ -12,6 +12,7 @@
     @media(max-width:650px){.row,.copy-grid,.money-grid{grid-template-columns:1fr;gap:0}.panel{padding:17px}.editor-group{padding:0}.editor-group>summary{padding:17px}.editor-group__body{padding:3px 17px 18px}.editor-group>summary span{display:none}.bar-inner{align-items:flex-start;flex-direction:column;gap:8px}.bar-actions{gap:7px}.tag{font-size:11px}}
   </style>
   <link rel="stylesheet" href="/admin/admin-shell.css" />
+<link rel="stylesheet" href="/copy-typography.css">
 </head>
 <body>
   <main class="wrap main admin-main" data-admin-page="content">
@@ -21,7 +22,7 @@
     <form id="editor">
       <details class="panel editor-group" open><summary><h2>첫 화면과 지급 안내</h2><span>제목 · 문구 · 금액 · 조회 연결</span></summary><div class="editor-group__body">
         <div class="field"><label for="headline">첫 화면 제목</label><textarea id="headline" maxlength="100" rows="2" required></textarea><small>줄바꿈은 Enter로 입력하세요. 지급 기준을 바꾸면 제목의 최대 금액도 새 총액에 맞아야 저장됩니다.</small></div>
-        <div class="field"><label for="introText">첫 화면 안내</label><textarea id="introText" maxlength="500" required></textarea><small>줄바꿈은 Enter로 입력하세요. 최대 500자</small></div>
+        <div class="field"><label for="introText">첫 화면 안내</label><textarea id="introText" maxlength="500" required></textarea><small>줄바꿈은 Enter로 입력하세요. 빈 줄은 새 문단입니다. 최대 500자</small><div id="introPreview" class="copy-prose" aria-label="첫 화면 안내 미리보기"></div></div>
         <div id="heroCopyFields" class="copy-grid"></div>
         <div class="field"><label>유지 기간별 지급 기준</label><p class="note">각 단계 금액을 바꾸면 한 건 최대 금액과 전체 최대 금액은 자동 계산됩니다. FAQ의 지급 안내도 함께 계산됩니다.</p><div id="payoutFields" class="money-grid"></div><p id="payoutSummary" class="readonly-note" aria-live="polite"></p></div>
         <div class="row"><div class="field"><label for="maxCases">한 사람 신청 가능 건수</label><input id="maxCases" type="number" min="1" max="3" step="1" required /></div><div class="field"><label for="lookupLabel">조회 버튼 문구</label><input id="lookupLabel" maxlength="80" required /></div><div class="field"><label for="lookupUrl">개통 가능 여부 조회 링크</label><input id="lookupUrl" type="url" maxlength="500" required /><small>현재 연결된 조회 사이트가 유지됩니다. HTTPS 링크를 입력하세요.</small></div></div>
@@ -49,6 +50,7 @@
   </main>
   <script src="/admin/admin-shell.js" defer></script>
   <script src="/admin/admin-auth.js" defer></script>
+  <script src="/copy-text.js" defer></script>
   <script src="/admin/content-editor.js" defer></script>
 </body>
 </html>

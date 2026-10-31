@@ -83,7 +83,8 @@ nav.footer-nav a { white-space: nowrap; }
 /* Existing hero/guide chunk classes share the same behavior. */
 .hero-intro__chunk, .hero-intro__part, .lead__chunk, .lead__part { display: inline; }
 @media (max-width: 760px) {
-  .hero-intro__chunk, .hero-intro__part, .lead__chunk, .lead__part { display: block; }
+  .hero-intro__chunk, .lead__chunk { display: block; }
+  .hero-intro__part, .lead__part { display: inline; }
 }
 
 /* Group paragraphs by meaning without imposing a fixed number of lines. */
@@ -98,3 +99,15 @@ nav.footer-nav a { white-space: nowrap; }
 @media (max-width: 760px) {
   .copy-prose { max-width: min(100%, var(--copy-measure-mobile)); }
 }
+
+/* Reflow boundaries for public cards and actual administrator workflows. */
+:where(.row, .grid, .actions, .header-inner, .admin-layout, .admin-main, .editor-grid, .copy-grid) > * { min-width: 0; }
+:where(.button, button, .btn, .cta-main, .cta-secondary) { white-space: normal; overflow-wrap: break-word; height: auto; }
+:where(p, li) { line-height: 1.75; }
+:where(.row strong, .row a, .admin-main a, .admin-main td) { overflow-wrap: anywhere; }
+:where(.row) { gap: 12px; }
+:where(.copy-table-scroll, .table-wrap) { max-width: 100%; overflow-x: auto; }
+.service-definition { max-width: 38em; line-height: 1.75; }
+.service-facts-summary { margin: 1em 0; font-size: .9em; color: #afc4d2; }
+#introPreview { padding: 16px; border: 1px solid #b9cbd3; border-radius: 12px; margin-top: 12px; }
+@media (max-width: 760px) { .row { flex-wrap: wrap; } .row > * { max-width: 100%; } }

@@ -23,11 +23,11 @@ function context(url) {
 }
 
 test("the CLIME introduction replaces the retired investment about page with the current USIM service", () => {
-  assert.match(about, /<title>CLIME 소개 \| 클라임유심 · 유심 개통 혜택<\/title>/);
+  assert.match(about, /<title>CLIME 소개 \| 클라임유심<\/title>/);
   assert.match(about, /rel="canonical" href="https:\/\/climekr\.com\/about\/"/);
-  assert.match(about, /서울평가정보㈜가 운영하는 클라임유심/);
-  assert.match(about, /몰랐던 유심 혜택/);
-  assert.match(about, /66만원/);
+  assert.match(about, /서울평가정보㈜/);
+  assert.match(about, /유심으로 받을 수 있는 혜택/);
+  assert.match(about, /조건에 맞는 보상금/);
   assert.match(about, /114-81-47958/);
   assert.doesNotMatch(about, /미래 자산|주간 수익|원금 전액|만기까지|USDT|싱가포르/);
   assert.match(sitemap, /<loc>https:\/\/climekr\.com\/about\/<\/loc>/);

@@ -29,7 +29,7 @@ test('benefits guide displays payout amounts from the current public API', () =>
   assert.match(guide, /stage\.days/);
   assert.match(guide, /stage\.amount/);
   assert.match(guide, /payout\.maxCases/);
-  assert.doesNotMatch(guide, /<strong data-total[^>]*>66만원</);
+  assert.match(guide, /<strong data-total[^>]*>66만원</);
 });
 
 test('consultation links are direct, HTTPS, and restricted to known hosts', () => {
@@ -55,7 +55,7 @@ test('social links page is noindex; guide is indexed only on official host', () 
 test('site navigation and sitemap include original guide but not social noindex page', () => {
   assert.match(home, /href="\/guide\/"/);
   assert.match(home, /href="\/about\/">CLIME 소개<\/a>/);
-  assert.match(home, /href="\/structure\/">사업 구조<\/a>/);
+  assert.match(home, /href="\/structure\/">이용 절차<\/a>/);
   assert.match(home, /href="\/disclosures\/">고지·안내<\/a>/);
   assert.doesNotMatch(home, /site-footer[\s\S]*href="\/links\/"/);
   assert.match(sitemap, /<loc>https:\/\/climekr\.com\/guide\/<\/loc>/);
