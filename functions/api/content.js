@@ -439,30 +439,35 @@ export function upgradedV3(stored) {
 
 function payoutCopyIssueForText(text, payout) { return payoutTextIssue(text, payout); }
 
+// Shared read-only normalization path for the API and server-rendered pages.
+// Storage errors are metadata here: rendering may fall back while GET keeps 503.
+export async function loadPublicContent(env = {}) {
+  const fallback = { content: DEFAULT_CONTENT, contentSource: "default", cmsReady: Boolean(env.CONTENT_DB) };
+  if (!env.CONTENT_DB) return fallback;
+  let row;
+  try { row = await env.CONTENT_DB.prepare("SELECT content, updated_at FROM site_content WHERE id = ?").bind("home").first(); }
+  catch { return { ...fallback, cmsReady: false, error: "홈페이지 안내 저장소를 불러오지 못했습니다." }; }
+  if (!row) return fallback;
+  const metadata = { updatedAt: row.updated_at, cmsReady: true };
+  try {
+    const stored = JSON.parse(row.content);
+    if (stored.schemaVersion === 4 && !validateContent(stored)) {
+      return { ...metadata, contentSource: "cms", content: withCurrentPublicSummary({
+        ...DEFAULT_CONTENT, ...stored, operator: normalizeOperator(stored.operator),
+        copy: { ...stored.copy, ...fixedPrivacyCopy() }
+      }) };
+    }
+    if (stored.schemaVersion === 3 && !validateV3(stored)) {
+      return { ...metadata, contentSource: "cms", legacyContent: true, content: withCurrentPublicSummary(upgradedV3(stored)) };
+    }
+    return { ...fallback, ...metadata, legacyContent: true, content: { ...DEFAULT_CONTENT, supportLinks: safeSupportLinks(stored?.supportLinks) } };
+  } catch { return { ...fallback, ...metadata, legacyContent: true }; }
+}
+
 export async function onRequest({ request, env }) {
   if (request.method === "GET") {
-    if (!env.CONTENT_DB) return json({ ...DEFAULT_CONTENT, retentionDays: RETENTION_DAYS, cmsReady: false });
-    let row;
-    try { row = await env.CONTENT_DB.prepare("SELECT content, updated_at FROM site_content WHERE id = ?").bind("home").first(); }
-    catch { return json({ ...DEFAULT_CONTENT, retentionDays: RETENTION_DAYS, cmsReady: false, error: "홈페이지 안내 저장소를 불러오지 못했습니다." }, 503); }
-    if (!row) return json({ ...DEFAULT_CONTENT, retentionDays: RETENTION_DAYS, cmsReady: true });
-    try {
-      const stored = JSON.parse(row.content);
-      if (stored.schemaVersion === 4 && !validateContent(stored)) {
-    const content = withCurrentPublicSummary({
-      ...DEFAULT_CONTENT,
-      ...stored,
-      operator: normalizeOperator(stored.operator),
-      copy: { ...stored.copy, ...fixedPrivacyCopy() }
-    });
-    return json({ ...content, retentionDays: RETENTION_DAYS, updatedAt: row.updated_at, cmsReady: true });
-      }
-      if (stored.schemaVersion === 3 && !validateV3(stored)) {
-    return json({ ...withCurrentPublicSummary(upgradedV3(stored)), retentionDays: RETENTION_DAYS, updatedAt: row.updated_at, cmsReady: true, legacyContent: true });
-      }
-      const supportLinks = safeSupportLinks(stored?.supportLinks);
-      return json({ ...DEFAULT_CONTENT, supportLinks, retentionDays: RETENTION_DAYS, updatedAt: row.updated_at, cmsReady: true, legacyContent: true });
-    } catch { return json({ ...DEFAULT_CONTENT, retentionDays: RETENTION_DAYS, updatedAt: row.updated_at, cmsReady: true, legacyContent: true }); }
+    const { content, contentSource, ...metadata } = await loadPublicContent(env);
+    return json({ ...content, retentionDays: RETENTION_DAYS, ...metadata }, metadata.error ? 503 : 200);
   }
 
   if (request.method !== "PUT") return json({ error: "Method not allowed" }, 405);

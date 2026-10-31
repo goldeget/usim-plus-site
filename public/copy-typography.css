@@ -7,7 +7,7 @@
        <p class="copy-line"><span class="copy-chunk">문장 1.</span> <span class="copy-chunk">문장 2.</span></p>
      </div>
      .prose-ko                            long-form body copy with readable measure
-     .copy-chunk / .copy-part             inline on desktop, stacked + balanced on mobile
+     .copy-chunk / .copy-part             inline by default; complete chunks stack on mobile
      .copy-nowrap                         keep a short token (number, ㈜ phrase, "3일·15일·30일") together
      <br>                                 phrase break on both desktop and mobile
      <br class="pc">                      desktop-only break (Toss br.pc)
@@ -48,7 +48,8 @@
 
 @media (max-width: 760px) {
   .prose-ko, .copy-stack { max-width: min(100%, var(--copy-measure-mobile)); }
-  .copy-chunk, .copy-part { display: block; }
+  .copy-chunk { display: block; }
+  .copy-part { display: inline; }
   .copy-chunk + .copy-chunk { margin-top: .15em; }
   .copy-stack { gap: .6em; }
 }
@@ -83,4 +84,17 @@ nav.footer-nav a { white-space: nowrap; }
 .hero-intro__chunk, .hero-intro__part, .lead__chunk, .lead__part { display: inline; }
 @media (max-width: 760px) {
   .hero-intro__chunk, .hero-intro__part, .lead__chunk, .lead__part { display: block; }
+}
+
+/* Group paragraphs by meaning without imposing a fixed number of lines. */
+.copy-prose { max-width: min(100%, var(--copy-measure)); line-height: 1.75; }
+.copy-prose > p { margin: 0; }
+.copy-prose > p + p { margin-top: 1em; }
+.copy-prose :where(h1, h2, h3) { line-height: 1.35; }
+/* Only constrain children of our copy containers, not unrelated app layouts. */
+:where(.copy-prose, .copy-stack, .copy-footer-lines) > * { min-width: 0; }
+.copy-url, .copy-email, .copy-identifier { overflow-wrap: anywhere; word-break: normal; }
+.copy-prose a { overflow-wrap: anywhere; }
+@media (max-width: 760px) {
+  .copy-prose { max-width: min(100%, var(--copy-measure-mobile)); }
 }
