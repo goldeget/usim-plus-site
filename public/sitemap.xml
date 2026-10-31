@@ -2,30 +2,42 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://climekr.com/</loc>
-    <lastmod>2026-10-28</lastmod>
+    <lastmod>2026-11-01</lastmod>
   </url>
   <url>
     <loc>https://climekr.com/about/</loc>
-    <lastmod>2026-10-28</lastmod>
+    <lastmod>2026-11-01</lastmod>
   </url>
   <url>
     <loc>https://climekr.com/guide/</loc>
-    <lastmod>2026-10-28</lastmod>
+    <lastmod>2026-11-01</lastmod>
   </url>
   <url>
     <loc>https://climekr.com/structure/</loc>
-    <lastmod>2026-10-28</lastmod>
+    <lastmod>2026-11-01</lastmod>
   </url>
   <url>
     <loc>https://climekr.com/reviews/</loc>
-    <lastmod>2026-10-28</lastmod>
+    <lastmod>2026-10-29</lastmod>
   </url>
   <url>
     <loc>https://climekr.com/disclosures/</loc>
-    <lastmod>2026-10-28</lastmod>
+    <lastmod>2026-11-01</lastmod>
   </url>
-  <url><loc>https://climekr.com/service-facts/</loc></url>
-  <url><loc>https://climekr.com/disclosures/service/</loc></url>
-  <url><loc>https://climekr.com/disclosures/safety/</loc></url>
-  <url><loc>https://climekr.com/disclosures/privacy/</loc></url>
+  <url>
+    <loc>https://climekr.com/service-facts/</loc>
+    <lastmod>2026-11-01</lastmod>
+  </url>
+  <url>
+    <loc>https://climekr.com/disclosures/service/</loc>
+    <lastmod>2026-11-01</lastmod>
+  </url>
+  <url>
+    <loc>https://climekr.com/disclosures/safety/</loc>
+    <lastmod>2026-11-01</lastmod>
+  </url>
+  <url>
+    <loc>https://climekr.com/disclosures/privacy/</loc>
+    <lastmod>2026-11-01</lastmod>
+  </url>
 </urlset>
