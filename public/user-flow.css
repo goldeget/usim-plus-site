@@ -516,3 +516,21 @@ a { color: #8cffe8; }
 @supports (text-wrap: balance) {
   @media (max-width: 760px) { .hero-intro__part { text-wrap: balance; } }
 }
+
+/* Keep the first decision brief; full service details remain visible below. */
+.hero { overflow: visible; }
+.hero-cost { margin: 10px 0 0; color: #a8fff1; font-weight: 750; }
+.hero-actions #heroApplyButton { justify-self: start; width: auto; min-height: 44px; padding: 8px 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; text-decoration: underline; text-underline-offset: 4px; }
+.service-overview { margin: 24px 0; padding: 22px 20px; border: 1px solid #346277; border-radius: 18px; background: #081722; }
+.service-overview h2 { margin: 0 0 16px; font-size: 22px; }
+.service-overview .hero-intro { max-width: 100%; }
+.service-overview .service-facts-summary { margin-top: 0; }
+@media (max-width: 760px) {
+  .hero .hero-art { display: none; }
+  .hero .service-definition { margin: 12px 0 0; font-size: 14px; line-height: 1.65; }
+  .hero .hero-actions { gap: 2px; margin-top: 12px; }
+  .hero .payout-note { margin: 6px 0 0; font-size: 12px; line-height: 1.6; }
+}
+
+.service-overview__steps { padding-left: 1.5em; line-height: 1.8; }
+.service-overview__steps li + li { margin-top: .25em; }
