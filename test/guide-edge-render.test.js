@@ -61,3 +61,14 @@ test("guide passes through HTML when the runtime has no HTMLRewriter", async () 
     if (previous !== undefined) globalThis.HTMLRewriter = previous;
   }
 });
+
+test('guide client updates payouts even when optional channel links are empty', async () => {
+ const {readFile}=await import('node:fs/promises');const vm=await import('node:vm');
+ const page=await readFile(new URL('../public/guide/index.html',import.meta.url),'utf8');
+ const source=[...page.matchAll(/<script>([\s\S]*?)<\/script>/g)].at(-1)[1];
+ const content=structuredClone(DEFAULT_CONTENT);content.payout.maxCases=2;
+ const nodes={'[data-total]':{textContent:''},'[data-milestones]':{children:[],replaceChildren(){this.children=[];},append(node){this.children.push(node);}}};
+ const document={querySelector:s=>nodes[s],querySelectorAll:()=>[],createElement:tag=>({tag,children:[],append(...children){this.children.push(...children);}})};
+ await vm.runInNewContext(source,{document,URL,Intl,fetch:async()=>({ok:true,json:async()=>content})});
+ assert.equal(nodes['[data-total]'].textContent,'440,000원');assert.equal(nodes['[data-milestones]'].children.length,4);
+});

@@ -48,3 +48,18 @@ test('footer renderer uses one validated CMS read for metadata, visible operator
  const graph=JSON.parse(html.match(/<script[^>]*>([\s\S]*?)<\/script>/)[1])['@graph'];assert.equal(graph[0].legalName,content.operator.company);assert.equal(graph[0].address.streetAddress,content.operator.address);assert.equal(graph[1].description,'클라임유심은 유심으로 받을 수 있는 혜택을 확인해주는 플랫폼입니다.');
  }finally{if(original===undefined)delete globalThis.HTMLRewriter;else globalThis.HTMLRewriter=original;}
 });
+
+test('home labels fallback provenance rather than implying current CMS conditions were read', async()=>{
+ const {onRequest}=await import('../functions/index.js');const {FixtureHTMLRewriter}=await import('../test-support/html-rewriter.js');
+ const prior=globalThis.HTMLRewriter;globalThis.HTMLRewriter=FixtureHTMLRewriter;
+ try{const response=await onRequest({request:new Request('https://climekr.com/'),env:{},next:()=>new Response('<span data-content-source>old</span>',{headers:{'Content-Type':'text/html'}})});assert.match(await response.text(),/기본 안내 기준/);}
+ finally{if(prior===undefined)delete globalThis.HTMLRewriter;else globalThis.HTMLRewriter=prior;}
+});
+
+test('only exact former default cost explanations migrate; custom stored explanations survive', async()=>{
+ const {withCurrentPublicSummary}=await import('../functions/api/content.js');
+ const content=structuredClone(DEFAULT_CONTENT);
+ content.faqs=[{question:'유심 개통·통신요금은 누가 부담하나요?',answer:'CLIME 운영사 안내 기준 고객의 개통·통신·회선 유지 관련 비용은 회사가 전액 부담합니다. 지급 혜택은 별도의 유지 조건이 충족되어야 받을 수 있습니다. 신청 전 본인 명의 회선 계약의 청구·납부 주체 및 회사 부담 범위를 확인하세요.'},{question:'유심 개통·통신요금은 누가 부담하나요?',answer:'운영자가 저장한 별도 안내'}];
+ const migrated=withCurrentPublicSummary(content);
+ assert.match(migrated.faqs[0].answer,/이용 비용은 0원/);assert.doesNotMatch(migrated.faqs[0].answer,/회사.*부담/);assert.equal(migrated.faqs[1].answer,'운영자가 저장한 별도 안내');assert.match(content.faqs[0].answer,/회사.*부담/);
+});

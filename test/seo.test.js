@@ -51,7 +51,8 @@ test("covers the requested climekr spellings and gives review searches useful, a
   assert.match(llms, /registrationNumber: 114-81-47958/);
   assert.match(llms, /유심으로 받을 수 있는 혜택을 확인해주는 플랫폼/);
   assert.match(llms, /텔레그램: https:\/\/t.me\/climeusim/);
-  assert.doesNotMatch(llms.slice(0, 500), /3일|15일|30일|수거/);
+  assert.match(llms, /이용 비용 0원 \/ 별도 계약서 작성 없음 \/ 별도 통신요금 납부 없음/);
+  for (const day of [3,15,30]) assert.ok(llms.includes(`${day}일 유지 조건 확인`));
   assert.doesNotMatch(llms.slice(0, 500), /통신혜택|통신 혜택|급전|폰깡|폰테크/);
   assert.doesNotMatch(llms, /\/topics\/|주제별 정보 안내/);
   assert.doesNotMatch(llms, /명의도용|소액결제|불법 개통|위험 없음|100% 안전/);

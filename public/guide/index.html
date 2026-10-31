@@ -128,8 +128,9 @@
         const allowed = { telegram: 't.me', channeltalk: 'climeusim.channel.io' };
         for (const key of Object.keys(allowed)) {
           const candidate = links[key];
-          if (typeof candidate !== 'string') continue;
-          const url = new URL(candidate);
+          if (typeof candidate !== 'string' || !candidate.trim()) continue;
+          let url;
+          try { url = new URL(candidate); } catch { continue; }
           if (url.protocol !== 'https:' || url.hostname !== allowed[key] || url.username || url.password) continue;
           document.querySelectorAll('[data-channel="' + key + '"]').forEach(a => { a.href = url.href; });
         }

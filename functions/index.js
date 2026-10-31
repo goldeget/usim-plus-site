@@ -140,7 +140,7 @@ export function buildPublicMetadata(content) {
   };
 }
 
-async function currentContent(env) { return (await loadPublicContent(env)).content; }
+async function currentContent(env) { return loadPublicContent(env); }
 
 function cacheable(response) {
   const headers = new Headers(response.headers);
@@ -170,7 +170,7 @@ export async function onRequest(context) {
   const response = await context.next();
   if (!isGet) return response;
   if (!response.ok || !response.headers.get("content-type")?.includes("text/html")) return response;
-  const content = await currentContent(context.env);
+  const { content, contentSource } = await currentContent(context.env);
   const metadata = buildPublicMetadata(content);
   const Rewriter = globalThis.HTMLRewriter;
   if (typeof Rewriter !== "function") return response;
@@ -182,6 +182,7 @@ export async function onRequest(context) {
     .on('meta[name="twitter:title"]', { element(element) { element.setAttribute("content", metadata.socialTitle); } })
     .on('meta[name="twitter:description"]', { element(element) { element.setAttribute("content", metadata.socialDescription); } })
     .on('script[type="application/ld+json"]', { element(element) { element.setInnerContent(jsonLdEscape(metadata.structuredData), { html: true }); } })
+    .on("[data-content-source]", { element(element) { element.setInnerContent(contentSource === "cms" ? "현재 저장된 운영 안내 기준" : "기본 안내 기준 · 현재 조건은 공식 상담에서 확인하세요"); } })
     .on("[data-service-definition]", { element(element) { element.setInnerContent(SERVICE_FACTS.definition); } })
     .on("#homeIntro", { element(element) { element.setInnerContent(structuredIntroHtml(content.intro, content), { html: true }); } })
     .on("#operatorCompany", { element(element) { element.setInnerContent(content.operator.company); } })
