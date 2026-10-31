@@ -1,0 +1,145 @@
+{
+  "checkedAt": "2026-10-31T21:40:56.735Z",
+  "home": {
+    "status": 200,
+    "title": "클라임유심 | 유심 혜택 · 유심 혜택 확인 · 최대 66만원 | 서울평가정보㈜",
+    "top": 356.53125,
+    "bottom": 406.53125,
+    "reachable": true,
+    "viewport": 844,
+    "overflow": false
+  },
+  "rows": [
+    {
+      "path": "/api/content",
+      "status": 200,
+      "url": "https://climekr.com/api/content",
+      "redirected": false,
+      "bytes": 5441
+    },
+    {
+      "path": "/api/service-facts",
+      "status": 200,
+      "url": "https://climekr.com/api/service-facts",
+      "redirected": false,
+      "bytes": 733
+    },
+    {
+      "path": "/llms.txt",
+      "status": 200,
+      "url": "https://climekr.com/llms.txt",
+      "redirected": false,
+      "bytes": 1178
+    },
+    {
+      "path": "/about/",
+      "status": 200,
+      "url": "https://climekr.com/about/",
+      "redirected": false,
+      "bytes": 4876
+    },
+    {
+      "path": "/structure/",
+      "status": 200,
+      "url": "https://climekr.com/structure/",
+      "redirected": false,
+      "bytes": 4967
+    },
+    {
+      "path": "/guide/",
+      "status": 200,
+      "url": "https://climekr.com/guide/",
+      "redirected": false,
+      "bytes": 15365
+    },
+    {
+      "path": "/links/",
+      "status": 200,
+      "url": "https://climekr.com/links/",
+      "redirected": false,
+      "bytes": 6504
+    },
+    {
+      "path": "/disclosures/",
+      "status": 200,
+      "url": "https://climekr.com/disclosures/",
+      "redirected": false,
+      "bytes": 4945
+    },
+    {
+      "path": "/disclosures/service/",
+      "status": 200,
+      "url": "https://climekr.com/disclosures/service/",
+      "redirected": false,
+      "bytes": 4996
+    },
+    {
+      "path": "/disclosures/safety/",
+      "status": 200,
+      "url": "https://climekr.com/disclosures/safety/",
+      "redirected": false,
+      "bytes": 4963
+    },
+    {
+      "path": "/disclosures/privacy/",
+      "status": 200,
+      "url": "https://climekr.com/disclosures/privacy/",
+      "redirected": false,
+      "bytes": 7562
+    },
+    {
+      "path": "/service-facts/",
+      "status": 200,
+      "url": "https://climekr.com/service-facts/",
+      "redirected": false,
+      "bytes": 5023
+    },
+    {
+      "path": "/robots.txt",
+      "status": 200,
+      "url": "https://climekr.com/robots.txt",
+      "redirected": false,
+      "bytes": 99
+    },
+    {
+      "path": "/sitemap.xml",
+      "status": 200,
+      "url": "https://climekr.com/sitemap.xml",
+      "redirected": false,
+      "bytes": 927
+    },
+    {
+      "path": "/admin/",
+      "status": 404,
+      "url": "https://climekr.com/admin/",
+      "redirected": false,
+      "bytes": 9
+    },
+    {
+      "path": "/api/admin/applications",
+      "status": 401,
+      "url": "https://climekr.com/api/admin/applications",
+      "redirected": false,
+      "bytes": 27
+    },
+    {
+      "path": "/topics/urgent-money/",
+      "status": 200,
+      "url": "https://climekr.com/guide/",
+      "redirected": true,
+      "bytes": 15365
+    },
+    {
+      "path": "/terms",
+      "status": 410,
+      "url": "https://climekr.com/terms",
+      "redirected": false,
+      "bytes": 1747
+    },
+    {
+      "path": "/api/applications",
+      "method": "POST",
+      "status": 410
+    }
+  ]
+}

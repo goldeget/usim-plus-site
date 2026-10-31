@@ -1,0 +1,22 @@
+{
+  "sourceCommit": "ce7698b6930e816bbce6550933c5f823c98f5f4e",
+  "productionBranch": "main",
+  "site": "https://climekr.com/",
+  "ci": {
+    "status": "succeeded",
+    "url": "https://github.com/goldeget/usim-plus-site/actions/runs/41244666507",
+    "job": "Node 22 test suite"
+  },
+  "cloudflare": {
+    "status": "Deployed successfully",
+    "checkUrl": "https://github.com/goldeget/usim-plus-site/runs/124665574927",
+    "deploymentUrl": "https://79377b35.usim-plus-site.pages.dev"
+  },
+  "localTests": {
+    "passed": 235,
+    "failed": 0,
+    "skipped": 0
+  },
+  "productionPathsChecked": 19,
+  "observedAtKST": "2026-11-01T06:42:03.163265+09:00"
+}
