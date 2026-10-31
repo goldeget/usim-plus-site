@@ -1,0 +1,279 @@
+[
+  {
+    "path": "/",
+    "viewport": {
+      "width": 320,
+      "height": 650
+    },
+    "targets": 4,
+    "result": "pass"
+  },
+  {
+    "path": "/about/",
+    "viewport": {
+      "width": 320,
+      "height": 650
+    },
+    "targets": 2,
+    "result": "pass"
+  },
+  {
+    "path": "/structure/",
+    "viewport": {
+      "width": 320,
+      "height": 650
+    },
+    "targets": 2,
+    "result": "pass"
+  },
+  {
+    "path": "/guide/",
+    "viewport": {
+      "width": 320,
+      "height": 650
+    },
+    "targets": 5,
+    "result": "pass"
+  },
+  {
+    "path": "/disclosures/",
+    "viewport": {
+      "width": 320,
+      "height": 650
+    },
+    "targets": 2,
+    "result": "pass"
+  },
+  {
+    "path": "/disclosures/service/",
+    "viewport": {
+      "width": 320,
+      "height": 650
+    },
+    "targets": 2,
+    "result": "pass"
+  },
+  {
+    "path": "/disclosures/safety/",
+    "viewport": {
+      "width": 320,
+      "height": 650
+    },
+    "targets": 2,
+    "result": "pass"
+  },
+  {
+    "path": "/disclosures/privacy/",
+    "viewport": {
+      "width": 320,
+      "height": 650
+    },
+    "targets": 4,
+    "result": "pass"
+  },
+  {
+    "path": "/service-facts/",
+    "viewport": {
+      "width": 320,
+      "height": 650
+    },
+    "targets": 2,
+    "result": "pass"
+  },
+  {
+    "path": "/links/",
+    "viewport": {
+      "width": 320,
+      "height": 650
+    },
+    "targets": 3,
+    "result": "pass"
+  },
+  {
+    "path": "/",
+    "viewport": {
+      "width": 390,
+      "height": 650
+    },
+    "targets": 4,
+    "result": "pass"
+  },
+  {
+    "path": "/about/",
+    "viewport": {
+      "width": 390,
+      "height": 650
+    },
+    "targets": 2,
+    "result": "pass"
+  },
+  {
+    "path": "/structure/",
+    "viewport": {
+      "width": 390,
+      "height": 650
+    },
+    "targets": 2,
+    "result": "pass"
+  },
+  {
+    "path": "/guide/",
+    "viewport": {
+      "width": 390,
+      "height": 650
+    },
+    "targets": 5,
+    "result": "pass"
+  },
+  {
+    "path": "/disclosures/",
+    "viewport": {
+      "width": 390,
+      "height": 650
+    },
+    "targets": 2,
+    "result": "pass"
+  },
+  {
+    "path": "/disclosures/service/",
+    "viewport": {
+      "width": 390,
+      "height": 650
+    },
+    "targets": 2,
+    "result": "pass"
+  },
+  {
+    "path": "/disclosures/safety/",
+    "viewport": {
+      "width": 390,
+      "height": 650
+    },
+    "targets": 2,
+    "result": "pass"
+  },
+  {
+    "path": "/disclosures/privacy/",
+    "viewport": {
+      "width": 390,
+      "height": 650
+    },
+    "targets": 4,
+    "result": "pass"
+  },
+  {
+    "path": "/service-facts/",
+    "viewport": {
+      "width": 390,
+      "height": 650
+    },
+    "targets": 2,
+    "result": "pass"
+  },
+  {
+    "path": "/links/",
+    "viewport": {
+      "width": 390,
+      "height": 650
+    },
+    "targets": 3,
+    "result": "pass"
+  },
+  {
+    "path": "/",
+    "viewport": {
+      "width": 844,
+      "height": 390
+    },
+    "targets": 4,
+    "result": "pass"
+  },
+  {
+    "path": "/about/",
+    "viewport": {
+      "width": 844,
+      "height": 390
+    },
+    "targets": 2,
+    "result": "pass"
+  },
+  {
+    "path": "/structure/",
+    "viewport": {
+      "width": 844,
+      "height": 390
+    },
+    "targets": 2,
+    "result": "pass"
+  },
+  {
+    "path": "/guide/",
+    "viewport": {
+      "width": 844,
+      "height": 390
+    },
+    "targets": 5,
+    "result": "pass"
+  },
+  {
+    "path": "/disclosures/",
+    "viewport": {
+      "width": 844,
+      "height": 390
+    },
+    "targets": 2,
+    "result": "pass"
+  },
+  {
+    "path": "/disclosures/service/",
+    "viewport": {
+      "width": 844,
+      "height": 390
+    },
+    "targets": 2,
+    "result": "pass"
+  },
+  {
+    "path": "/disclosures/safety/",
+    "viewport": {
+      "width": 844,
+      "height": 390
+    },
+    "targets": 2,
+    "result": "pass"
+  },
+  {
+    "path": "/disclosures/privacy/",
+    "viewport": {
+      "width": 844,
+      "height": 390
+    },
+    "targets": 4,
+    "result": "pass"
+  },
+  {
+    "path": "/service-facts/",
+    "viewport": {
+      "width": 844,
+      "height": 390
+    },
+    "targets": 2,
+    "result": "pass"
+  },
+  {
+    "path": "/links/",
+    "viewport": {
+      "width": 844,
+      "height": 390
+    },
+    "targets": 3,
+    "result": "pass"
+  },
+  {
+    "state": "short viewport focus; not native OS keyboard",
+    "viewport": 320,
+    "top": 190.828125,
+    "bottom": 236.828125,
+    "reachable": true
+  }
+]

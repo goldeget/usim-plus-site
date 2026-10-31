@@ -1,5 +1,7 @@
 # 클라임유심 공식 정보·전 페이지 문단 개선 Implementation Plan
 
+현재 실행 결과는 [완료·검증 기록](../../validation/2026-11-01-platform-patch-results.md)을 기준으로 확인한다. 아래는 원래의 세부 작업 명세이며, 미검증 외부 항목까지 일괄 완료 체크하지 않는다. 사용자의 후속 지시에 따라 서브 에이전트 실행과 작업 브랜치 GitHub 커밋·푸시가 허용됐다. main 병합·운영 배포·환경 게시는 수행하지 않았다.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking. 사용자의 별도 지시 없이 구현을 시작하거나 하위 에이전트를 생성하지 않는다.
 
 **Goal:** 푸터 연결 페이지부터 메인·관리자·오류 화면까지 서비스 사실과 한국어 문단을 일치시킨다.
@@ -20,7 +22,7 @@
 - 문서에 시크릿·개인정보·운영 데이터 원본을 남기지 않는다.
 - 실제 외부 채널 수정·메시지 발송·remote migration·main push·사이트/환경 게시 없음.
 - 기존 체크아웃 사용. 사용자의 요청 없이 worktree 생성 안 함.
-- 아래 실행 체크박스는 모두 미실행이다. 이 문서 작성은 구현 완료가 아니다.
+- 세부 체크박스의 계획과 실제 실행·검증 결과를 구분한다. 구현 상태와 한계는 별도 검증 기록에 남긴다.
 
 ## Review Focus
 

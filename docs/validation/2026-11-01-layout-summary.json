@@ -1,65 +1,20 @@
 {
-  "initial-public": {
-    "count": 130,
-    "viewports": [
-      320,
-      360,
-      390,
-      430,
-      759,
-      760,
-      761,
-      768,
-      1024,
-      1440
-    ],
-    "documentOverflow": 0,
-    "clipped": 0,
-    "runtimeErrors": 0,
-    "duplicateIds": 0,
-    "emptyLinks": 0,
-    "outlierRecords": 0
-  },
-  "admin-final": {
-    "count": 70,
-    "viewports": [
-      320,
-      360,
-      390,
-      430,
-      759,
-      760,
-      761,
-      768,
-      1024,
-      1440
-    ],
-    "documentOverflow": 0,
-    "clipped": 0,
-    "runtimeErrors": 0,
-    "duplicateIds": 0,
-    "emptyLinks": 0,
-    "outlierRecords": 0
-  },
-  "affected-public-final": {
-    "count": 50,
-    "viewports": [
-      320,
-      360,
-      390,
-      430,
-      759,
-      760,
-      761,
-      768,
-      1024,
-      1440
-    ],
-    "documentOverflow": 0,
-    "clipped": 0,
-    "runtimeErrors": 0,
-    "duplicateIds": 0,
-    "emptyLinks": 0,
-    "outlierRecords": 0
-  }
+  "finalCases": 200,
+  "publicCases": 130,
+  "adminFixtureCases": 70,
+  "viewports": [
+    320,
+    360,
+    390,
+    430,
+    759,
+    760,
+    761,
+    768,
+    1024,
+    1440
+  ],
+  "recordedFailures": 0,
+  "source": "latest result per path/width/fixture; root rerun after UX change",
+  "adminLimitation": "source HTML + synthetic empty API data; auth unchanged; closed and open sidebar checked"
 }

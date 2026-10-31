@@ -1,5 +1,7 @@
 # CLIME 플랫폼 패치 — 최종 아키텍처
 
+> 이 문서는 2026-10-28 기준의 이전 설계 기록입니다. 현재 구현과 운영 정의는 [2026-11-01 설계](superpowers/specs/2026-11-01-platform-facts-typography-design.md)와 [검증 결과](validation/2026-11-01-platform-patch-results.md)를 기준으로 확인하세요. 아래의 과거 작업 트리·운영 설명을 현재 검증 결과로 사용하지 않습니다.
+
 기준: 저장소 `F:/usim-plus-site`의 공개 HTML, `functions/`, 네이버 블로그 문서, 사이트맵. 운영 숫자는 CMS 기본값(3일 5만 / 15일 +7만 / 30일 +10만, 건당 22만, 최대 3건, 총 66만)과 `public/llms.txt`를 따른다. 금액이 바뀌면 `functions/api/content.js`의 `payout`과 D1 `site_content`(`id=home`)가 원본이고, 정적 HTML에 박힌 66만원은 함께 고쳐야 한다.
 
 ## 현재 상태 스냅샷 (2026-10-28)

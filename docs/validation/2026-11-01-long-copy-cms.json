@@ -1,0 +1,37 @@
+{
+  "records": [
+    {
+      "path": "/",
+      "status": 200,
+      "cmsCostOperatorChannel": "pass"
+    },
+    {
+      "path": "/guide/",
+      "status": 200,
+      "cmsCostOperatorChannel": "pass"
+    },
+    {
+      "path": "/links/",
+      "status": 200,
+      "cmsCostOperatorChannel": "pass"
+    },
+    {
+      "path": "/about/",
+      "status": 200,
+      "cmsCostOperatorChannel": "pass"
+    },
+    {
+      "path": "/disclosures/privacy/",
+      "status": 200,
+      "cmsCostOperatorChannel": "pass"
+    },
+    {
+      "path": "/service-facts/",
+      "status": 200,
+      "cmsCostOperatorChannel": "pass"
+    }
+  ],
+  "api": "pass",
+  "llms": "pass",
+  "mode": "Actual local D1 + real Functions, JavaScript disabled"
+}
