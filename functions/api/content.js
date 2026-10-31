@@ -224,6 +224,16 @@ export function withCurrentPublicSummary(content) {
   if (!content || typeof content !== "object") return content;
   const seo = content.seo && typeof content.seo === "object" ? { ...content.seo } : content.seo;
   const next = { ...content, seo };
+  // Match complete former defaults, so operator-authored answers are never overwritten.
+  const formerAnswers = new Map([
+    ["회사의 고객 유치와 유심 개통 혜택 홍보를 위한 참여 안내입니다. 회사에서 고객의 개통·통신 관련 비용을 부담한다고 안내하고 있으며, 지급 대상과 금액은 조회 결과와 유지 조건 확인 후 결정됩니다.", "왜 참여자를 모집하나요?"],
+    ["CLIME 운영사 안내 기준 고객의 개통·통신·회선 유지 관련 비용은 회사가 전액 부담합니다. 지급 혜택은 별도의 유지 조건이 충족되어야 받을 수 있습니다. 신청 전 본인 명의 회선 계약의 청구·납부 주체 및 회사 부담 범위를 확인하세요.", "유심 개통·통신요금은 누가 부담하나요?"]
+  ]);
+  if (Array.isArray(next.faqs)) next.faqs = next.faqs.map(item => {
+    if (formerAnswers.get(item.answer) !== item.question) return item;
+    const currentQuestion = item.question === "왜 참여자를 모집하나요?" ? item.question : "이용 비용과 별도 통신요금이 있나요?";
+    return { ...item, ...DEFAULT_CONTENT.faqs.find(current => current.question === currentQuestion) };
+  });
   if (next.headline === "유심 개통 가능하면\n최대 {{MAX_TOTAL}}" || next.headline === "유심 개통 가능하면\n최대 66만원") next.headline = DEFAULT_CONTENT.headline;
   if (next.headline === "몰랐던 유심 혜택,\n유심 혜택 확인부터") next.headline = DEFAULT_CONTENT.headline;
   if (next.headline === "몰랐던 유심 혜택 · 최대 {{MAX_TOTAL}}" || next.headline === "몰랐던 유심 혜택 · 최대 66만원") next.headline = DEFAULT_CONTENT.headline;
