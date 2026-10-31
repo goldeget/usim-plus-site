@@ -174,7 +174,21 @@ export async function onRequest(context) {
   const metadata = buildPublicMetadata(content);
   const Rewriter = globalThis.HTMLRewriter;
   if (typeof Rewriter !== "function") return response;
-  const result = cacheable(await new Rewriter()
+  let rewriter = new Rewriter();
+  for (const key of ["telegram", "channeltalk"]) {
+    const fallback = key === "telegram" ? "https://t.me/climeusim" : "https://climeusim.channel.io";
+    rewriter = rewriter.on(`[data-contact="${key}"]`, { element(element) { element.setAttribute("href", content.supportLinks[key] || fallback); } });
+  }
+  for (const id of ["eligibilityButton", "contactLookupLink"]) {
+    rewriter = rewriter.on(`#${id}`, { element(element) { element.setAttribute("href", content.lookup.url); } });
+  }
+  const result = cacheable(await rewriter
+    .on("#hero-title", { element(element) { element.setInnerContent(multilineHtml(content.headline, content), { html: true }); } })
+    .on("#footerTerms", { element(element) { element.setInnerContent(expandTokens(content.copy.footerTerms, content)); } })
+    .on("#contact-title", { element(element) { element.setInnerContent(expandTokens(content.copy.contactTitle, content)); } })
+    .on("#contactIntro", { element(element) { element.setInnerContent(multilineHtml(content.copy.contactIntro, content), { html: true }); } })
+    .on("#contactLookupLabel", { element(element) { element.setInnerContent(`${content.copy.contactLookupLabel} ↗`); } })
+    .on("#eligibilityButton", { element(element) { element.setInnerContent(`${escapeHtml(content.lookup.label)} <span aria-hidden="true">↗</span>`, { html: true }); } })
     .on("title", { element(element) { element.setInnerContent(metadata.title); } })
     .on('meta[name="description"]', { element(element) { element.setAttribute("content", metadata.description); } })
     .on('meta[property="og:title"]', { element(element) { element.setAttribute("content", metadata.socialTitle); } })

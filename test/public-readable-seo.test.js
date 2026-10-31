@@ -72,7 +72,7 @@ test("structure explains the actual seven-stage process without speculative fund
 });
 
 test("guide page stays short: unified hero hook, milestone rows, no card explainer blocks", () => {
-  assert.match(guide, /몰랐던 유심 혜택으로<br><strong>최대 66만원<\/strong>/);
+  assert.match(guide, /<h1>혜택 조건을 확인하세요<\/h1>/);
   assert.match(guide, /data-milestones/);
   assert.match(guide, /data-total/);
   assert.match(guide, /footer-hook/);

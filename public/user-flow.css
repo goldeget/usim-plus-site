@@ -508,7 +508,6 @@ a { color: #8cffe8; }
 .hero-intro__chunk, .hero-intro__part { display: inline; }
 @media (max-width: 760px) {
   .hero-intro { max-width: 24em; line-height: 1.75; }
-  .hero-intro br { display: none; }
   .hero-intro__chunk { display: block; }
   .hero-intro__part { display: inline; }
   .hero-intro__chunk + .hero-intro__chunk { margin-top: .15em; }

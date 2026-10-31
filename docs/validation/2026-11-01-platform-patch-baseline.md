@@ -13,3 +13,5 @@
 - Chromium baseline: 8 footer/home pages × widths360/1440, all HTTP200, no document overflow at these widths.
 - Screenshots: /workspace/.tools/clime-validation/before; machine-readable baseline /workspace/.tools/clime-validation/baseline.json.
 - Browser executables: system Chromium available; Playwright Firefox/WebKit executables missing.
+
+- Protected manifest expanded to include all tracked public/reviews/data files, with hashes read from immutable base commit7c0ee68 (not from edited working files). Current comparison passes.

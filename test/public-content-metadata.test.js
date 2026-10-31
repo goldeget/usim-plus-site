@@ -45,6 +45,14 @@ class TestHTMLRewriter {
           handlers.element({ setInnerContent(next) { value = next; } });
           return tag.replace(/>[\s\S]*<\/script>$/i, `>${value}</script>`);
         });
+      } else if (/^\[[^=]+="[^"]+"\]$/.test(selector)) {
+        const [, key, value] = selector.match(/^\[([^=]+)="([^"]+)"\]$/);
+        html = html.replace(/<a\b[^>]*>/gi, tag => {
+          if (readAttribute(tag, key) !== value) return tag;
+          let nextTag = tag;
+          handlers.element({ setAttribute(name, next) { nextTag = setAttribute(nextTag, name, next); } });
+          return nextTag;
+        });
       } else if (selector.startsWith("#")) {
         const id = selector.slice(1);
         html = html.replace(new RegExp(`(<(p|span|a|div|h[1-6]|li|strong|small|em|button)\\b[^>]*\\bid="${id}"[^>]*>)([\\s\\S]*?)(</\\2>)`, "i"), (all, open, tag, inner, close) => {
@@ -256,4 +264,12 @@ test("reuses the short-lived edge copy instead of querying D1 for every homepage
     if (previousRewriter === undefined) delete globalThis.HTMLRewriter;
     else globalThis.HTMLRewriter = previousRewriter;
   }
+});
+
+test('home first HTML includes current headline, footer, lookup and channels using one CMS read',async()=>{
+ const {onRequest}=await import('../functions/index.js');const content=structuredClone(DEFAULT_CONTENT);content.payout.maxCases=2;content.supportLinks.telegram='https://t.me/current';content.supportLinks.channeltalk='https://custom.channel.io';content.lookup={url:'https://www.credit.or.kr/credit/search?source=custom',label:'맞춤 혜택 조회'};content.copy.contactTitle='현재 상담 제목';content.copy.contactLookupLabel='별도 상담 조회 문구';
+ let reads=0;const env={CONTENT_DB:{prepare(){return{bind(){return{async first(){reads++;return {content:JSON.stringify(content)}}}}}}}};
+ const previous=globalThis.HTMLRewriter;globalThis.HTMLRewriter=TestHTMLRewriter;
+ try{const html=await (await onRequest({request:new Request('https://climekr.com/'),env,next:()=>new Response(page,{headers:{'Content-Type':'text/html'}})})).text();assert.equal(reads,1);assert.match(html,/<h1 id="hero-title">몰랐던 유심 혜택<br>최대 44만원<\/h1>/);assert.match(html,/id="footerTerms">[^<]*44만원/);assert.match(html,/id="eligibilityButton" href="https:\/\/www.credit.or.kr\/credit\/search\?source=custom"/);assert.match(html,/id="contactLookupLabel">별도 상담 조회 문구 ↗/);assert.match(html,/id="contact-title">현재 상담 제목/);assert.match(html,/data-contact="telegram" href="https:\/\/t.me\/current"/);assert.match(html,/data-contact="channeltalk" href="https:\/\/custom.channel.io\/?"/);}
+ finally{if(previous===undefined)delete globalThis.HTMLRewriter;else globalThis.HTMLRewriter=previous;}
 });

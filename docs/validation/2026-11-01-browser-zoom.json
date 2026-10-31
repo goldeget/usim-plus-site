@@ -1,0 +1,188 @@
+{
+  "method": "chrome.settingsPrivate.setDefaultZoom",
+  "windowWidth": 1440,
+  "records": [
+    {
+      "path": "/",
+      "factor": 2,
+      "viewport": 720,
+      "scroll": 720,
+      "clipped": 0
+    },
+    {
+      "path": "/about/",
+      "factor": 2,
+      "viewport": 720,
+      "scroll": 720,
+      "clipped": 0
+    },
+    {
+      "path": "/structure/",
+      "factor": 2,
+      "viewport": 720,
+      "scroll": 720,
+      "clipped": 0
+    },
+    {
+      "path": "/guide/",
+      "factor": 2,
+      "viewport": 720,
+      "scroll": 720,
+      "clipped": 0
+    },
+    {
+      "path": "/disclosures/",
+      "factor": 2,
+      "viewport": 720,
+      "scroll": 720,
+      "clipped": 0
+    },
+    {
+      "path": "/disclosures/service/",
+      "factor": 2,
+      "viewport": 720,
+      "scroll": 720,
+      "clipped": 0
+    },
+    {
+      "path": "/disclosures/safety/",
+      "factor": 2,
+      "viewport": 720,
+      "scroll": 720,
+      "clipped": 0
+    },
+    {
+      "path": "/disclosures/privacy/",
+      "factor": 2,
+      "viewport": 720,
+      "scroll": 720,
+      "clipped": 0
+    },
+    {
+      "path": "/service-facts/",
+      "factor": 2,
+      "viewport": 720,
+      "scroll": 720,
+      "clipped": 0
+    },
+    {
+      "path": "/links/",
+      "factor": 2,
+      "viewport": 720,
+      "scroll": 720,
+      "clipped": 0
+    },
+    {
+      "path": "/reviews/",
+      "factor": 2,
+      "viewport": 720,
+      "scroll": 720,
+      "clipped": 0
+    },
+    {
+      "path": "/404.html",
+      "factor": 2,
+      "viewport": 720,
+      "scroll": 720,
+      "clipped": 0
+    },
+    {
+      "path": "/terms",
+      "factor": 2,
+      "viewport": 720,
+      "scroll": 720,
+      "clipped": 0
+    },
+    {
+      "path": "/",
+      "factor": 4,
+      "viewport": 360,
+      "scroll": 360,
+      "clipped": 0
+    },
+    {
+      "path": "/about/",
+      "factor": 4,
+      "viewport": 360,
+      "scroll": 360,
+      "clipped": 0
+    },
+    {
+      "path": "/structure/",
+      "factor": 4,
+      "viewport": 360,
+      "scroll": 360,
+      "clipped": 0
+    },
+    {
+      "path": "/guide/",
+      "factor": 4,
+      "viewport": 360,
+      "scroll": 360,
+      "clipped": 0
+    },
+    {
+      "path": "/disclosures/",
+      "factor": 4,
+      "viewport": 360,
+      "scroll": 360,
+      "clipped": 0
+    },
+    {
+      "path": "/disclosures/service/",
+      "factor": 4,
+      "viewport": 360,
+      "scroll": 360,
+      "clipped": 0
+    },
+    {
+      "path": "/disclosures/safety/",
+      "factor": 4,
+      "viewport": 360,
+      "scroll": 360,
+      "clipped": 0
+    },
+    {
+      "path": "/disclosures/privacy/",
+      "factor": 4,
+      "viewport": 360,
+      "scroll": 360,
+      "clipped": 0
+    },
+    {
+      "path": "/service-facts/",
+      "factor": 4,
+      "viewport": 360,
+      "scroll": 360,
+      "clipped": 0
+    },
+    {
+      "path": "/links/",
+      "factor": 4,
+      "viewport": 360,
+      "scroll": 360,
+      "clipped": 0
+    },
+    {
+      "path": "/reviews/",
+      "factor": 4,
+      "viewport": 360,
+      "scroll": 360,
+      "clipped": 0
+    },
+    {
+      "path": "/404.html",
+      "factor": 4,
+      "viewport": 360,
+      "scroll": 360,
+      "clipped": 0
+    },
+    {
+      "path": "/terms",
+      "factor": 4,
+      "viewport": 360,
+      "scroll": 360,
+      "clipped": 0
+    }
+  ]
+}

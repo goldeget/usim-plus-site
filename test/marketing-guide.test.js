@@ -11,7 +11,7 @@ const sitemap = read('../public/sitemap.xml');
 test('benefits guide has unique self-canonical and describes actual service', () => {
   assert.match(guide, /<title>혜택 조건 \| 텔레그램·채널톡 상담 \| 클라임유심/);
   assert.match(guide, /rel="canonical" href="https:\/\/climekr\.com\/guide\/"/);
-  assert.match(guide, /<h1>몰랐던 유심 혜택으로<br><strong>최대 66만원<\/strong><\/h1>/);
+  assert.match(guide, /<h1>혜택 조건을 확인하세요<\/h1>/);
   assert.doesNotMatch(guide.slice(0, guide.indexOf('class="notice"')), /자금이 급할 때|급전|폰깡|통신혜택/);
   assert.match(guide, /혜택은 상담·신청 직후 지급되지 않습니다/);
   assert.match(guide, /href="\/disclosures\/">고지·안내/);

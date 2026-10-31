@@ -1,6 +1,7 @@
 import { loadPublicInformation } from './public-information.js';
 import { publicStructuredData, jsonLdEscape } from './structured-data.js';
 export const PUBLIC_PAGES = {
+ links: ["공식 상담 링크", "유심 혜택 확인 플랫폼의 공식 상담 채널과 이용 비용, 현재 조건 안내입니다."],
  about: ['CLIME 소개','유심 혜택 확인 플랫폼의 역할과 운영사, 공식 상담 채널을 안내합니다.'],
  structure: ['이용 절차','혜택 확인부터 적용 대상·조건 안내, 희망 시 진행 지원과 보상금 지급까지의 절차입니다.'],
  guide: ['혜택 조건','적용 대상과 유지 조건, 현재 단계별 보상금 및 지급 기준을 확인하세요.'],
