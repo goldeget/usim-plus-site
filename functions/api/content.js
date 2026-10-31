@@ -210,7 +210,11 @@ const LEGACY_PUBLIC_DESCRIPTIONS = new Set([
 
 const LEGACY_SEO_TITLES = new Set([
   "클라임유심 | 정식 사업자 유심 개통 혜택 · 최대 {{MAX_TOTAL}}",
-  "클라임유심 | 정식 사업자 유심 개통 혜택 · 최대 66만원"
+  "클라임유심 | 정식 사업자 유심 개통 혜택 · 최대 66만원",
+  "클라임유심 CLIME | 개통·통신비 회사 부담 · 최대 {{MAX_TOTAL}} 혜택",
+  "클라임유심 CLIME | 개통·통신비 회사 부담 · 최대 66만원 혜택",
+  "CLIME 유심 혜택 | 고객 비용 회사 부담 · 조건 충족 시 최대 {{MAX_TOTAL}}",
+  "CLIME 유심 혜택 | 고객 비용 회사 부담 · 조건 충족 시 최대 66만원"
 ]);
 
 const LEGACY_PUBLIC_SOCIAL_DESCRIPTIONS = new Set([
@@ -227,7 +231,8 @@ export function withCurrentPublicSummary(content) {
   // Match complete former defaults, so operator-authored answers are never overwritten.
   const formerAnswers = new Map([
     ["회사의 고객 유치와 유심 개통 혜택 홍보를 위한 참여 안내입니다. 회사에서 고객의 개통·통신 관련 비용을 부담한다고 안내하고 있으며, 지급 대상과 금액은 조회 결과와 유지 조건 확인 후 결정됩니다.", "왜 참여자를 모집하나요?"],
-    ["CLIME 운영사 안내 기준 고객의 개통·통신·회선 유지 관련 비용은 회사가 전액 부담합니다. 지급 혜택은 별도의 유지 조건이 충족되어야 받을 수 있습니다. 신청 전 본인 명의 회선 계약의 청구·납부 주체 및 회사 부담 범위를 확인하세요.", "유심 개통·통신요금은 누가 부담하나요?"]
+    ["CLIME 운영사 안내 기준 고객의 개통·통신·회선 유지 관련 비용은 회사가 전액 부담합니다. 지급 혜택은 별도의 유지 조건이 충족되어야 받을 수 있습니다. 신청 전 본인 명의 회선 계약의 청구·납부 주체 및 회사 부담 범위를 확인하세요.", "유심 개통·통신요금은 누가 부담하나요?"],
+    ["CLIME 운영사가 안내한 조건에 따르면 고객의 유심 개통·통신·회선 유지와 관련된 비용은 회사가 전액 부담합니다. 혜택 지급에는 별도 회선 유지 조건이 적용되며, 실제 본인 명의 계약과 회사의 비용 부담 범위를 확인한 뒤 참여하세요.", "유심 개통·통신 비용은 누가 부담하나요?"]
   ]);
   if (Array.isArray(next.faqs)) next.faqs = next.faqs.map(item => {
     if (formerAnswers.get(item.answer) !== item.question) return item;
