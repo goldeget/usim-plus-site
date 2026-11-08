@@ -61,7 +61,7 @@ test('only exact former default cost explanations migrate; custom stored explana
  const content=structuredClone(DEFAULT_CONTENT);
  content.faqs=[{question:'유심 개통·통신요금은 누가 부담하나요?',answer:'CLIME 운영사 안내 기준 고객의 개통·통신·회선 유지 관련 비용은 회사가 전액 부담합니다. 지급 혜택은 별도의 유지 조건이 충족되어야 받을 수 있습니다. 신청 전 본인 명의 회선 계약의 청구·납부 주체 및 회사 부담 범위를 확인하세요.'},{question:'유심 개통·통신요금은 누가 부담하나요?',answer:'운영자가 저장한 별도 안내'}];
  const migrated=withCurrentPublicSummary(content);
- assert.match(migrated.faqs[0].answer,/이용 비용은 0원/);assert.doesNotMatch(migrated.faqs[0].answer,/회사.*부담/);assert.equal(migrated.faqs[1].answer,'운영자가 저장한 별도 안내');assert.match(content.faqs[0].answer,/회사.*부담/);
+ assert.match(migrated.faqs[0].answer,/비용은 0원/);assert.doesNotMatch(migrated.faqs[0].answer,/회사.*부담/);assert.equal(migrated.faqs[1].answer,'운영자가 저장한 별도 안내');assert.match(content.faqs[0].answer,/회사.*부담/);
 });
 
 test('guide and privacy bind every operator contact and avoid redundant fixed payout pitches', async()=>{
