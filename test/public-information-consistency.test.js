@@ -78,7 +78,7 @@ test('guide and privacy bind every operator contact and avoid redundant fixed pa
 
 test('links page includes current platform facts, common server renderer and per-entry safe channel parsing',async()=>{
  const {readFile}=await import('node:fs/promises');const html=await readFile(new URL('../public/links/index.html',import.meta.url),'utf8');
- assert.match(html,/data-service-definition/);assert.match(html,/별도 계약서 작성 없음/);assert.match(html,/별도 통신요금 납부 없음/);assert.match(html,/href="\/service-facts\/"/);assert.doesNotMatch(html,/사업 구조/);assert.match(html,/name="robots" content="noindex,follow"/);
+ assert.match(html,/data-service-definition/);assert.match(html,/혜택 확인·상담 비용 0원/);assert.match(html,/가입·통신요금·해지 책임/);assert.match(html,/href="\/service-facts\/"/);assert.doesNotMatch(html,/사업 구조/);assert.match(html,/name="robots" content="noindex,follow"/);
  assert.ok(existsSync(new URL('../functions/links/index.js',import.meta.url)));
 });
 
