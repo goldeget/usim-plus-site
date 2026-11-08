@@ -21,9 +21,9 @@ const contentApi = await readFile(new URL("../functions/api/content.js", import.
 const userFlowCss = await readFile(new URL("../public/user-flow.css", import.meta.url), "utf8");
 
 test("preserves the dark visual identity and exposes direct consultation without a file form", () => {
-  for (const element of ['<html lang="ko">','class="hero-payouts"','class="sim-image"','id="contact"','id="heroApplyButton" href="#contact"']) assert.ok(html.includes(element), element);
+  for (const element of ['<html lang="ko">','class="benefit-programs"','class="sim-image"','id="contact"','id="heroApplyButton" href="#contact"']) assert.ok(html.includes(element), element);
   assert.doesNotMatch(html, /type="file"|id="precheckForm"|FormData|challenges\.cloudflare\.com|turnstile\.render/);
-  assert.match(html.replace(/<\/?span[^>]*>/g, ""), /몰랐던 유심 혜택으로 최대 66만원\.<br>3일·15일·30일 유지 확인 후 단계 지급 대상이 정해집니다\.<br>자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다\./);
+  assert.match(html.replace(/<\/?span[^>]*>/g, ""), /선불 최대 66만원 · 후불 최대 180만원\(별도 프로그램\)\.<br>선불은 3일·15일·30일 유지 후 단계별 지급 대상이 정해집니다\.<br>후불 지급·통신요금 조건은 상담에서 확인하세요\./);
   assert.match(html, /name="color-scheme" content="dark"/);
 });
 
@@ -118,15 +118,15 @@ test("admin-managed public copy covers payouts, lookup, privacy, footer, status,
 
 test("renders the homepage announcement lines and the footer without visible backslash-n", () => {
   const expectedIntro = [
-    "몰랐던 유심 혜택으로 최대 66만원.",
-    "3일·15일·30일 유지 확인 후 단계 지급 대상이 정해집니다.",
-    "자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다."
+    "선불 최대 66만원 · 후불 최대 180만원(별도 프로그램).",
+    "선불은 3일·15일·30일 유지 후 단계별 지급 대상이 정해집니다.",
+    "후불 지급·통신요금 조건은 상담에서 확인하세요."
   ].join("<br>");
   const heroIntroHtml = html.match(/<div class="hero-intro copy-prose" id="homeIntro">([\s\S]*?)<\/div>/)[1];
   assert.equal(heroIntroHtml.replace(/<\/?span[^>]*>/g, ''), expectedIntro);
   assert.doesNotMatch(html, /id="homeIntro"[^>]*>[\s\S]*?\{\{MAX_TOTAL\}\}/);
   const normalizedHtml = html.replace(/\r\n/g, "\n");
-  assert.ok(normalizedHtml.includes('<p class="site-footer__terms" id="footerTerms">몰랐던 유심 혜택 · 최대 66만원\n자세한 혜택·조건은 텔레그램·채널톡 상담</p>'));
+  assert.ok(normalizedHtml.includes('<p class="site-footer__terms" id="footerTerms">선불 최대 66만원 · 후불 최대 180만원\n개별 조건 및 지급 가능 여부는 상담에서 확인</p>'));
   assert.match(html, /renderHeroIntro\(document\.getElementById\('homeIntro'\),content\.intro,content\)/);
   assert.match(html, /normalizeDisplayedLineBreaks\(expandTokens\(value,content\)\)/);
   assert.match(html, /normalizeDisplayedLineBreaks\(expandTokens\(copy\.footerTerms,content\)\)/);
