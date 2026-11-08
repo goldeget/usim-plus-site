@@ -256,11 +256,6 @@ export function withCurrentPublicSummary(content) {
   if (seo && LEGACY_PUBLIC_DESCRIPTIONS.has(seo.description)) seo.description = DEFAULT_CONTENT.seo.description;
   if (seo && LEGACY_PUBLIC_SOCIAL_DESCRIPTIONS.has(seo.socialDescription)) seo.socialDescription = DEFAULT_CONTENT.seo.socialDescription;
   next.postpaid = next.postpaid || { ...DEFAULT_CONTENT.postpaid };
-  if (next.headline === "몰랐던 유심 혜택\n최대 {{MAX_TOTAL}}" || next.headline === "몰랐던 유심 혜택\n최대 66만원") next.headline = DEFAULT_CONTENT.headline;
-  else if (!/후불/.test(next.headline)) next.headline = (next.headline + "\n후불 최대 {{POSTPAID_MAX_TOTAL}}").slice(0, 100);
-  if (!/후불/.test(next.intro)) next.intro = (next.intro + "\n후불 최대 {{POSTPAID_MAX_TOTAL}}는 세부 조건 확인 후 안내됩니다.").slice(0, 500);
-  for (const key of ["title", "socialTitle"]) if (seo && !/후불/.test(seo[key] || "")) seo[key] = (seo[key] + " · 후불 최대 {{POSTPAID_MAX_TOTAL}}").slice(0, 160);
-  for (const key of ["description", "socialDescription"]) if (seo && !/후불/.test(seo[key] || "")) seo[key] = (seo[key] + " 후불 최대 {{POSTPAID_MAX_TOTAL}}의 세부 요금·지급 조건은 별도 확인하세요.").slice(0, 500);
   next.lookup = publishedLookup(next.lookup);
   if (next.copy && typeof next.copy === "object") {
     const copy = { ...next.copy };
@@ -390,7 +385,7 @@ function payoutCopyIssue(content) {
 
 function payoutTextIssue(text, payout, postpaid) {
   // A stated zero service cost is not a payout promise. Keep every other amount validated.
-  text = text.replace(/(?:플랫폼 )?이용 비용(?:은|는)?\s*0원/g, "이용 비용 없음");
+  text = text.replace(/(?:플랫폼 상담·혜택 확인 비용|혜택 조회·상담 비용|(?:플랫폼 )?이용 비용)(?:은|는)?\s*0원/g, "이용 비용 없음");
   const milestones = payout.milestones;
   const allowedDays = new Set(milestones.map(item => item.days));
   const perCase = milestones.reduce((sum, item) => sum + item.amount, 0);
