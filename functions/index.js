@@ -17,6 +17,8 @@ function expandTokens(value, content) {
   const perCase = content.payout.milestones.reduce((sum, item) => sum + item.amount, 0);
   const tokens = {
     MAX_TOTAL: formatMoney(perCase * content.payout.maxCases),
+    PREPAID_MAX_TOTAL: formatMoney(perCase * content.payout.maxCases),
+    POSTPAID_MAX_TOTAL: formatMoney(content.postpaid?.maxTotalKrw ?? 1800000),
     MAX_PER_CASE: formatMoney(perCase),
     MAX_CASES: String(content.payout.maxCases),
     EMAIL: content.operator.email,
