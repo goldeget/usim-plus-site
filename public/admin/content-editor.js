@@ -68,6 +68,8 @@ function expandText(value, model) {
   const perCase = model.payout.milestones.reduce((sum, item) => sum + item.amount, 0);
   const values = {
     MAX_TOTAL: formatMoney(perCase * model.payout.maxCases),
+    PREPAID_MAX_TOTAL: formatMoney(perCase * model.payout.maxCases),
+    POSTPAID_MAX_TOTAL: formatMoney(model.postpaid?.maxTotalKrw ?? 1800000),
     MAX_PER_CASE: formatMoney(perCase),
     MAX_CASES: String(model.payout.maxCases),
     EMAIL: model.operator.email,
@@ -87,6 +89,7 @@ function previewModel() {
   return {
     ...original,
     payout: readPayout(),
+    postpaid: readPostpaid(),
     operator: { ...original.operator, email },
     lookup: { ...original.lookup, label }
   };
@@ -310,6 +313,7 @@ function fill(data) {
   document.getElementById("operatorFax").value = data.operator.fax ?? "";
   document.getElementById("operatorEmail").value = data.operator.email;
   renderPayoutFields(data.payout);
+  renderPostpaidFields(data.postpaid);
   const model = previewModel();
   previousPreviewModel = model;
   renderCopyFields("heroCopyFields", COPY_FIELDS.hero, data.copy, model);
@@ -342,6 +346,7 @@ function readSeo() {
 
 for (const id of ["telegramLink", "lineLink", "channeltalkLink"]) document.getElementById(id).addEventListener("input", updateChannelStatus);
 document.getElementById("maxCases").addEventListener("input", refreshDerivedPreviews);
+document.getElementById("postpaidMax").addEventListener("input", refreshDerivedPreviews);
 document.getElementById("payoutFields").addEventListener("input", refreshDerivedPreviews);
 document.getElementById("operatorEmail").addEventListener("input", refreshDerivedPreviews);
 document.getElementById("lookupLabel").addEventListener("input", refreshDerivedPreviews);
@@ -395,6 +400,7 @@ document.getElementById("editor").addEventListener("submit", async event => {
     },
     lookup: { ...original.lookup, url: document.getElementById("lookupUrl").value.trim(), label: document.getElementById("lookupLabel").value.trim() },
     payout: { ...readPayout(), maxCases: Number(document.getElementById("maxCases").value) },
+    postpaid: readPostpaid(),
     copy: readCopy(),
     seo: readSeo(),
     operator: {
@@ -427,3 +433,16 @@ function refreshIntroPreview() {
   if (preview) ClimeCopy.render(preview, document.getElementById("introText").value);
 }
 document.getElementById("introText").addEventListener("input", refreshIntroPreview);
+
+// Separate postpaid display cap: do not invent a per-line payout formula.
+function readPostpaid() {
+  return {
+    maxTotalKrw: Number(document.getElementById("postpaidMax").value),
+    termsNote: document.getElementById("postpaidTerms").value.trim()
+  };
+}
+function renderPostpaidFields(value) {
+  const terms = value || { maxTotalKrw: 1800000, termsNote: "후불 회선당 지급액·개통 가능 건수·유지 기간·통신요금 청구 및 실제 지급 시점은 신청 전에 안내받아 확인하세요." };
+  document.getElementById("postpaidMax").value = terms.maxTotalKrw;
+  document.getElementById("postpaidTerms").value = terms.termsNote;
+}
