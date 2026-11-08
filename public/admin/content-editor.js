@@ -223,7 +223,7 @@ function refreshDerivedPreviews() {
 function payoutFaqText(model) {
   const stages = model.payout.milestones.map((item, index) => `${item.days}일 유지 후 ${formatMoney(item.amount)}${index ? " 추가" : ""}`).join(", ");
   const perCase = model.payout.milestones.reduce((sum, item) => sum + item.amount, 0);
-  return `각 유지 기간이 확인되면 단계별 지급 대상이 됩니다: ${stages}.\n한 사람 최대 ${model.payout.maxCases}건이며, 모든 조건을 충족하면 최대 ${formatMoney(perCase * model.payout.maxCases)}입니다.\n실제 지급 여부와 시점은 신청 내용과 유지 조건 확인 후 결정됩니다.`;
+  return `선불: 각 유지 기간이 확인되면 단계별 지급 대상이 됩니다: ${stages}.\n선불 한 사람 최대 ${model.payout.maxCases}건이며, 모든 조건을 충족하면 최대 ${formatMoney(perCase * model.payout.maxCases)}입니다.\n후불은 별도 프로그램이며 최대 ${formatMoney(model.postpaid?.maxTotalKrw ?? 1800000)}로 안내됩니다. 회선 수·지급 단계·통신요금 및 중복 참여 여부는 신청 전 확인해야 합니다.\n실제 지급 여부와 시점은 신청 내용과 유지 조건 확인 후 결정됩니다.`;
 }
 
 function renderEntries(container, items, type, model = original) {
