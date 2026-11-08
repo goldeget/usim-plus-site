@@ -68,6 +68,8 @@ function expandText(value, model) {
   const perCase = model.payout.milestones.reduce((sum, item) => sum + item.amount, 0);
   const values = {
     MAX_TOTAL: formatMoney(perCase * model.payout.maxCases),
+    PREPAID_MAX_TOTAL: formatMoney(perCase * model.payout.maxCases),
+    POSTPAID_MAX_TOTAL: formatMoney(model.postpaid?.maxTotalKrw ?? 1800000),
     MAX_PER_CASE: formatMoney(perCase),
     MAX_CASES: String(model.payout.maxCases),
     EMAIL: model.operator.email,
@@ -87,6 +89,7 @@ function previewModel() {
   return {
     ...original,
     payout: readPayout(),
+    postpaid: readPostpaid(),
     operator: { ...original.operator, email },
     lookup: { ...original.lookup, label }
   };
@@ -220,7 +223,7 @@ function refreshDerivedPreviews() {
 function payoutFaqText(model) {
   const stages = model.payout.milestones.map((item, index) => `${item.days}일 유지 후 ${formatMoney(item.amount)}${index ? " 추가" : ""}`).join(", ");
   const perCase = model.payout.milestones.reduce((sum, item) => sum + item.amount, 0);
-  return `각 유지 기간이 확인되면 단계별 지급 대상이 됩니다: ${stages}.\n한 사람 최대 ${model.payout.maxCases}건이며, 모든 조건을 충족하면 최대 ${formatMoney(perCase * model.payout.maxCases)}입니다.\n실제 지급 여부와 시점은 신청 내용과 유지 조건 확인 후 결정됩니다.`;
+  return `선불: 각 유지 기간이 확인되면 단계별 지급 대상이 됩니다: ${stages}.\n선불 한 사람 최대 ${model.payout.maxCases}건이며, 모든 조건을 충족하면 최대 ${formatMoney(perCase * model.payout.maxCases)}입니다.\n후불은 별도 프로그램이며 최대 ${formatMoney(model.postpaid?.maxTotalKrw ?? 1800000)}로 안내됩니다. 회선 수·지급 단계·통신요금 및 중복 참여 여부는 신청 전 확인해야 합니다.\n실제 지급 여부와 시점은 신청 내용과 유지 조건 확인 후 결정됩니다.`;
 }
 
 function renderEntries(container, items, type, model = original) {
@@ -310,6 +313,7 @@ function fill(data) {
   document.getElementById("operatorFax").value = data.operator.fax ?? "";
   document.getElementById("operatorEmail").value = data.operator.email;
   renderPayoutFields(data.payout);
+  renderPostpaidFields(data.postpaid);
   const model = previewModel();
   previousPreviewModel = model;
   renderCopyFields("heroCopyFields", COPY_FIELDS.hero, data.copy, model);
@@ -342,6 +346,7 @@ function readSeo() {
 
 for (const id of ["telegramLink", "lineLink", "channeltalkLink"]) document.getElementById(id).addEventListener("input", updateChannelStatus);
 document.getElementById("maxCases").addEventListener("input", refreshDerivedPreviews);
+document.getElementById("postpaidMax").addEventListener("input", refreshDerivedPreviews);
 document.getElementById("payoutFields").addEventListener("input", refreshDerivedPreviews);
 document.getElementById("operatorEmail").addEventListener("input", refreshDerivedPreviews);
 document.getElementById("lookupLabel").addEventListener("input", refreshDerivedPreviews);
@@ -395,6 +400,7 @@ document.getElementById("editor").addEventListener("submit", async event => {
     },
     lookup: { ...original.lookup, url: document.getElementById("lookupUrl").value.trim(), label: document.getElementById("lookupLabel").value.trim() },
     payout: { ...readPayout(), maxCases: Number(document.getElementById("maxCases").value) },
+    postpaid: readPostpaid(),
     copy: readCopy(),
     seo: readSeo(),
     operator: {
@@ -427,3 +433,16 @@ function refreshIntroPreview() {
   if (preview) ClimeCopy.render(preview, document.getElementById("introText").value);
 }
 document.getElementById("introText").addEventListener("input", refreshIntroPreview);
+
+// Separate postpaid display cap: do not invent a per-line payout formula.
+function readPostpaid() {
+  return {
+    maxTotalKrw: Number(document.getElementById("postpaidMax").value),
+    termsNote: document.getElementById("postpaidTerms").value.trim()
+  };
+}
+function renderPostpaidFields(value) {
+  const terms = value || { maxTotalKrw: 1800000, termsNote: "후불 회선당 지급액·개통 가능 건수·유지 기간·통신요금 청구 및 실제 지급 시점은 신청 전에 안내받아 확인하세요." };
+  document.getElementById("postpaidMax").value = terms.maxTotalKrw;
+  document.getElementById("postpaidTerms").value = terms.termsNote;
+}

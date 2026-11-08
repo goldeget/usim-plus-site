@@ -24,8 +24,16 @@
         <div class="field"><label for="headline">첫 화면 제목</label><textarea id="headline" maxlength="100" rows="2" required></textarea><small>줄바꿈은 Enter로 입력하세요. 지급 기준을 바꾸면 제목의 최대 금액도 새 총액에 맞아야 저장됩니다.</small></div>
         <div class="field"><label for="introText">첫 화면 안내</label><textarea id="introText" maxlength="500" required></textarea><small>줄바꿈은 Enter로 입력하세요. 빈 줄은 새 문단입니다. 최대 500자</small><div id="introPreview" class="copy-prose" aria-label="첫 화면 안내 미리보기"></div></div>
         <div id="heroCopyFields" class="copy-grid"></div>
-        <div class="field"><label>유지 기간별 지급 기준</label><p class="note">각 단계 금액을 바꾸면 한 건 최대 금액과 전체 최대 금액은 자동 계산됩니다. FAQ의 지급 안내도 함께 계산됩니다.</p><div id="payoutFields" class="money-grid"></div><p id="payoutSummary" class="readonly-note" aria-live="polite"></p></div>
+        <div class="field"><label>선불 유심 유지 기간별 지급 기준</label><p class="note">선불 각 단계 금액으로 한 건 최대 금액과 전체 최대 금액이 자동 계산됩니다. 후불 혜택은 아래 별도로 설정하며 선불 총액과 합산하지 않습니다.</p><div id="payoutFields" class="money-grid"></div><p id="payoutSummary" class="readonly-note" aria-live="polite"></p></div>
         <div class="row"><div class="field"><label for="maxCases">한 사람 신청 가능 건수</label><input id="maxCases" type="number" min="1" max="3" step="1" required /></div><div class="field"><label for="lookupLabel">조회 버튼 문구</label><input id="lookupLabel" maxlength="80" required /></div><div class="field"><label for="lookupUrl">개통 가능 여부 조회 링크</label><input id="lookupUrl" type="url" maxlength="500" required /><small>현재 연결된 조회 사이트가 유지됩니다. HTTPS 링크를 입력하세요.</small></div></div>
+        <section class="panel" aria-labelledby="postpaidEditorTitle" style="margin-top:18px;padding:18px;border:1px solid #50617b;border-radius:12px">
+          <h3 id="postpaidEditorTitle">후불 유심 혜택 · 별도 프로그램</h3>
+          <p class="note">후불 최대 금액은 선불과 합산하지 않습니다. 지급 단계·회선 수·통신요금 책임은 확인되지 않았으므로 임의 계산하지 않습니다.</p>
+          <div class="row">
+            <div class="field"><label for="postpaidMax">후불 전체 조건 충족 시 최대 금액 (원)</label><input id="postpaidMax" type="number" min="0" max="10000000" step="10000" required value="1800000"></div>
+            <div class="field"><label for="postpaidTerms">후불 조건 안내</label><textarea id="postpaidTerms" rows="3" maxlength="400" required>후불 회선당 지급액·개통 가능 건수·유지 기간·통신요금 청구 및 실제 지급 시점은 신청 전에 안내받아 확인하세요.</textarea></div>
+          </div>
+        </section>
       </div></details>
       <details class="panel editor-group"><summary><h2>상담 화면과 상담 채널</h2><span>안내 문구 · 연락처</span></summary><div class="editor-group__body">
         <p class="note">사진은 상담 채널에서 직접 주고받습니다. 주소를 비워 두면 채널이 ‘연결 준비 중’으로 표시됩니다.</p><p id="channelStatus" class="status" role="status"></p><div class="row"><div class="field"><label for="telegramLink">텔레그램 1:1 상담 링크</label><input id="telegramLink" type="url" maxlength="500" autocomplete="url" placeholder="https://t.me/운영자아이디" /></div><div class="field"><label for="lineLink">LINE 상담 링크</label><input id="lineLink" type="url" maxlength="500" autocomplete="url" placeholder="https://line.me/..." /></div><div class="field"><label for="channeltalkLink">채널톡 상담 링크</label><input id="channeltalkLink" type="url" maxlength="500" autocomplete="url" placeholder="https://상담주소" /></div></div>

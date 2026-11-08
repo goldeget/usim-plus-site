@@ -23,7 +23,7 @@ test("all public pages use Korean language metadata and preserve meaningful text
   const visible = home.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
     .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, "");
   assert.doesNotMatch(visible, /\\n/, "No literal backslash-n text in main visible markup");
-  assert.match(visible.replace(/<\/?span[^>]*>/g, ""), /몰랐던 유심 혜택으로 최대 66만원\.<br>3일·15일·30일 유지 확인 후 단계 지급 대상이 정해집니다\.<br>자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다\./);
+  assert.match(visible.replace(/<\/?span[^>]*>/g, ""), /선불 최대 66만원 · 후불 최대 180만원\(별도 프로그램\)\.<br>선불은 3일·15일·30일 유지 후 단계별 지급 대상이 정해집니다\.<br>후불 지급·통신요금 조건은 상담에서 확인하세요\./);
   assert.doesNotMatch(visible, /통신혜택|통신 혜택|급전|폰깡|폰테크|\/topics\/|trust-bar|data-live/);
   assert.doesNotMatch(visible, /\{\{MAX_TOTAL\}\}/);
 });
@@ -31,7 +31,7 @@ test("all public pages use Korean language metadata and preserve meaningful text
 test("home page stays slim: one hero hook, no duplicate step sections", () => {
   const visible = home.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
     .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, "");
-  assert.match(visible, /<h1[^>]*>몰랐던 유심 혜택<br>최대 66만원<\/h1>/);
+  assert.match(visible, /<h1[^>]*>선불 최대 66만원<br>후불 최대 180만원<\/h1>/);
   assert.match(visible, /id="heroTrust">서울평가정보㈜ 공식 안내<br>사업자등록번호 <span class="copy-nowrap">114-81-47958<\/span>/);
   assert.doesNotMatch(visible, /유심 혜택 확인 순서|문의부터 완료까지|class="steps-grid"|id="quickFlow"|class="empathy"|class="process"/);
   assert.doesNotMatch(visible, /class="guide-disclosure"|신청 방법|신청 순서/);
@@ -106,7 +106,7 @@ test("SEO retains original service information without fabricated ratings or bot
   assert.ok(json);
   const graph=JSON.parse(json)["@graph"];
   assert.deepEqual(graph.map(x=>x["@type"]), ["Organization","WebSite","WebPage","Service"]);
-  assert.match(graph.find(x=>x["@type"]==="WebPage").description, /몰랐던 유심 혜택으로 최대 66만원/);
+  assert.match(graph.find(x=>x["@type"]==="WebPage").description, /선불 최대 66만원 · 후불 최대 180만원/);
   assert.doesNotMatch(graph.find(x=>x["@type"]==="WebPage").description, /3일|15일|30일/);
   assert.match(graph.find(x=>x["@type"]==="Service").description, /서울평가정보㈜가 운영합니다/);
   assert.doesNotMatch(graph.find(x=>x["@type"]==="Service").description, /통신혜택|급전|폰깡/);

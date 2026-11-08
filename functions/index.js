@@ -17,6 +17,8 @@ function expandTokens(value, content) {
   const perCase = content.payout.milestones.reduce((sum, item) => sum + item.amount, 0);
   const tokens = {
     MAX_TOTAL: formatMoney(perCase * content.payout.maxCases),
+    PREPAID_MAX_TOTAL: formatMoney(perCase * content.payout.maxCases),
+    POSTPAID_MAX_TOTAL: formatMoney(content.postpaid?.maxTotalKrw ?? 1800000),
     MAX_PER_CASE: formatMoney(perCase),
     MAX_CASES: String(content.payout.maxCases),
     EMAIL: content.operator.email,
@@ -184,6 +186,9 @@ export async function onRequest(context) {
   }
   const result = cacheable(await rewriter
     .on("#hero-title", { element(element) { element.setInnerContent(multilineHtml(content.headline, content), { html: true }); } })
+    .on("#prepaidCap", { element(element) { const prepaid = content.payout.milestones.reduce((sum, stage) => sum + stage.amount, 0) * content.payout.maxCases; element.setInnerContent(formatMoney(prepaid)); } })
+    .on("#postpaidCap", { element(element) { element.setInnerContent(formatMoney(content.postpaid?.maxTotalKrw ?? 1800000)); } })
+    .on("#postpaidTermsPublic", { element(element) { element.setInnerContent(content.postpaid?.termsNote || "후불 세부 지급·요금 조건은 신청 전 확인하세요."); } })
     .on("#footerTerms", { element(element) { element.setInnerContent(expandTokens(content.copy.footerTerms, content)); } })
     .on("#contact-title", { element(element) { element.setInnerContent(expandTokens(content.copy.contactTitle, content)); } })
     .on("#contactIntro", { element(element) { element.setInnerContent(multilineHtml(content.copy.contactIntro, content), { html: true }); } })

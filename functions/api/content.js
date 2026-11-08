@@ -2,8 +2,8 @@ import { isAdminRequest, readBoundedRequestBody } from "../_lib/applications.js"
 
 export const DEFAULT_CONTENT = {
   "schemaVersion": 4,
-  "headline": "몰랐던 유심 혜택\n최대 {{MAX_TOTAL}}",
-  "intro": "유심으로 받을 수 있는 혜택을 확인하고, 희망하면 진행을 도와드립니다.\n3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.\n자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다.",
+  "headline": "선불 최대 {{MAX_TOTAL}}\n후불 최대 {{POSTPAID_MAX_TOTAL}}",
+  "intro": "선불과 후불 유심의 혜택을 구분하여 확인하세요.\n선불은 3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.\n후불은 최대 {{POSTPAID_MAX_TOTAL}} 안내 기준이며, 세부 지급·요금·유지 조건은 신청 전 상담에서 확인해야 합니다.",
   "checklist": [
     {
       "title": "상담 채널 연결",
@@ -35,6 +35,10 @@ export const DEFAULT_CONTENT = {
     ],
     "maxCases": 3
   },
+  "postpaid": {
+    "maxTotalKrw": 1800000,
+    "termsNote": "후불 회선당 지급액·개통 가능 건수·유지 기간·통신요금 청구 및 실제 지급 시점은 신청 전에 안내받아 확인하세요."
+  },
   "operator": {
     "company": "서울평가정보㈜",
     "representative": "김중근",
@@ -45,10 +49,10 @@ export const DEFAULT_CONTENT = {
     "email": "help@climekr.com"
   },
   "seo": {
-    "title": "클라임유심 | 유심 혜택 · 유심 혜택 확인 · 최대 {{MAX_TOTAL}} | 서울평가정보㈜",
-    "description": "클라임유심(CLIME)은 서울평가정보㈜가 운영합니다. 몰랐던 유심 혜택으로 최대 {{MAX_TOTAL}}. 자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다.",
-    "socialTitle": "클라임유심 | 유심 혜택 · 유심 혜택 확인 · 최대 {{MAX_TOTAL}} | 서울평가정보㈜",
-    "socialDescription": "클라임유심(CLIME)은 서울평가정보㈜가 운영합니다. 몰랐던 유심 혜택으로 최대 {{MAX_TOTAL}}. 자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다."
+    "title": "클라임유심 | 선불 최대 {{MAX_TOTAL}} · 후불 최대 {{POSTPAID_MAX_TOTAL}} | 혜택 조건 안내",
+    "description": "클라임유심 선불 유심 최대 {{MAX_TOTAL}}, 후불 유심 최대 {{POSTPAID_MAX_TOTAL}}. 최대 금액은 조건부 안내 기준이며 후불 세부 지급·통신요금 조건은 상담에서 확인하세요.",
+    "socialTitle": "클라임유심 | 선불 최대 {{MAX_TOTAL}} · 후불 최대 {{POSTPAID_MAX_TOTAL}}",
+    "socialDescription": "선불 최대 {{MAX_TOTAL}} · 후불 최대 {{POSTPAID_MAX_TOTAL}}. 두 혜택은 별도 프로그램이며 중복 지급을 의미하지 않습니다. 후불 세부 지급·요금 조건은 신청 전 확인하세요."
   },
   "copy": {
     "brandSub": "유심 혜택 · 간편 참여 안내",
@@ -110,7 +114,7 @@ export const DEFAULT_CONTENT = {
     "privacyProvider": "사이트 운영과 기존 신청 사진 보관에 Cloudflare의 클라우드 서비스를 이용합니다.",
     "privacyProviderLabel": "처리 서비스",
     "footerBrand": "클라임유심 · climekr.com",
-    "footerTerms": "몰랐던 유심 혜택 · 최대 {{MAX_TOTAL}}\n자세한 혜택·조건은 텔레그램·채널톡 상담",
+    "footerTerms": "선불 최대 {{MAX_TOTAL}} · 후불 최대 {{POSTPAID_MAX_TOTAL}}\n프로그램별 실제 지급 기준 및 비용 부담은 상담에서 확인하세요",
     "operatorSummary": "사업자 정보\n사업자등록번호 114-81-47958",
     "operatorCompanyLabel": "법인명",
     "operatorRepresentativeLabel": "대표이사",
@@ -140,7 +144,7 @@ export const DEFAULT_CONTENT = {
     },
     {
       "question": "이용 비용과 별도 통신요금이 있나요?",
-      "answer": "이용 비용은 0원이며 별도 계약서 작성이나 별도 통신요금 납부가 없습니다. 보상금은 개통·유지 등 안내된 조건을 충족해야 받을 수 있습니다."
+      "answer": "플랫폼 상담·혜택 확인 비용은 0원으로 안내됩니다. 다만 후불 통신서비스의 실제 요금 청구·납부 의무와 운영사 부담 범위는 본인 명의 가입 계약 및 별도 안내를 확인해야 합니다. 개통·유지·해지 조건을 서면으로 확인한 뒤 결정하세요."
     },
     {
       "question": "상담하거나 사진을 보내면 바로 지급되나요?",
@@ -239,6 +243,21 @@ export function withCurrentPublicSummary(content) {
     const currentQuestion = item.question === "왜 참여자를 모집하나요?" ? item.question : "이용 비용과 별도 통신요금이 있나요?";
     return { ...item, ...DEFAULT_CONTENT.faqs.find(current => current.question === currentQuestion) };
   });
+  // Convert only exact pre-dual-program defaults, retaining operator-authored custom copy.
+  const previousDefaultHeadline = "몰랐던 유심 혜택\n최대 {{MAX_TOTAL}}";
+  const previousDefaultIntro = "유심으로 받을 수 있는 혜택을 확인하고, 희망하면 진행을 도와드립니다.\n3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.\n자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다.";
+  const previousDefaultSeo = "클라임유심 | 유심 혜택 · 유심 혜택 확인 · 최대 {{MAX_TOTAL}} | 서울평가정보㈜";
+  const previousDefaultFooter = "몰랐던 유심 혜택 · 최대 {{MAX_TOTAL}}\n자세한 혜택·조건은 텔레그램·채널톡 상담";
+  if (next.headline === previousDefaultHeadline || next.headline === previousDefaultHeadline.replace("{{MAX_TOTAL}}", "66만원")) next.headline = DEFAULT_CONTENT.headline;
+  if (next.intro === previousDefaultIntro || next.intro === previousDefaultIntro.replace("{{MAX_TOTAL}}", "66만원")) next.intro = DEFAULT_CONTENT.intro;
+  if (seo) {
+    for (const field of ["title", "socialTitle"]) {
+      if (seo[field] === previousDefaultSeo || seo[field] === previousDefaultSeo.replace("{{MAX_TOTAL}}", "66만원")) seo[field] = DEFAULT_CONTENT.seo[field];
+    }
+  }
+  if (next.copy && (next.copy.footerTerms === previousDefaultFooter || next.copy.footerTerms === previousDefaultFooter.replace("{{MAX_TOTAL}}", "66만원"))) {
+    next.copy = { ...next.copy, footerTerms: DEFAULT_CONTENT.copy.footerTerms };
+  }
   if (next.headline === "유심 개통 가능하면\n최대 {{MAX_TOTAL}}" || next.headline === "유심 개통 가능하면\n최대 66만원") next.headline = DEFAULT_CONTENT.headline;
   if (next.headline === "몰랐던 유심 혜택,\n유심 혜택 확인부터") next.headline = DEFAULT_CONTENT.headline;
   if (next.headline === "몰랐던 유심 혜택 · 최대 {{MAX_TOTAL}}" || next.headline === "몰랐던 유심 혜택 · 최대 66만원") next.headline = DEFAULT_CONTENT.headline;
@@ -251,6 +270,7 @@ export function withCurrentPublicSummary(content) {
   if (LEGACY_PUBLIC_INTROS.has(next.intro)) next.intro = DEFAULT_CONTENT.intro;
   if (seo && LEGACY_PUBLIC_DESCRIPTIONS.has(seo.description)) seo.description = DEFAULT_CONTENT.seo.description;
   if (seo && LEGACY_PUBLIC_SOCIAL_DESCRIPTIONS.has(seo.socialDescription)) seo.socialDescription = DEFAULT_CONTENT.seo.socialDescription;
+  next.postpaid = next.postpaid || { ...DEFAULT_CONTENT.postpaid };
   next.lookup = publishedLookup(next.lookup);
   if (next.copy && typeof next.copy === "object") {
     const copy = { ...next.copy };
@@ -335,6 +355,7 @@ export function validateContent(value) {
   }
   const totalPayout = total * value.payout.maxCases;
   if (totalPayout > 10000000) return "최대 지급 금액은 1,000만원 이하여야 합니다.";
+  if (value.postpaid !== undefined && (!value.postpaid || typeof value.postpaid !== "object" || Array.isArray(value.postpaid) || !Number.isSafeInteger(value.postpaid.maxTotalKrw) || value.postpaid.maxTotalKrw < 0 || value.postpaid.maxTotalKrw > 10000000 || typeof value.postpaid.termsNote !== "string" || !value.postpaid.termsNote.trim() || value.postpaid.termsNote.length > 400)) return "후불 최대 혜택과 안내 조건을 확인하세요.";
   if (!value.copy || typeof value.copy !== "object" || Array.isArray(value.copy)) return "화면 안내 문구를 확인하세요.";
   for (const [key, max] of Object.entries(COPY_LIMITS)) {
     const text = value.copy[key];
@@ -369,7 +390,7 @@ function payoutCopyIssue(content) {
     ...Object.entries(content.seo).map(([key, text]) => [`검색·공유 문구 ${key}`, text])
   ];
   for (const [label, text] of entries) {
-    const issue = payoutTextIssue(text, content.payout);
+    const issue = payoutTextIssue(text, content.payout, content.postpaid);
     if (issue === "days") return `화면 문구(${label})의 유지 일수가 지급 기준과 다릅니다. 유지 일수를 확인하세요.`;
     if (issue === "pair") return `화면 문구(${label})의 유지 일수와 지급 금액이 서로 맞지 않습니다. 지급 기준을 확인하세요.`;
     if (issue === "amount") return `화면 문구(${label})의 지급 금액이 현재 기준과 다릅니다. 최대 총액과 단계별 금액을 확인하세요.`;
@@ -377,14 +398,16 @@ function payoutCopyIssue(content) {
   return null;
 }
 
-function payoutTextIssue(text, payout) {
+function payoutTextIssue(text, payout, postpaid) {
   // A stated zero service cost is not a payout promise. Keep every other amount validated.
-  text = text.replace(/이용 비용(?:은|는)?\s*0원/g, "이용 비용 없음");
+  text = text.replace(/(?:플랫폼 상담·혜택 확인 비용|혜택 조회·상담 비용|(?:플랫폼 )?이용 비용)(?:은|는)?\s*0원/g, "이용 비용 없음");
   const milestones = payout.milestones;
   const allowedDays = new Set(milestones.map(item => item.days));
   const perCase = milestones.reduce((sum, item) => sum + item.amount, 0);
   const total = perCase * payout.maxCases;
   const allowedAmounts = new Set([...milestones.map(item => item.amount), perCase, total]);
+  const postpaidMax = /후불/.test(text) && postpaid?.maxTotalKrw;
+  if (Number.isSafeInteger(postpaidMax)) allowedAmounts.add(postpaidMax);
   const days = [...text.matchAll(/(\d+)\s*일/g)].map(match => ({ day: Number(match[1]), index: match.index }));
   const payoutContext = /지급|유지|수령|받|금액|단계|조건/.test(text) || days.length > 1;
   if (payoutContext && days.some(({ day }) => !allowedDays.has(day))) return "days";
@@ -404,10 +427,10 @@ function payoutTextIssue(text, payout) {
   }
   for (const { amount, index } of amounts) {
     if (!Number.isSafeInteger(amount) || !allowedAmounts.has(amount)) return "amount";
-    if (amount === perCase || amount === total) continue;
+    if (amount === perCase || amount === total || amount === postpaidMax) continue;
     const nearestDay = days
       .filter(item => Math.abs(item.index - index) <= 48)
-      .sort((left, right) => Math.abs(left.index - match.index) - Math.abs(right.index - match.index))[0];
+      .sort((left, right) => Math.abs(left.index - index) - Math.abs(right.index - index))[0];
     if (nearestDay) {
       const milestone = milestones.find(item => item.days === nearestDay.day);
       if (milestone && milestone.amount !== amount) return "pair";
@@ -471,7 +494,7 @@ export async function loadPublicContent(env = {}) {
     const stored = JSON.parse(row.content);
     if (stored.schemaVersion === 4 && !validateContent(stored)) {
       return { ...metadata, contentSource: "cms", content: withCurrentPublicSummary({
-        ...DEFAULT_CONTENT, ...stored, operator: normalizeOperator(stored.operator),
+        ...DEFAULT_CONTENT, ...stored, postpaid: stored.postpaid || { ...DEFAULT_CONTENT.postpaid }, operator: normalizeOperator(stored.operator),
         copy: { ...stored.copy, ...fixedPrivacyCopy() }
       }) };
     }
@@ -513,6 +536,7 @@ export async function onRequest({ request, env }) {
     supportLinks: safeSupportLinks(content.supportLinks),
     lookup: { url: content.lookup.url.trim(), label: content.lookup.label.trim() },
     payout: { milestones: content.payout.milestones.map(x => ({ days: x.days, amount: x.amount })), maxCases: content.payout.maxCases },
+    postpaid: { maxTotalKrw: (content.postpaid || DEFAULT_CONTENT.postpaid).maxTotalKrw, termsNote: (content.postpaid || DEFAULT_CONTENT.postpaid).termsNote.trim() },
     operator: normalizeOperator(content.operator),
     seo: Object.fromEntries(["title", "description", "socialTitle", "socialDescription"].map(key => [key, content.seo[key].trim()])),
     copy: Object.fromEntries(Object.keys(DEFAULT_CONTENT.copy).map(key => [key, lockedPrivacyCopy[key] ?? normalizePublicLineBreaks(content.copy[key])]))
@@ -526,6 +550,7 @@ export async function onRequest({ request, env }) {
       const currentIsValid = current?.schemaVersion === 4 && !validateContent(current);
       if (currentIsValid) {
     // Older open admin tabs may omit new fields; retain their saved values.
+    if (content.postpaid === undefined && current.postpaid) safe.postpaid = { ...current.postpaid };
     safe.operator = normalizeOperator({ ...current.operator, ...content.operator });
       }
       if (content.supportLinks === undefined && current?.supportLinks) {

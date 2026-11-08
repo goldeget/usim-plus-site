@@ -8,6 +8,7 @@ export async function loadPublicInformation(env = {}) {
     operator: content.operator,
     supportLinks: content.supportLinks,
     payout: content.payout,
+    postpaid: content.postpaid,
     contentSource
   };
 }

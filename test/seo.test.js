@@ -8,9 +8,9 @@ const sitemap = await readFile(new URL("../public/sitemap.xml", import.meta.url)
 const indexNowKey = "2cc7263262b5a365ad26c37e214acd2b";
 
 test("publishes a canonical Korean title, description, and social preview metadata", () => {
-  assert.match(page, /<title>클라임유심 \| 유심 혜택 · 유심 혜택 확인 · 최대 66만원 \| 서울평가정보㈜<\/title>/);
+  assert.match(page, /<title>클라임유심 \| 선불 최대 66만원 · 후불 최대 180만원 \| 서울평가정보㈜<\/title>/);
   assert.match(page, /<link rel="canonical" href="https:\/\/climekr\.com\/"\s*\/>/);
-  assert.match(page, /name="description" content="[^\"]*서울평가정보㈜[^\"]*몰랐던 유심 혜택으로 최대 66만원[^\"]*텔레그램·채널톡 상담[^\"]*"/);
+  assert.match(page, /name="description" content="[^\"]*선불 최대 66만원 · 후불 최대 180만원[^\"]*별도 확인[^\"]*"/);
   assert.doesNotMatch(page, /통신사|요금·약정|월 요금|해지 비용/);
   assert.doesNotMatch(page, /통신혜택|통신 혜택|급전|폰깡|폰테크|<script src="\/live-activity/);
   assert.doesNotMatch(page, /href="\/topics\//);
@@ -28,7 +28,7 @@ test("describes the real public service without inventing hidden FAQ or review s
   }
   assert.ok(graph.some(item => item["@type"] === "Organization" && item.email === "help@climekr.com"));
   assert.match(graph.find(item => item["@type"] === "WebPage").description, /서울평가정보㈜가 운영합니다/);
-  assert.match(graph.find(item => item["@type"] === "WebPage").description, /몰랐던 유심 혜택으로 최대 66만원/);
+  assert.match(graph.find(item => item["@type"] === "WebPage").description, /선불 최대 66만원 · 후불 최대 180만원/);
   const org = graph.find(item => item["@type"] === "Organization");
   assert.equal(org["@id"], "https://climekr.com/#organization");
   assert.equal(org.taxID, "114-81-47958");
@@ -51,7 +51,7 @@ test("covers the requested climekr spellings and gives review searches useful, a
   assert.match(llms, /registrationNumber: 114-81-47958/);
   assert.match(llms, /유심으로 받을 수 있는 혜택을 확인해주는 플랫폼/);
   assert.match(llms, /텔레그램: https:\/\/t.me\/climeusim/);
-  assert.match(llms, /이용 비용 0원 \/ 별도 계약서 작성 없음 \/ 별도 통신요금 납부 없음/);
+  assert.match(llms, /혜택 확인·상담 비용 0원 \/ 통신서비스 계약상 요금 청구·납부 및 해지 책임/);
   for (const day of [3,15,30]) assert.ok(llms.includes(`${day}일 유지 조건 확인`));
   assert.doesNotMatch(llms.slice(0, 500), /통신혜택|통신 혜택|급전|폰깡|폰테크/);
   assert.doesNotMatch(llms, /\/topics\/|주제별 정보 안내/);

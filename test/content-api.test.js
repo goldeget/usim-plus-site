@@ -383,7 +383,7 @@ test("migrates stored homepage SEO still using loan-first search and social desc
   const data = await (await onRequest({ request: new Request("https://climekr.com/api/content"), env: createAdminEnvironment({ cloudflare }) })).json();
   assert.equal(data.seo.description, DEFAULT_CONTENT.seo.description);
   assert.equal(data.seo.socialDescription, DEFAULT_CONTENT.seo.socialDescription);
-  assert.match(data.seo.description, /몰랐던 유심 혜택/);
+  assert.match(data.seo.description, /선불 유심 최대.*후불 유심 최대/);
   assert.doesNotMatch(data.seo.description, /대출이 아닌|3일·15일·30일/);
 });
 
@@ -397,7 +397,7 @@ test("moves one-line operator phrases onto designed line breaks", async () => {
     payoutNote: "지급은 유지 조건 확인 후 결정됩니다. 상담·신청 즉시 지급이 아닙니다."
   };
   const next = withCurrentPublicSummary(stored);
-  assert.equal(next.headline, "몰랐던 유심 혜택\n최대 {{MAX_TOTAL}}");
+  assert.equal(next.headline, DEFAULT_CONTENT.headline);
   assert.equal(next.copy.operatorSummary, "사업자 정보\n사업자등록번호 114-81-47958");
   assert.equal(next.copy.payoutNote, "지급은 유지 조건 확인 후 결정됩니다.\n상담·신청 즉시 지급이 아닙니다.");
   assert.match(next.intro, /3일·15일·30일/);

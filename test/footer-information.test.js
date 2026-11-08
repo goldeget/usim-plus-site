@@ -6,8 +6,8 @@ test('footer information pages provide definition, fixed costs and official navi
   for (const page of ['about','structure','guide','disclosures','disclosures/service','disclosures/safety','disclosures/privacy','service-facts']) {
     const html = await readFile(new URL(`../public/${page}/index.html`, import.meta.url), 'utf8');
     assert.match(html, /data-service-definition/, page);
-    assert.match(html, /별도 계약서 작성 없음/, page);
-    assert.match(html, /별도 통신요금 납부 없음/, page);
+    assert.match(html, /혜택 확인·상담 비용 0원|상담·혜택 조회 비용 0원/, page);
+    assert.match(html, /통신요금.*책임|통신계약 책임/, page);
     assert.match(html, /href="\/service-facts\/"/, page);
     assert.match(html, /data-operator="address"/, page);
   }

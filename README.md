@@ -1,6 +1,6 @@
 # USIM PLUS
 
-클라임유심은 유심으로 받을 수 있는 혜택을 확인하고, 적용 대상자가 희망하면 진행을 지원하며 조건에 맞는 보상금을 지급하는 플랫폼입니다. 운영자가 확인한 안내 기준은 이용 비용 0원, 별도 계약서 작성 없음, 별도 통신요금 납부 없음입니다. 적용 대상·진행 의사·조건 충족·지급 확정은 서로 구분합니다.
+클라임유심은 유심으로 받을 수 있는 혜택을 확인하고, 적용 대상자가 희망하면 진행을 지원하며 조건에 맞는 보상금을 지급하는 플랫폼입니다. 혜택 확인·상담 비용은 0원으로 안내됩니다. 통신서비스의 계약상 요금 청구·납부, 해지 책임 및 운영사의 비용 부담 범위는 가입 전에 별도로 확인해야 합니다. 적용 대상·진행 의사·조건 충족·지급 확정은 서로 구분합니다.
 
 New applications and photo conversations now take place in the Telegram or ChannelTalk links configured by the operator at `/admin/content.html`. LINE remains a saved configuration field but is not displayed on the public homepage. The homepage no longer uploads photos or loads Turnstile; `POST /api/applications` returns 410 for cached forms without reading or storing their bodies. Messenger photos and messages are not synchronized into the admin photo queue. Empty optional channel settings retain the existing official Telegram/ChannelTalk fallback links; unavailable-link feedback and email contact remain supported.
 

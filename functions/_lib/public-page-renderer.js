@@ -6,7 +6,7 @@ export const PUBLIC_PAGES = {
  structure: ['이용 절차','혜택 확인부터 적용 대상·조건 안내, 희망 시 진행 지원과 보상금 지급까지의 절차입니다.'],
  guide: ['혜택 조건','적용 대상과 유지 조건, 현재 단계별 보상금 및 지급 기준을 확인하세요.'],
  disclosures: ['고지·안내','이용 비용과 절차, 공식 채널 확인 및 개인정보 처리 안내입니다.'],
- 'disclosures/service': ['서비스 이용 안내','이용 비용 0원, 별도 계약서 작성 및 별도 통신요금 납부 없는 진행 절차를 안내합니다.'],
+ 'disclosures/service': ['서비스 이용 안내','혜택 확인·상담 비용과 별도 통신요금·지급 조건 확인 절차를 안내합니다.'],
  'disclosures/safety': ['공식 채널 확인','공식 사이트와 상담 채널을 확인하고 사칭이 의심되면 운영사에 문의하세요.'],
  'disclosures/privacy': ['상담 채널 개인정보','상담 중 전달되는 정보와 채널별 처리, 과거 홈페이지 사진 접수의 구분을 안내합니다.'],
  'service-facts': ['공식 정보','클라임유심의 서비스 정의, 비용, 이용 절차, 운영사와 지급 조건을 요약합니다.']
@@ -32,6 +32,8 @@ export async function renderPublicPage(context,pageKey) {
  info.flow.forEach((value,index)=>text(`[data-flow="${index}"]`,value));
  const perCase=info.payout.milestones.reduce((sum,s)=>sum+s.amount,0);
  text('[data-total]',currency(perCase*info.payout.maxCases));
+ text('[data-postpaid-total]',currency(info.postpaid?.maxTotalKrw ?? 1800000));
+ text('[data-postpaid-terms]',info.postpaid?.termsNote || '후불 세부 조건은 상담에서 확인하세요.');
  rw=rw.on('[data-milestones]',{element(el){el.setInnerContent(info.payout.milestones.map(s=>`<div class="row"><span>${s.days}일 유지 단계</span><strong>${currency(s.amount)} 지급 대상</strong></div>`).join('')+`<div class="row"><span>1건 전체 조건 충족 · 최대 ${info.payout.maxCases}건</span><strong>${currency(perCase)} / 건</strong></div>`,{html:true});}});
  rw=rw.on('script[type="application/ld+json"]',{element(el){el.setInnerContent(jsonLdEscape(publicStructuredData(info,{path:`/${pageKey}/`,title,description})),{html:true});}});
  const headers=new Headers(response.headers); headers.set('Cache-Control','public, max-age=0, s-maxage=15');headers.delete('Content-Length');
