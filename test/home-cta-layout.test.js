@@ -7,8 +7,8 @@ const overview=html.match(/<section[^>]*id="serviceOverview"[\s\S]*?<\/section>/
 test('home has no floating consultation CTA',()=>assert.doesNotMatch(html,/<a[^>]*class="sticky-cta"/));
 test('hero prioritizes lookup and keeps detailed conditions in a visible overview',()=>{
  assert.doesNotMatch(hero,/id="homeIntro"|혜택 확인 →|data-content-source|id="heroTrust"/);
- assert.match(hero,/data-service-definition/);assert.match(hero,/이용 비용 <span class="copy-nowrap">0원/);
+ assert.match(hero,/data-service-definition/);assert.match(hero,/혜택 조회·상담 비용 <span class="copy-nowrap">0원/);
  assert.match(hero,/id="eligibilityButton"/);assert.match(hero,/id="heroApplyButton"/);
- for(const text of ['id="homeIntro"','id="heroTrust"','data-content-source','/service-facts/','별도 계약서 작성 없음','조건에 맞는 보상금 지급']) assert.ok(overview.includes(text),text);
+ for(const text of ['id="homeIntro"','id="heroTrust"','data-content-source','/service-facts/','통신요금 청구·납부 및 해지 책임','조건에 맞는 보상금 지급']) assert.ok(overview.includes(text),text);
  assert.doesNotMatch(overview, / hidden|<details/);
 });
