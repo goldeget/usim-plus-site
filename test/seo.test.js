@@ -8,7 +8,7 @@ const sitemap = await readFile(new URL("../public/sitemap.xml", import.meta.url)
 const indexNowKey = "2cc7263262b5a365ad26c37e214acd2b";
 
 test("publishes a canonical Korean title, description, and social preview metadata", () => {
-  assert.match(page, /<title>클라임유심 \| 선불 최대 66만원 · 후불 최대 180만원<\/title>/);
+  assert.match(page, /<title>클라임유심 \| 선불 최대 66만원 · 후불 최대 180만원 \| 서울평가정보㈜<\/title>/);
   assert.match(page, /<link rel="canonical" href="https:\/\/climekr\.com\/"\s*\/>/);
   assert.match(page, /name="description" content="[^\"]*선불 최대 66만원 · 후불 최대 180만원[^\"]*별도 확인[^\"]*"/);
   assert.doesNotMatch(page, /통신사|요금·약정|월 요금|해지 비용/);
