@@ -58,3 +58,19 @@ test('public pages and editor expose both programs and terms disclosure without 
   assert.match(admin, /id="postpaidTerms"/);
   assert.match(editor, /postpaid: readPostpaid\(\)/);
 });
+
+test('upgrades only exact former production defaults to separate benefit copy', () => {
+  const old = structuredClone(DEFAULT_CONTENT);
+  old.headline = '몰랐던 유심 혜택\n최대 {{MAX_TOTAL}}';
+  old.intro = '유심으로 받을 수 있는 혜택을 확인하고, 희망하면 진행을 도와드립니다.\n3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.\n자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다.';
+  old.seo.title = '클라임유심 | 유심 혜택 · 유심 혜택 확인 · 최대 {{MAX_TOTAL}} | 서울평가정보㈜';
+  old.seo.socialTitle = old.seo.title;
+  old.copy.footerTerms = '몰랐던 유심 혜택 · 최대 {{MAX_TOTAL}}\n자세한 혜택·조건은 텔레그램·채널톡 상담';
+  const current = withCurrentPublicSummary(old);
+  assert.equal(current.headline, DEFAULT_CONTENT.headline);
+  assert.equal(current.intro, DEFAULT_CONTENT.intro);
+  assert.equal(current.seo.title, DEFAULT_CONTENT.seo.title);
+  assert.equal(current.seo.socialTitle, DEFAULT_CONTENT.seo.socialTitle);
+  assert.equal(current.copy.footerTerms, DEFAULT_CONTENT.copy.footerTerms);
+  assert.equal(current.postpaid.maxTotalKrw, 1800000);
+});
