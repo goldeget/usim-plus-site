@@ -32,6 +32,8 @@ export async function renderPublicPage(context,pageKey) {
  info.flow.forEach((value,index)=>text(`[data-flow="${index}"]`,value));
  const perCase=info.payout.milestones.reduce((sum,s)=>sum+s.amount,0);
  text('[data-total]',currency(perCase*info.payout.maxCases));
+ text('[data-postpaid-total]',currency(info.postpaid?.maxTotalKrw ?? 1800000));
+ text('[data-postpaid-terms]',info.postpaid?.termsNote || '후불 세부 조건은 상담에서 확인하세요.');
  rw=rw.on('[data-milestones]',{element(el){el.setInnerContent(info.payout.milestones.map(s=>`<div class="row"><span>${s.days}일 유지 단계</span><strong>${currency(s.amount)} 지급 대상</strong></div>`).join('')+`<div class="row"><span>1건 전체 조건 충족 · 최대 ${info.payout.maxCases}건</span><strong>${currency(perCase)} / 건</strong></div>`,{html:true});}});
  rw=rw.on('script[type="application/ld+json"]',{element(el){el.setInnerContent(jsonLdEscape(publicStructuredData(info,{path:`/${pageKey}/`,title,description})),{html:true});}});
  const headers=new Headers(response.headers); headers.set('Cache-Control','public, max-age=0, s-maxage=15');headers.delete('Content-Length');
