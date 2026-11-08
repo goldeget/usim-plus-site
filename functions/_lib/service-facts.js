@@ -9,5 +9,7 @@ export const SERVICE_FACTS = Object.freeze({
   ]),
   customerCostWon: 0,
   separateContractRequired: false,
-  separateTelecomPaymentRequired: false
+  // Telecom billing is governed by the subscriber's carrier contract and must be verified for each program.
+  separateTelecomPaymentRequired: null,
+  telecomBillingDisclosure: '통신서비스 계약상 요금 청구·납부와 해지 책임은 신청 전 별도로 확인해야 합니다.'
 });
