@@ -8,7 +8,8 @@ test('fixed operational facts and default provenance', async () => {
   const facts = await loadPublicInformation({});
   assert.equal(facts.customerCostWon, 0);
   assert.equal(facts.separateContractRequired, false);
-  assert.equal(facts.separateTelecomPaymentRequired, false);
+  assert.equal(facts.separateTelecomPaymentRequired, null);
+  assert.match(facts.telecomBillingDisclosure, /통신서비스 계약상 요금/);
   assert.equal(facts.definition, SERVICE_FACTS.definition);
   assert.equal(facts.contentSource, 'default');
   assert.deepEqual(facts.payout, DEFAULT_CONTENT.payout);
