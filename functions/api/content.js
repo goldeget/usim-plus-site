@@ -243,6 +243,21 @@ export function withCurrentPublicSummary(content) {
     const currentQuestion = item.question === "왜 참여자를 모집하나요?" ? item.question : "이용 비용과 별도 통신요금이 있나요?";
     return { ...item, ...DEFAULT_CONTENT.faqs.find(current => current.question === currentQuestion) };
   });
+  // Convert only exact pre-dual-program defaults, retaining operator-authored custom copy.
+  const previousDefaultHeadline = "몰랐던 유심 혜택\n최대 {{MAX_TOTAL}}";
+  const previousDefaultIntro = "유심으로 받을 수 있는 혜택을 확인하고, 희망하면 진행을 도와드립니다.\n3일·15일·30일 유지 조건 충족 시 최대 {{MAX_TOTAL}} 지급 대상입니다.\n자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다.";
+  const previousDefaultSeo = "클라임유심 | 유심 혜택 · 유심 혜택 확인 · 최대 {{MAX_TOTAL}} | 서울평가정보㈜";
+  const previousDefaultFooter = "몰랐던 유심 혜택 · 최대 {{MAX_TOTAL}}\n자세한 혜택·조건은 텔레그램·채널톡 상담";
+  if (next.headline === previousDefaultHeadline || next.headline === previousDefaultHeadline.replace("{{MAX_TOTAL}}", "66만원")) next.headline = DEFAULT_CONTENT.headline;
+  if (next.intro === previousDefaultIntro || next.intro === previousDefaultIntro.replace("{{MAX_TOTAL}}", "66만원")) next.intro = DEFAULT_CONTENT.intro;
+  if (seo) {
+    for (const field of ["title", "socialTitle"]) {
+      if (seo[field] === previousDefaultSeo || seo[field] === previousDefaultSeo.replace("{{MAX_TOTAL}}", "66만원")) seo[field] = DEFAULT_CONTENT.seo[field];
+    }
+  }
+  if (next.copy && (next.copy.footerTerms === previousDefaultFooter || next.copy.footerTerms === previousDefaultFooter.replace("{{MAX_TOTAL}}", "66만원"))) {
+    next.copy = { ...next.copy, footerTerms: DEFAULT_CONTENT.copy.footerTerms };
+  }
   if (next.headline === "유심 개통 가능하면\n최대 {{MAX_TOTAL}}" || next.headline === "유심 개통 가능하면\n최대 66만원") next.headline = DEFAULT_CONTENT.headline;
   if (next.headline === "몰랐던 유심 혜택,\n유심 혜택 확인부터") next.headline = DEFAULT_CONTENT.headline;
   if (next.headline === "몰랐던 유심 혜택 · 최대 {{MAX_TOTAL}}" || next.headline === "몰랐던 유심 혜택 · 최대 66만원") next.headline = DEFAULT_CONTENT.headline;
