@@ -141,7 +141,7 @@ test("serves edited title, social metadata and matching Organization/Service gra
     assert.match(html, /id="operatorEmailLink" href="mailto:contact@example\.com"><span id="operatorEmail">contact@example\.com<\/span>/);
     const intro = html.match(/id="homeIntro">([\s\S]*?)<\/p>/)?.[1].replace(/<\/?span[^>]*>/g, "") || "";
     assert.equal(intro.split("<br>").length, 3);
-    assert.match(intro, /^<p>유심으로 받을 수 있는 혜택을 확인하고, 희망하면 진행을 도와드립니다\.<br>3일·15일·30일 유지 조건 충족 시 최대 18만원 지급 대상입니다\.<br>자세한 혜택·조건은 텔레그램·채널톡 상담으로 안내합니다\.$/);
+    assert.match(intro, /^<p>선불과 후불 유심의 혜택을 구분하여 확인하세요\.<br>선불은 3일·15일·30일 유지 조건 충족 시 최대 18만원 지급 대상입니다\.<br>후불은 최대 180만원 안내 기준이며/);
     assert.doesNotMatch(intro, /\{\{MAX_TOTAL\}\}/);
   } finally {
     if (previous === undefined) delete globalThis.HTMLRewriter;
@@ -191,8 +191,8 @@ test("migrates legacy loan-first CMS SEO into homepage HTML metadata at the edge
   const stored = structuredClone(DEFAULT_CONTENT);
   stored.seo.description = "클라임유심(CLIME)은 대출이 아닌 유심 개통 혜택 서비스입니다. 고객 개통·통신 관련 비용은 회사 전액 부담. 3일·15일·30일 유지 조건 충족 시 최대 66만원 지급 대상. 텔레그램·채널톡 상담.";
   stored.seo.socialDescription = "고객 개통·통신 비용 회사 전액 부담. 대출이 아닌 유심 개통 혜택이며 회선 유지 조건 충족 시 최대 66만원 지급 대상. 텔레그램·채널톡 상담.";
-  const expectedDescription = DEFAULT_CONTENT.seo.description.replace("{{MAX_TOTAL}}", "66만원");
-  const expectedSocial = DEFAULT_CONTENT.seo.socialDescription.replace("{{MAX_TOTAL}}", "66만원");
+  const expectedDescription = DEFAULT_CONTENT.seo.description.replace("{{MAX_TOTAL}}", "66만원").replace("{{POSTPAID_MAX_TOTAL}}", "180만원");
+  const expectedSocial = DEFAULT_CONTENT.seo.socialDescription.replace("{{MAX_TOTAL}}", "66만원").replace("{{POSTPAID_MAX_TOTAL}}", "180만원");
   const previous = globalThis.HTMLRewriter;
   globalThis.HTMLRewriter = TestHTMLRewriter;
   try {
@@ -204,7 +204,7 @@ test("migrates legacy loan-first CMS SEO into homepage HTML metadata at the edge
     assert.match(html, new RegExp(`name="description"[^>]*content="${escapeAttribute(expectedDescription).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"`));
     assert.match(html, new RegExp(`property="og:description"[^>]*content="${escapeAttribute(expectedSocial).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"`));
     assert.doesNotMatch(html, /대출이 아닌/);
-    assert.match(html, /몰랐던 유심 혜택/);
+    assert.match(html, /선불 유심 최대/);
   } finally {
     if (previous === undefined) delete globalThis.HTMLRewriter;
     else globalThis.HTMLRewriter = previous;
@@ -217,7 +217,7 @@ test("uses safe defaults when CMS content is unavailable", async () => {
   globalThis.HTMLRewriter = TestHTMLRewriter;
   try {
     const response = await onRequest({ request: new Request("https://climekr.com/"), env: {}, next: async () => new Response(page) });
-    assert.match(await response.text(), /<title>클라임유심 \| 유심 혜택 · 유심 혜택 확인 · 최대 66만원 \| 서울평가정보㈜<\/title>/);
+    assert.match(await response.text(), /<title>클라임유심 \| 선불 최대 66만원 · 후불 최대 180만원<\/title>/);
   } finally {
     if (previous === undefined) delete globalThis.HTMLRewriter;
     else globalThis.HTMLRewriter = previous;
@@ -270,6 +270,6 @@ test('home first HTML includes current headline, footer, lookup and channels usi
  const {onRequest}=await import('../functions/index.js');const content=structuredClone(DEFAULT_CONTENT);content.payout.maxCases=2;content.supportLinks.telegram='https://t.me/current';content.supportLinks.channeltalk='https://custom.channel.io';content.lookup={url:'https://www.credit.or.kr/credit/search?source=custom',label:'맞춤 혜택 조회'};content.copy.contactTitle='현재 상담 제목';content.copy.contactLookupLabel='별도 상담 조회 문구';
  let reads=0;const env={CONTENT_DB:{prepare(){return{bind(){return{async first(){reads++;return {content:JSON.stringify(content)}}}}}}}};
  const previous=globalThis.HTMLRewriter;globalThis.HTMLRewriter=TestHTMLRewriter;
- try{const html=await (await onRequest({request:new Request('https://climekr.com/'),env,next:()=>new Response(page,{headers:{'Content-Type':'text/html'}})})).text();assert.equal(reads,1);assert.match(html,/<h1 id="hero-title">몰랐던 유심 혜택<br>최대 44만원<\/h1>/);assert.match(html,/id="footerTerms">[^<]*44만원/);assert.match(html,/id="eligibilityButton" href="https:\/\/www.credit.or.kr\/credit\/search\?source=custom"/);assert.match(html,/id="contactLookupLabel">별도 상담 조회 문구 ↗/);assert.match(html,/id="contact-title">현재 상담 제목/);assert.match(html,/data-contact="telegram" href="https:\/\/t.me\/current"/);assert.match(html,/data-contact="channeltalk" href="https:\/\/custom.channel.io\/?"/);}
+ try{const html=await (await onRequest({request:new Request('https://climekr.com/'),env,next:()=>new Response(page,{headers:{'Content-Type':'text/html'}})})).text();assert.equal(reads,1);assert.match(html,/<h1 id="hero-title">선불 최대 44만원<br>후불 최대 180만원<\/h1>/);assert.match(html,/id="footerTerms">[^<]*44만원/);assert.match(html,/id="eligibilityButton" href="https:\/\/www.credit.or.kr\/credit\/search\?source=custom"/);assert.match(html,/id="contactLookupLabel">별도 상담 조회 문구 ↗/);assert.match(html,/id="contact-title">현재 상담 제목/);assert.match(html,/data-contact="telegram" href="https:\/\/t.me\/current"/);assert.match(html,/data-contact="channeltalk" href="https:\/\/custom.channel.io\/?"/);}
  finally{if(previous===undefined)delete globalThis.HTMLRewriter;else globalThis.HTMLRewriter=previous;}
 });
